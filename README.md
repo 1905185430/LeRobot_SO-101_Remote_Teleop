@@ -12,6 +12,13 @@ The bridge preserves LeRobot's native SO-101 action format: joint-name dictionar
 - `protocol.py`: wire schema, encoding, decoding, and validation
 - `logging_utils.py`: shared logging setup
 
+The follower terminal also prints periodic latency stats:
+- `latest`: most recent one-way packet age derived from `sent_at_ns`
+- `avg` / `max`: running averages over all received packets
+- `stream_age`: time since the last valid packet arrived, based on the follower's monotonic clock
+
+Note: `latest/avg/max` assume the two machines have roughly aligned system clocks. If they are not synchronized, use `stream_age` as the more reliable freshness signal.
+
 ## Wire Format
 
 Leader packets are JSON objects with an `action` dictionary:
@@ -50,7 +57,8 @@ python3 follower_receiver.py \
   --bind-ip 0.0.0.0 \
   --udp-port 5005 \
   --hz 50 \
-  --timeout-ms 200
+  --timeout-ms 200 \
+  --latency-log-interval 1.0
 ```
 
 Then start the leader machine:

@@ -16,6 +16,7 @@ DEFAULT_BIND_IP = "0.0.0.0"
 DEFAULT_HZ = 50.0
 DEFAULT_TIMEOUT_MS = 200
 DEFAULT_UDP_PORT = 5005
+DEFAULT_LATENCY_LOG_INTERVAL_S = 1.0
 MAX_UDP_PACKET_SIZE = 4096
 
 
@@ -49,24 +50,36 @@ class FollowerReceiver:
         sock: socket.socket,
         hz: float = DEFAULT_HZ,
         timeout_ms: int = DEFAULT_TIMEOUT_MS,
+        latency_log_interval_s: float = DEFAULT_LATENCY_LOG_INTERVAL_S,
         logger: logging.Logger | None = None,
     ) -> None:
         self.follower_robot = follower_robot
         self.sock = sock
         self.period_s = 1.0 / hz
         self.timeout_ns = timeout_ms * 1_000_000
+        self.latency_log_interval_s = latency_log_interval_s
         self.logger = logger or get_logger("follower_receiver")
 
         self.last_valid_action: dict[str, float] | None = None
         self.last_packet_monotonic_ns: int | None = None
         self.last_seq: int | None = None
+        self.last_packet_latency_ms: float | None = None
         self.first_packet_seen = False
         self.timeout_active = False
         self.decode_error_count = 0
+        self.latency_sample_count = 0
+        self.latency_sum_ms = 0.0
+        self.latency_max_ms = float("-inf")
+        self.last_latency_log_monotonic_s = time.monotonic()
 
         self.sock.setblocking(False)
 
-    def handle_datagram(self, payload: bytes, received_at_ns: int | None = None) -> ActionMessage:
+    def handle_datagram(
+        self,
+        payload: bytes,
+        received_at_ns: int | None = None,
+        received_wall_time_ns: int | None = None,
+    ) -> ActionMessage:
         message = decode_action_message(payload)
         if self.last_seq is not None and message.seq <= self.last_seq:
             raise ProtocolError(
@@ -75,10 +88,16 @@ class FollowerReceiver:
 
         if received_at_ns is None:
             received_at_ns = time.monotonic_ns()
+        if received_wall_time_ns is None:
+            received_wall_time_ns = time.time_ns()
 
         self.last_valid_action = message.action
         self.last_packet_monotonic_ns = received_at_ns
         self.last_seq = message.seq
+        self.last_packet_latency_ms = (received_wall_time_ns - message.sent_at_ns) / 1_000_000
+        self.latency_sample_count += 1
+        self.latency_sum_ms += self.last_packet_latency_ms
+        self.latency_max_ms = max(self.latency_max_ms, self.last_packet_latency_ms)
 
         if not self.first_packet_seen:
             self.logger.info(
@@ -93,6 +112,36 @@ class FollowerReceiver:
             self.logger.info("Control stream recovered at seq=%s.", message.seq)
 
         return message
+
+    def maybe_log_latency(
+        self,
+        now_monotonic_s: float | None = None,
+        now_monotonic_ns: int | None = None,
+    ) -> None:
+        if self.last_packet_latency_ms is None or self.last_packet_monotonic_ns is None:
+            return
+        if self.latency_log_interval_s <= 0:
+            return
+
+        if now_monotonic_s is None:
+            now_monotonic_s = time.monotonic()
+        if now_monotonic_ns is None:
+            now_monotonic_ns = time.monotonic_ns()
+
+        if now_monotonic_s - self.last_latency_log_monotonic_s < self.latency_log_interval_s:
+            return
+
+        avg_latency_ms = self.latency_sum_ms / self.latency_sample_count
+        staleness_ms = (now_monotonic_ns - self.last_packet_monotonic_ns) / 1_000_000
+        self.logger.info(
+            "Latency: latest=%.2f ms avg=%.2f ms max=%.2f ms samples=%s stream_age=%.2f ms",
+            self.last_packet_latency_ms,
+            avg_latency_ms,
+            self.latency_max_ms,
+            self.latency_sample_count,
+            staleness_ms,
+        )
+        self.last_latency_log_monotonic_s = now_monotonic_s
 
     def poll_network(self) -> int:
         processed = 0
@@ -156,6 +205,7 @@ class FollowerReceiver:
             while True:
                 self.poll_network()
                 self.control_step()
+                self.maybe_log_latency()
                 next_tick += self.period_s
                 sleep_s = next_tick - time.perf_counter()
                 if sleep_s > 0:
@@ -200,6 +250,12 @@ def parse_args() -> argparse.Namespace:
         default=DEFAULT_TIMEOUT_MS,
         help="Timeout before holding the last known position.",
     )
+    parser.add_argument(
+        "--latency-log-interval",
+        type=positive_float,
+        default=DEFAULT_LATENCY_LOG_INTERVAL_S,
+        help="Seconds between latency log lines on the follower terminal.",
+    )
     return parser.parse_args()
 
 
@@ -228,6 +284,7 @@ def main() -> int:
             sock=sock,
             hz=args.hz,
             timeout_ms=args.timeout_ms,
+            latency_log_interval_s=args.latency_log_interval,
             logger=logger,
         )
         return receiver.run()
