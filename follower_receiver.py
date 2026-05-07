@@ -9,7 +9,7 @@ import time
 from typing import Any
 
 from logging_utils import configure_logging, get_logger
-from protocol import ActionMessage, ProtocolError, decode_action_message
+from protocol import AckMessage, ActionMessage, ProtocolError, decode_action_message, encode_ack_message
 
 
 DEFAULT_BIND_IP = "0.0.0.0"
@@ -48,6 +48,7 @@ class FollowerReceiver:
         self,
         follower_robot: Any,
         sock: socket.socket,
+        follower_id: str,
         hz: float = DEFAULT_HZ,
         timeout_ms: int = DEFAULT_TIMEOUT_MS,
         latency_log_interval_s: float = DEFAULT_LATENCY_LOG_INTERVAL_S,
@@ -55,6 +56,7 @@ class FollowerReceiver:
     ) -> None:
         self.follower_robot = follower_robot
         self.sock = sock
+        self.follower_id = follower_id
         self.period_s = 1.0 / hz
         self.timeout_ns = timeout_ms * 1_000_000
         self.latency_log_interval_s = latency_log_interval_s
@@ -64,12 +66,15 @@ class FollowerReceiver:
         self.last_packet_monotonic_ns: int | None = None
         self.last_seq: int | None = None
         self.last_packet_latency_ms: float | None = None
+        self.last_clock_skew_ms: float | None = None
         self.first_packet_seen = False
         self.timeout_active = False
         self.decode_error_count = 0
         self.latency_sample_count = 0
         self.latency_sum_ms = 0.0
         self.latency_max_ms = float("-inf")
+        self.clock_skew_detected = False
+        self.clock_skew_warning_emitted = False
         self.last_latency_log_monotonic_s = time.monotonic()
 
         self.sock.setblocking(False)
@@ -95,9 +100,22 @@ class FollowerReceiver:
         self.last_packet_monotonic_ns = received_at_ns
         self.last_seq = message.seq
         self.last_packet_latency_ms = (received_wall_time_ns - message.sent_at_ns) / 1_000_000
-        self.latency_sample_count += 1
-        self.latency_sum_ms += self.last_packet_latency_ms
-        self.latency_max_ms = max(self.latency_max_ms, self.last_packet_latency_ms)
+        self.last_clock_skew_ms = self.last_packet_latency_ms
+
+        if self.last_packet_latency_ms < 0:
+            self.clock_skew_detected = True
+            if not self.clock_skew_warning_emitted:
+                self.logger.warning(
+                    "Detected unsynchronized system clocks between leader and follower "
+                    "(latest offset %.2f ms). Latency stats will be hidden; use stream_age "
+                    "or sync both machines with NTP/chrony.",
+                    self.last_packet_latency_ms,
+                )
+                self.clock_skew_warning_emitted = True
+        else:
+            self.latency_sample_count += 1
+            self.latency_sum_ms += self.last_packet_latency_ms
+            self.latency_max_ms = max(self.latency_max_ms, self.last_packet_latency_ms)
 
         if not self.first_packet_seen:
             self.logger.info(
@@ -112,6 +130,10 @@ class FollowerReceiver:
             self.logger.info("Control stream recovered at seq=%s.", message.seq)
 
         return message
+
+    def send_ack(self, seq: int, addr: tuple[str, int]) -> None:
+        ack = AckMessage(seq=seq, follower_id=self.follower_id)
+        self.sock.sendto(encode_ack_message(ack), addr)
 
     def maybe_log_latency(
         self,
@@ -131,28 +153,37 @@ class FollowerReceiver:
         if now_monotonic_s - self.last_latency_log_monotonic_s < self.latency_log_interval_s:
             return
 
-        avg_latency_ms = self.latency_sum_ms / self.latency_sample_count
         staleness_ms = (now_monotonic_ns - self.last_packet_monotonic_ns) / 1_000_000
-        self.logger.info(
-            "Latency: latest=%.2f ms avg=%.2f ms max=%.2f ms samples=%s stream_age=%.2f ms",
-            self.last_packet_latency_ms,
-            avg_latency_ms,
-            self.latency_max_ms,
-            self.latency_sample_count,
-            staleness_ms,
-        )
+        if self.clock_skew_detected:
+            self.logger.info(
+                "Clock skew detected: latest_offset=%.2f ms stream_age=%.2f ms seq=%s",
+                self.last_clock_skew_ms,
+                staleness_ms,
+                self.last_seq,
+            )
+        elif self.latency_sample_count > 0:
+            avg_latency_ms = self.latency_sum_ms / self.latency_sample_count
+            self.logger.info(
+                "Latency: latest=%.2f ms avg=%.2f ms max=%.2f ms samples=%s stream_age=%.2f ms",
+                self.last_packet_latency_ms,
+                avg_latency_ms,
+                self.latency_max_ms,
+                self.latency_sample_count,
+                staleness_ms,
+            )
         self.last_latency_log_monotonic_s = now_monotonic_s
 
     def poll_network(self) -> int:
         processed = 0
         while True:
             try:
-                payload, _addr = self.sock.recvfrom(MAX_UDP_PACKET_SIZE)
+                payload, addr = self.sock.recvfrom(MAX_UDP_PACKET_SIZE)
             except BlockingIOError:
                 break
 
             try:
-                self.handle_datagram(payload)
+                message = self.handle_datagram(payload)
+                self.send_ack(message.seq, addr)
                 processed += 1
             except ProtocolError as exc:
                 self.decode_error_count += 1
@@ -282,6 +313,7 @@ def main() -> int:
         receiver = FollowerReceiver(
             follower_robot=follower_robot,
             sock=sock,
+            follower_id=args.follower_id,
             hz=args.hz,
             timeout_ms=args.timeout_ms,
             latency_log_interval_s=args.latency_log_interval,

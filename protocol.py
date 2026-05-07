@@ -8,6 +8,7 @@ from typing import Any
 
 
 MSG_TYPE_ACTION_V1 = "action_v1"
+MSG_TYPE_ACTION_ACK_V1 = "action_ack_v1"
 EXPECTED_ACTION_LENGTH = 6
 DEFAULT_ACTION_KEYS = (
     "shoulder_pan.pos",
@@ -40,6 +41,22 @@ class ActionMessage:
             "sent_at_ns": self.sent_at_ns,
             "leader_id": self.leader_id,
             "action": self.action,
+        }
+
+
+@dataclass(slots=True, frozen=True)
+class AckMessage:
+    """Validated acknowledgment message sent from follower to leader."""
+
+    seq: int
+    follower_id: str
+    msg_type: str = MSG_TYPE_ACTION_ACK_V1
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "msg_type": self.msg_type,
+            "seq": self.seq,
+            "follower_id": self.follower_id,
         }
 
 
@@ -99,6 +116,14 @@ def encode_action_message(message: ActionMessage) -> bytes:
     )
 
 
+def encode_ack_message(message: AckMessage) -> bytes:
+    """Serialize an acknowledgment message to compact JSON bytes."""
+
+    return json.dumps(message.to_dict(), separators=(",", ":"), ensure_ascii=True).encode(
+        "utf-8"
+    )
+
+
 def decode_action_message(payload: bytes, expected_len: int = EXPECTED_ACTION_LENGTH) -> ActionMessage:
     """Deserialize and validate a UDP action message."""
 
@@ -133,3 +158,29 @@ def decode_action_message(payload: bytes, expected_len: int = EXPECTED_ACTION_LE
         leader_id=leader_id,
         action=normalize_action(action, expected_len=expected_len),
     )
+
+
+def decode_ack_message(payload: bytes) -> AckMessage:
+    """Deserialize and validate a UDP acknowledgment message."""
+
+    try:
+        raw = json.loads(payload.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise ProtocolError("Payload is not valid UTF-8 JSON.") from exc
+
+    if not isinstance(raw, dict):
+        raise ProtocolError("Payload root must be a JSON object.")
+
+    msg_type = raw.get("msg_type")
+    if msg_type != MSG_TYPE_ACTION_ACK_V1:
+        raise ProtocolError(f"Unsupported ack msg_type: {msg_type!r}.")
+
+    seq = raw.get("seq")
+    follower_id = raw.get("follower_id")
+
+    if not isinstance(seq, int) or seq < 0:
+        raise ProtocolError("Field 'seq' must be a non-negative integer.")
+    if not isinstance(follower_id, str) or not follower_id:
+        raise ProtocolError("Field 'follower_id' must be a non-empty string.")
+
+    return AckMessage(msg_type=msg_type, seq=seq, follower_id=follower_id)

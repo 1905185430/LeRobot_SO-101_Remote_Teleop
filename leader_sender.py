@@ -14,6 +14,8 @@ from protocol import ActionMessage, ProtocolError, encode_action_message, normal
 
 DEFAULT_HZ = 50.0
 DEFAULT_UDP_PORT = 5005
+DEFAULT_RTT_LOG_INTERVAL_S = 1.0
+MAX_PENDING_ACK_AGE_S = 5.0
 
 
 def positive_float(value: str) -> float:
@@ -40,6 +42,7 @@ class LeaderSender:
         udp_port: int,
         leader_id: str,
         hz: float = DEFAULT_HZ,
+        rtt_log_interval_s: float = DEFAULT_RTT_LOG_INTERVAL_S,
         sock: socket.socket | None = None,
         logger: logging.Logger | None = None,
     ) -> None:
@@ -47,9 +50,19 @@ class LeaderSender:
         self.target = (follower_ip, udp_port)
         self.leader_id = leader_id
         self.period_s = 1.0 / hz
+        self.rtt_log_interval_s = rtt_log_interval_s
         self.sock = sock or socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.logger = logger or get_logger("leader_sender")
         self.seq = 0
+        self.pending_send_times_ns: dict[int, int] = {}
+        self.last_rtt_ms: float | None = None
+        self.rtt_sample_count = 0
+        self.rtt_sum_ms = 0.0
+        self.rtt_min_ms = float("inf")
+        self.rtt_max_ms = float("-inf")
+        self.last_rtt_log_monotonic_s = time.monotonic()
+
+        self.sock.setblocking(False)
 
     def build_message(self) -> ActionMessage:
         action = normalize_action(self.leader_device.get_action())
@@ -65,7 +78,71 @@ class LeaderSender:
     def send_once(self) -> ActionMessage:
         message = self.build_message()
         self.sock.sendto(encode_action_message(message), self.target)
+        self.pending_send_times_ns[message.seq] = time.monotonic_ns()
         return message
+
+    def handle_ack(self, payload: bytes) -> float | None:
+        from protocol import decode_ack_message
+
+        ack = decode_ack_message(payload)
+        send_time_ns = self.pending_send_times_ns.pop(ack.seq, None)
+        if send_time_ns is None:
+            return None
+
+        rtt_ms = (time.monotonic_ns() - send_time_ns) / 1_000_000
+        self.last_rtt_ms = rtt_ms
+        self.rtt_sample_count += 1
+        self.rtt_sum_ms += rtt_ms
+        self.rtt_min_ms = min(self.rtt_min_ms, rtt_ms)
+        self.rtt_max_ms = max(self.rtt_max_ms, rtt_ms)
+        return rtt_ms
+
+    def poll_acks(self) -> int:
+        processed = 0
+        while True:
+            try:
+                payload, _addr = self.sock.recvfrom(4096)
+            except BlockingIOError:
+                break
+
+            try:
+                if self.handle_ack(payload) is not None:
+                    processed += 1
+            except ProtocolError as exc:
+                self.logger.warning("Dropped invalid ACK packet: %s", exc)
+
+        return processed
+
+    def prune_stale_pending_acks(self, now_ns: int | None = None) -> None:
+        if now_ns is None:
+            now_ns = time.monotonic_ns()
+
+        cutoff_ns = now_ns - int(MAX_PENDING_ACK_AGE_S * 1_000_000_000)
+        stale = [seq for seq, sent_ns in self.pending_send_times_ns.items() if sent_ns < cutoff_ns]
+        for seq in stale:
+            self.pending_send_times_ns.pop(seq, None)
+
+    def maybe_log_rtt(self, now_monotonic_s: float | None = None) -> None:
+        if self.rtt_sample_count == 0 or self.rtt_log_interval_s <= 0:
+            return
+
+        if now_monotonic_s is None:
+            now_monotonic_s = time.monotonic()
+
+        if now_monotonic_s - self.last_rtt_log_monotonic_s < self.rtt_log_interval_s:
+            return
+
+        avg_rtt_ms = self.rtt_sum_ms / self.rtt_sample_count
+        self.logger.info(
+            "RTT: latest=%.2f ms avg=%.2f ms min=%.2f ms max=%.2f ms samples=%s in_flight=%s",
+            self.last_rtt_ms,
+            avg_rtt_ms,
+            self.rtt_min_ms,
+            self.rtt_max_ms,
+            self.rtt_sample_count,
+            len(self.pending_send_times_ns),
+        )
+        self.last_rtt_log_monotonic_s = now_monotonic_s
 
     def run(self) -> int:
         self.logger.info(
@@ -79,6 +156,9 @@ class LeaderSender:
         try:
             while True:
                 self.send_once()
+                self.poll_acks()
+                self.prune_stale_pending_acks()
+                self.maybe_log_rtt()
                 next_tick += self.period_s
                 sleep_s = next_tick - time.perf_counter()
                 if sleep_s > 0:
@@ -116,6 +196,12 @@ def parse_args() -> argparse.Namespace:
         help="UDP port on the follower machine.",
     )
     parser.add_argument("--hz", type=positive_float, default=DEFAULT_HZ, help="Control loop frequency.")
+    parser.add_argument(
+        "--rtt-log-interval",
+        type=positive_float,
+        default=DEFAULT_RTT_LOG_INTERVAL_S,
+        help="Seconds between RTT log lines on the leader terminal.",
+    )
     return parser.parse_args()
 
 
@@ -138,6 +224,7 @@ def main() -> int:
             udp_port=args.udp_port,
             leader_id=args.leader_id,
             hz=args.hz,
+            rtt_log_interval_s=args.rtt_log_interval,
             logger=logger,
         )
         return sender.run()

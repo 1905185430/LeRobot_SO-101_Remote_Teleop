@@ -5,6 +5,11 @@ Minimal UDP bridge for running an SO-101 leader arm and follower arm on differen
 The bridge preserves LeRobot's native SO-101 action format: joint-name dictionaries such as
 `{"shoulder_pan.pos": ..., "gripper.pos": ...}`.
 
+It also supports ping-like latency monitoring:
+- the follower immediately sends a UDP ACK for every valid action packet
+- the leader measures round-trip time (RTT) with its own monotonic clock
+- this RTT output does not depend on the two machines having synchronized system clocks
+
 ## Files
 
 - `leader_sender.py`: reads `SO101Leader.get_action()` and streams validated JSON packets over UDP
@@ -12,12 +17,17 @@ The bridge preserves LeRobot's native SO-101 action format: joint-name dictionar
 - `protocol.py`: wire schema, encoding, decoding, and validation
 - `logging_utils.py`: shared logging setup
 
-The follower terminal also prints periodic latency stats:
+The follower terminal also prints periodic link timing stats:
 - `latest`: most recent one-way packet age derived from `sent_at_ns`
 - `avg` / `max`: running averages over all received packets
 - `stream_age`: time since the last valid packet arrived, based on the follower's monotonic clock
 
-Note: `latest/avg/max` assume the two machines have roughly aligned system clocks. If they are not synchronized, use `stream_age` as the more reliable freshness signal.
+If the two machines are not time-synchronized, the follower will detect negative wall-clock deltas and switch the terminal output to `Clock skew detected ... stream_age=...` instead of showing misleading negative latency numbers. In that case, `stream_age` is the reliable freshness signal, and syncing both machines with NTP or `chrony` will restore meaningful one-way latency stats.
+
+For the most stable delay metric, watch the leader terminal RTT logs. They behave more like `ping`:
+- `latest`: latest measured round-trip time
+- `avg` / `min` / `max`: running RTT statistics
+- `in_flight`: action packets that have been sent but not yet acknowledged
 
 ## Wire Format
 
@@ -69,7 +79,8 @@ python3 leader_sender.py \
   --leader-id leader_arm \
   --follower-ip 192.168.1.100 \
   --udp-port 5005 \
-  --hz 50
+  --hz 50 \
+  --rtt-log-interval 1.0
 ```
 
 ## Test

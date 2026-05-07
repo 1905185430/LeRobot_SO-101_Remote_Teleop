@@ -3,11 +3,15 @@ from __future__ import annotations
 import unittest
 
 from protocol import (
+    AckMessage,
     ActionMessage,
     DEFAULT_ACTION_KEYS,
     MSG_TYPE_ACTION_V1,
+    MSG_TYPE_ACTION_ACK_V1,
     ProtocolError,
+    decode_ack_message,
     decode_action_message,
+    encode_ack_message,
     encode_action_message,
     normalize_action,
 )
@@ -89,6 +93,22 @@ class ProtocolTests(unittest.TestCase):
 
     def test_message_type_constant_matches_wire_contract(self) -> None:
         self.assertEqual(MSG_TYPE_ACTION_V1, "action_v1")
+
+    def test_ack_round_trip(self) -> None:
+        ack = AckMessage(seq=7, follower_id="follower_arm")
+
+        decoded = decode_ack_message(encode_ack_message(ack))
+
+        self.assertEqual(decoded, ack)
+
+    def test_wrong_ack_type_is_rejected(self) -> None:
+        payload = b'{"msg_type":"wrong","seq":1,"follower_id":"follower_arm"}'
+
+        with self.assertRaises(ProtocolError):
+            decode_ack_message(payload)
+
+    def test_ack_message_type_constant_matches_wire_contract(self) -> None:
+        self.assertEqual(MSG_TYPE_ACTION_ACK_V1, "action_ack_v1")
 
 
 if __name__ == "__main__":
