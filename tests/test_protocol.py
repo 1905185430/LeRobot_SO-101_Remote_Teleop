@@ -4,6 +4,7 @@ import unittest
 
 from protocol import (
     ActionMessage,
+    DEFAULT_ACTION_KEYS,
     MSG_TYPE_ACTION_V1,
     ProtocolError,
     decode_action_message,
@@ -18,7 +19,14 @@ class ProtocolTests(unittest.TestCase):
             seq=3,
             sent_at_ns=123456789,
             leader_id="leader_arm",
-            action=[0.0, 1.0, 2.0, 3.0, 4.0, 5.0],
+            action={
+                "shoulder_pan.pos": 0.0,
+                "shoulder_lift.pos": 1.0,
+                "elbow_flex.pos": 2.0,
+                "wrist_flex.pos": 3.0,
+                "wrist_roll.pos": 4.0,
+                "gripper.pos": 5.0,
+            },
         )
 
         decoded = decode_action_message(encode_action_message(message))
@@ -30,7 +38,25 @@ class ProtocolTests(unittest.TestCase):
             def tolist(self) -> list[float]:
                 return [1, 2, 3, 4, 5, 6]
 
-        self.assertEqual(normalize_action(FakeArray()), [1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+        self.assertEqual(
+            normalize_action(FakeArray()),
+            dict(zip(DEFAULT_ACTION_KEYS, [1.0, 2.0, 3.0, 4.0, 5.0, 6.0], strict=True)),
+        )
+
+    def test_normalize_action_preserves_joint_names(self) -> None:
+        action = {
+            "shoulder_pan.pos": 1,
+            "shoulder_lift.pos": 2,
+            "elbow_flex.pos": 3,
+            "wrist_flex.pos": 4,
+            "wrist_roll.pos": 5,
+            "gripper.pos": 6,
+        }
+
+        self.assertEqual(
+            normalize_action(action),
+            dict(zip(DEFAULT_ACTION_KEYS, [1.0, 2.0, 3.0, 4.0, 5.0, 6.0], strict=True)),
+        )
 
     def test_invalid_json_is_rejected(self) -> None:
         with self.assertRaises(ProtocolError):
@@ -39,7 +65,8 @@ class ProtocolTests(unittest.TestCase):
     def test_wrong_msg_type_is_rejected(self) -> None:
         payload = (
             b'{"msg_type":"unexpected","seq":1,"sent_at_ns":2,'
-            b'"leader_id":"leader","action":[0,1,2,3,4,5]}'
+            b'"leader_id":"leader","action":{"shoulder_pan.pos":0,"shoulder_lift.pos":1,'
+            b'"elbow_flex.pos":2,"wrist_flex.pos":3,"wrist_roll.pos":4,"gripper.pos":5}}'
         )
 
         with self.assertRaises(ProtocolError):

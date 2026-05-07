@@ -57,7 +57,7 @@ class FollowerReceiver:
         self.timeout_ns = timeout_ms * 1_000_000
         self.logger = logger or get_logger("follower_receiver")
 
-        self.last_valid_action: list[float] | None = None
+        self.last_valid_action: dict[str, float] | None = None
         self.last_packet_monotonic_ns: int | None = None
         self.last_seq: int | None = None
         self.first_packet_seen = False
@@ -116,7 +116,7 @@ class FollowerReceiver:
 
         return processed
 
-    def get_current_action(self, now_ns: int | None = None) -> list[float] | None:
+    def get_current_action(self, now_ns: int | None = None) -> dict[str, float] | None:
         if self.last_valid_action is None:
             return None
 

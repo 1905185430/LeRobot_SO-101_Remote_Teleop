@@ -2,12 +2,36 @@
 
 Minimal UDP bridge for running an SO-101 leader arm and follower arm on different computers with LeRobot.
 
+The bridge preserves LeRobot's native SO-101 action format: joint-name dictionaries such as
+`{"shoulder_pan.pos": ..., "gripper.pos": ...}`.
+
 ## Files
 
 - `leader_sender.py`: reads `SO101Leader.get_action()` and streams validated JSON packets over UDP
 - `follower_receiver.py`: receives packets, holds the last valid target on timeout, and forwards to `SO101Follower.send_action()`
 - `protocol.py`: wire schema, encoding, decoding, and validation
 - `logging_utils.py`: shared logging setup
+
+## Wire Format
+
+Leader packets are JSON objects with an `action` dictionary:
+
+```json
+{
+  "msg_type": "action_v1",
+  "seq": 12,
+  "sent_at_ns": 1710000000000000000,
+  "leader_id": "so_leader",
+  "action": {
+    "shoulder_pan.pos": 0.0,
+    "shoulder_lift.pos": 1.2,
+    "elbow_flex.pos": 2.3,
+    "wrist_flex.pos": 0.4,
+    "wrist_roll.pos": 1.1,
+    "gripper.pos": 0.0
+  }
+}
+```
 
 ## Requirements
 

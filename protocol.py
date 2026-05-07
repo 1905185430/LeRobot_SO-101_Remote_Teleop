@@ -9,6 +9,14 @@ from typing import Any
 
 MSG_TYPE_ACTION_V1 = "action_v1"
 EXPECTED_ACTION_LENGTH = 6
+DEFAULT_ACTION_KEYS = (
+    "shoulder_pan.pos",
+    "shoulder_lift.pos",
+    "elbow_flex.pos",
+    "wrist_flex.pos",
+    "wrist_roll.pos",
+    "gripper.pos",
+)
 
 
 class ProtocolError(ValueError):
@@ -22,7 +30,7 @@ class ActionMessage:
     seq: int
     sent_at_ns: int
     leader_id: str
-    action: list[float]
+    action: dict[str, float]
     msg_type: str = MSG_TYPE_ACTION_V1
 
     def to_dict(self) -> dict[str, Any]:
@@ -35,14 +43,14 @@ class ActionMessage:
         }
 
 
-def normalize_action(action: Any, expected_len: int = EXPECTED_ACTION_LENGTH) -> list[float]:
+def _normalize_action_values(action_values: Any, expected_len: int) -> list[float]:
     """Convert an action-like object into a validated list of floats."""
 
-    if hasattr(action, "tolist"):
-        action = action.tolist()
+    if hasattr(action_values, "tolist"):
+        action_values = action_values.tolist()
 
     try:
-        values = [float(value) for value in action]
+        values = [float(value) for value in action_values]
     except TypeError as exc:
         raise ProtocolError("Action must be an iterable of numeric values.") from exc
     except ValueError as exc:
@@ -54,6 +62,33 @@ def normalize_action(action: Any, expected_len: int = EXPECTED_ACTION_LENGTH) ->
         )
 
     return values
+
+
+def normalize_action(
+    action: Any,
+    expected_len: int = EXPECTED_ACTION_LENGTH,
+    action_keys: tuple[str, ...] = DEFAULT_ACTION_KEYS,
+) -> dict[str, float]:
+    """Convert an action-like object into a validated action dict.
+
+    LeRobot SO-101 currently exposes teleop and robot actions as dictionaries
+    keyed by joint names like ``shoulder_pan.pos``. For backward compatibility
+    we also accept list-like payloads and map them to the canonical joint order.
+    """
+
+    if isinstance(action, dict):
+        missing_keys = [key for key in action_keys if key not in action]
+        if missing_keys:
+            raise ProtocolError(
+                f"Action dict missing expected keys: {', '.join(missing_keys)}."
+            )
+        normalized_values = _normalize_action_values(
+            [action[key] for key in action_keys], expected_len=expected_len
+        )
+        return dict(zip(action_keys, normalized_values, strict=True))
+
+    normalized_values = _normalize_action_values(action, expected_len=expected_len)
+    return dict(zip(action_keys, normalized_values, strict=True))
 
 
 def encode_action_message(message: ActionMessage) -> bytes:
