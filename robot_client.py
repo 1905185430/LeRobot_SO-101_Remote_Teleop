@@ -17,8 +17,10 @@ from so101_remote.client import (
     SERVER_ADDRESS,
     TASK,
     build_camera_configs,
+    build_client_metadata,
     build_client_config,
     build_robot_config,
+    client_settings,
     main,
 )
 

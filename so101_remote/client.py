@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from importlib import import_module
+from pathlib import Path
 import threading
 
 from .config import (
@@ -19,6 +20,40 @@ from .config import (
     SERVER_ADDRESS,
     TASK,
 )
+from .recorder import build_run_metadata
+
+
+def client_settings() -> dict[str, object]:
+    """Return resolved robot client settings for logs and metadata."""
+    return {
+        "server_address": SERVER_ADDRESS,
+        "robot_port": ROBOT_PORT,
+        "robot_id": ROBOT_ID,
+        "cameras": CAMERAS,
+        "task": TASK,
+        "policy_type": POLICY_TYPE,
+        "pretrained_name_or_path": PRETRAINED_NAME_OR_PATH,
+        "policy_device": POLICY_DEVICE,
+        "actions_per_chunk": ACTIONS_PER_CHUNK,
+        "chunk_size_threshold": CHUNK_SIZE_THRESHOLD,
+        "aggregate_fn_name": AGGREGATE_FN_NAME,
+        "debug_visualize_queue_size": DEBUG_VISUALIZE_QUEUE_SIZE,
+    }
+
+
+def build_client_metadata(run_dir: str | Path) -> dict[str, object]:
+    """Build reproducibility metadata for a robot client run."""
+    return build_run_metadata(
+        role="robot-client",
+        server={"address": SERVER_ADDRESS},
+        robot={"id": ROBOT_ID, "port": ROBOT_PORT, "cameras": CAMERAS},
+        policy={
+            "type": POLICY_TYPE,
+            "pretrained_name_or_path": PRETRAINED_NAME_OR_PATH,
+            "device": POLICY_DEVICE,
+        },
+        extra={"resolved_settings": client_settings(), "run_dir": str(run_dir)},
+    )
 
 
 def build_camera_configs():

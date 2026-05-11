@@ -206,6 +206,42 @@ class MinimalAsyncScriptTests(unittest.TestCase):
         self.assertEqual(robot_cfg.kwargs["id"], robot_client.ROBOT_ID)
         self.assertIn("front", robot_cfg.kwargs["cameras"])
 
+    def test_robot_client_settings_are_resolved(self) -> None:
+        settings = robot_client.client_settings()
+
+        self.assertEqual(
+            set(settings),
+            {
+                "server_address",
+                "robot_port",
+                "robot_id",
+                "cameras",
+                "task",
+                "policy_type",
+                "pretrained_name_or_path",
+                "policy_device",
+                "actions_per_chunk",
+                "chunk_size_threshold",
+                "aggregate_fn_name",
+                "debug_visualize_queue_size",
+            },
+        )
+        self.assertEqual(settings["server_address"], robot_client.SERVER_ADDRESS)
+        self.assertEqual(settings["robot_id"], robot_client.ROBOT_ID)
+        self.assertEqual(settings["actions_per_chunk"], robot_client.ACTIONS_PER_CHUNK)
+
+    def test_robot_client_metadata_includes_resolved_settings(self) -> None:
+        metadata = robot_client.build_client_metadata("/tmp/client-run")
+
+        self.assertEqual(metadata["role"], "robot-client")
+        self.assertEqual(metadata["robot"]["id"], robot_client.ROBOT_ID)
+        self.assertEqual(metadata["server"]["address"], robot_client.SERVER_ADDRESS)
+        self.assertEqual(metadata["policy"]["type"], robot_client.POLICY_TYPE)
+        self.assertEqual(
+            metadata["extra"]["resolved_settings"]["actions_per_chunk"],
+            robot_client.ACTIONS_PER_CHUNK,
+        )
+
     def test_robot_client_main_starts_and_runs_control_loop(self) -> None:
         fake_thread = mock.Mock(side_effect=FakeThread)
         with mock.patch.object(robot_client.threading, "Thread", fake_thread):
