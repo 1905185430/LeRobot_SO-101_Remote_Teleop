@@ -61,6 +61,21 @@ The run artifact set is:
 
 Real LeRobot runtime hooks are wired in later phases; this artifact layout is the local contract those hooks will write into.
 
+## Real Runtime Artifacts
+
+When you run the real thin entrypoints, each side creates its own run directory under `logs/experiments/`.
+
+- `python3 policy_server.py` creates a `policy-server` run directory for the GPU/server process.
+- `python3 robot_client.py` creates a `robot-client` run directory for the robot-side process.
+
+Each real runtime run directory includes:
+
+- `metadata.json`
+- `events.jsonl`
+- `summary.md`
+
+The metadata records the role, endpoint, model/policy or robot fields available to that side, the run directory, and the resolved constant settings used at startup. For v1, constants in `policy_server.py` and `robot_client.py` remain the configuration path; there is no YAML or CLI override layer required for Phase 4.
+
 ## Dry Run
 
 Run a local dry-run without SO-101 hardware or LeRobot:

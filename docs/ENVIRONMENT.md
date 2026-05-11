@@ -183,7 +183,9 @@ Confirm the same run directory also contains:
 - `metrics.jsonl`
 - `events.jsonl`
 
-Phase 2 defines the artifact layout and summary generation. Real LeRobot runtime hooks are wired in later phases.
+For real LeRobot startup, `python3 policy_server.py` creates a `policy-server` run directory and `python3 robot_client.py` creates a `robot-client` run directory under `logs/experiments/`. Each side writes `metadata.json`, `events.jsonl`, and `summary.md`; metadata includes the role, endpoint, run directory, available server/robot/model fields, and the resolved constant settings used at startup.
+
+The current v1 configuration path is still the constants in `policy_server.py` and `robot_client.py`. Keep those constants as the source of truth for Phase 4 runs; do not expect a YAML file or CLI override layer.
 
 ## Common Failures
 
