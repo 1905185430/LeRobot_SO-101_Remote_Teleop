@@ -125,7 +125,7 @@ class ConfiguredRuntimeTests(unittest.TestCase):
         self.addCleanup(mock.patch.stopall)
 
     def test_runtime_summary_includes_lerobot_for_real_path(self) -> None:
-        config = load_config("configs/remote_inference_so101_smolvla.yaml")
+        config = load_config("configs/remote_inference/so101_smolvla.yaml")
 
         summary = configured_runtime_summary("server", config)
 
@@ -134,7 +134,7 @@ class ConfiguredRuntimeTests(unittest.TestCase):
 
     def test_lerobot_policy_server_runs_from_config(self) -> None:
         with TemporaryDirectory() as tmpdir:
-            config = with_save_dir(load_config("configs/remote_inference_so101_smolvla.yaml"), tmpdir)
+            config = with_save_dir(load_config("configs/remote_inference/so101_smolvla.yaml"), tmpdir)
 
             result = run_lerobot_policy_server(config)
 
@@ -144,7 +144,7 @@ class ConfiguredRuntimeTests(unittest.TestCase):
 
     def test_lerobot_robot_client_runs_from_config(self) -> None:
         with TemporaryDirectory() as tmpdir:
-            config = with_save_dir(load_config("configs/remote_inference_so101_smolvla.yaml"), tmpdir)
+            config = with_save_dir(load_config("configs/remote_inference/so101_smolvla.yaml"), tmpdir)
 
             result = run_lerobot_robot_client(config)
 
@@ -158,7 +158,7 @@ class ConfiguredRuntimeTests(unittest.TestCase):
     def test_mock_tcp_client_server_roundtrip_from_config(self) -> None:
         host, port = free_local_endpoint()
         with TemporaryDirectory() as tmpdir:
-            config = with_endpoint(load_config("configs/debug_mock_robot.yaml"), tmpdir, host, port)
+            config = with_endpoint(load_config("configs/debug/debug_mock_robot.yaml"), tmpdir, host, port)
             errors: list[BaseException] = []
 
             def serve() -> None:

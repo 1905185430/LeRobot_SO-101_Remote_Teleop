@@ -76,7 +76,7 @@ def with_safety(config, **kwargs):
 
 class TcpTeleopTests(unittest.TestCase):
     def test_settings_are_loaded_from_remote_teleop_config(self) -> None:
-        config = load_config("configs/remote_teleop_so101_tcp.yaml")
+        config = load_config("configs/teleop/remote_so101_tcp.yaml")
 
         settings = tcp_teleop_settings(config)
 
@@ -86,7 +86,7 @@ class TcpTeleopTests(unittest.TestCase):
         self.assertEqual(settings.follower_id, config.robot.id)
 
     def test_leader_builds_normalized_action_messages(self) -> None:
-        config = load_config("configs/remote_teleop_so101_tcp.yaml")
+        config = load_config("configs/teleop/remote_so101_tcp.yaml")
         client = TcpTeleopLeaderClient(FakeLeader(), tcp_teleop_settings(config))
 
         message = client.build_action_message()
@@ -96,7 +96,7 @@ class TcpTeleopTests(unittest.TestCase):
         self.assertEqual(sorted(message["action"]), sorted(JOINTS))
 
     def test_leader_read_failure_is_wrapped_before_send(self) -> None:
-        config = load_config("configs/remote_teleop_so101_tcp.yaml")
+        config = load_config("configs/teleop/remote_so101_tcp.yaml")
         client = TcpTeleopLeaderClient(FailingLeader(), tcp_teleop_settings(config))
 
         with self.assertRaisesRegex(RuntimeError, "Failed to read a safe leader action"):
@@ -104,9 +104,9 @@ class TcpTeleopTests(unittest.TestCase):
 
     def test_leader_prints_actions_when_enabled(self) -> None:
         config = replace(
-            load_config("configs/remote_teleop_so101_tcp.yaml"),
+            load_config("configs/teleop/remote_so101_tcp.yaml"),
             logging=replace(
-                load_config("configs/remote_teleop_so101_tcp.yaml").logging,
+                load_config("configs/teleop/remote_so101_tcp.yaml").logging,
                 print_leader_actions=True,
                 print_action_interval=1,
             ),
@@ -121,7 +121,7 @@ class TcpTeleopTests(unittest.TestCase):
         self.assertIn("Leader action frame=0", printer.call_args.args[0])
 
     def test_follower_rejects_duplicate_frames(self) -> None:
-        config = load_config("configs/remote_teleop_so101_tcp.yaml")
+        config = load_config("configs/teleop/remote_so101_tcp.yaml")
         server = TcpTeleopFollowerServer(FakeFollower(), tcp_teleop_settings(config))
         server.last_action = dict(JOINTS)
         message = {
@@ -138,7 +138,7 @@ class TcpTeleopTests(unittest.TestCase):
 
     def test_follower_limits_large_action_delta_from_current_position(self) -> None:
         config = with_safety(
-            load_config("configs/remote_teleop_so101_tcp.yaml"),
+            load_config("configs/teleop/remote_so101_tcp.yaml"),
             max_first_action_delta=200.0,
         )
         server = TcpTeleopFollowerServer(FakeFollower(), tcp_teleop_settings(config))
@@ -157,7 +157,7 @@ class TcpTeleopTests(unittest.TestCase):
 
     def test_follower_rejects_first_action_too_far_from_startup_pose(self) -> None:
         config = with_safety(
-            load_config("configs/remote_teleop_so101_tcp.yaml"),
+            load_config("configs/teleop/remote_so101_tcp.yaml"),
             max_first_action_delta=1.0,
         )
         server = TcpTeleopFollowerServer(FakeFollower(), tcp_teleop_settings(config))
@@ -174,7 +174,7 @@ class TcpTeleopTests(unittest.TestCase):
             )
 
     def test_follower_rejects_mismatched_action_keys(self) -> None:
-        config = load_config("configs/remote_teleop_so101_tcp.yaml")
+        config = load_config("configs/teleop/remote_so101_tcp.yaml")
         server = TcpTeleopFollowerServer(FakeFollower(), tcp_teleop_settings(config))
         server.initialize_action_baseline()
 
@@ -197,7 +197,7 @@ class TcpTeleopTests(unittest.TestCase):
     def test_tcp_teleop_roundtrip_with_fake_devices(self) -> None:
         host, port = free_local_endpoint()
         with TemporaryDirectory() as tmpdir:
-            config = with_endpoint(load_config("configs/remote_teleop_so101_tcp.yaml"), tmpdir, host, port)
+            config = with_endpoint(load_config("configs/teleop/remote_so101_tcp.yaml"), tmpdir, host, port)
             settings = tcp_teleop_settings(config)
             leader = FakeLeader()
             follower = FakeFollower()
@@ -225,7 +225,7 @@ class TcpTeleopTests(unittest.TestCase):
         self.assertEqual(len(follower.actions), 3)
 
     def test_runtime_dispatches_remote_teleoperation(self) -> None:
-        config = load_config("configs/remote_teleop_so101_tcp.yaml")
+        config = load_config("configs/teleop/remote_so101_tcp.yaml")
 
         with mock.patch("so101_remote.runtime.run_tcp_teleop_follower_server", return_value=0) as server:
             self.assertEqual(run_configured_server(config), 0)

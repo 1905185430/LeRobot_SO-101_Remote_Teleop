@@ -59,7 +59,7 @@ class LeRobotFactoryTests(unittest.TestCase):
         self.addCleanup(mock.patch.stopall)
 
     def test_describe_lerobot_runtime_from_config(self) -> None:
-        config = load_config("configs/remote_inference_so101_smolvla.yaml")
+        config = load_config("configs/remote_inference/so101_smolvla.yaml")
 
         description = describe_lerobot_runtime(config)
 
@@ -69,7 +69,7 @@ class LeRobotFactoryTests(unittest.TestCase):
         self.assertEqual(description["network"]["endpoint"], "192.168.1.151:9000")
 
     def test_build_camera_and_robot_configs(self) -> None:
-        config = load_config("configs/remote_inference_so101_smolvla.yaml")
+        config = load_config("configs/remote_inference/so101_smolvla.yaml")
 
         cameras = build_lerobot_camera_configs(config)
         robot = build_lerobot_robot_config(config)
@@ -82,7 +82,7 @@ class LeRobotFactoryTests(unittest.TestCase):
         self.assertEqual(sorted(robot.kwargs["cameras"]), ["front", "wrist"])
 
     def test_build_robot_client_config(self) -> None:
-        config = load_config("configs/remote_inference_so101_smolvla.yaml")
+        config = load_config("configs/remote_inference/so101_smolvla.yaml")
 
         client_config = build_lerobot_robot_client_config(config)
 
@@ -93,20 +93,20 @@ class LeRobotFactoryTests(unittest.TestCase):
         self.assertIsInstance(client_config.kwargs["robot"], FakeConfig)
 
     def test_build_policy_server_config(self) -> None:
-        config = load_config("configs/remote_inference_so101_smolvla.yaml")
+        config = load_config("configs/remote_inference/so101_smolvla.yaml")
 
         server_config = build_lerobot_policy_server_config(config)
 
         self.assertEqual(server_config.kwargs, {"host": "192.168.1.151", "port": 9000})
 
     def test_unsupported_robot_type_is_rejected(self) -> None:
-        config = load_config("configs/debug_mock_robot.yaml")
+        config = load_config("configs/debug/debug_mock_robot.yaml")
 
         with self.assertRaisesRegex(ConfigError, "Unsupported robot.type"):
             build_lerobot_robot_config(config)
 
     def test_unsupported_policy_type_is_rejected(self) -> None:
-        config = load_config("configs/debug_mock_robot.yaml")
+        config = load_config("configs/debug/debug_mock_robot.yaml")
 
         with self.assertRaisesRegex(ConfigError, "Unsupported model.type"):
             build_lerobot_policy_server_config(config)

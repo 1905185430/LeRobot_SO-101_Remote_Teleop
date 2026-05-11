@@ -59,23 +59,23 @@ Before running it, edit these constants in [robot_client.py](/home/xuan/Document
 Validate a local inference config without touching hardware:
 
 ```bash
-python3 scripts/run_local.py --config configs/local_inference_so101_smolvla.yaml --dry-run
+python3 scripts/run_local.py --config configs/local_inference/so101_smolvla.yaml --dry-run
 ```
 
 Validate the remote inference server/client configs:
 
 ```bash
-python3 scripts/run_server.py --config configs/remote_inference_so101_smolvla.yaml --dry-run
-python3 scripts/run_client.py --config configs/remote_inference_so101_smolvla.yaml --dry-run
+python3 scripts/run_server.py --config configs/remote_inference/so101_smolvla.yaml --dry-run
+python3 scripts/run_client.py --config configs/remote_inference/so101_smolvla.yaml --dry-run
 ```
 
 Validate the remote teleoperation config:
 
 ```bash
-python3 scripts/run_server.py --config configs/remote_teleop_so101_tcp.yaml --dry-run
-python3 scripts/run_client.py --config configs/remote_teleop_so101_tcp.yaml --dry-run
-python3 scripts/run_server.py --config configs/remote_teleop_starai_tcp.yaml --dry-run
-python3 scripts/run_client.py --config configs/remote_teleop_starai_tcp.yaml --dry-run
+python3 scripts/run_server.py --config configs/teleop/remote_so101_tcp.yaml --dry-run
+python3 scripts/run_client.py --config configs/teleop/remote_so101_tcp.yaml --dry-run
+python3 scripts/run_server.py --config configs/teleop/remote_starai_tcp.yaml --dry-run
+python3 scripts/run_client.py --config configs/teleop/remote_starai_tcp.yaml --dry-run
 ```
 
 Config-driven scripts now support two executable paths:

@@ -16,7 +16,7 @@ from so101_remote.webui import (
 
 class WebUITests(unittest.TestCase):
     def test_dashboard_state_updates_observation_action_and_latency(self) -> None:
-        config = load_config("configs/debug_mock_robot.yaml")
+        config = load_config("configs/debug/debug_mock_robot.yaml")
         state = DashboardState.from_config(config, "mock-server")
 
         state.update_connection("client connected")
@@ -38,7 +38,7 @@ class WebUITests(unittest.TestCase):
         self.assertEqual(snapshot["latest_inference_ms"], 3.0)
 
     def test_render_dashboard_snapshot(self) -> None:
-        config = load_config("configs/debug_mock_robot.yaml")
+        config = load_config("configs/debug/debug_mock_robot.yaml")
         state = DashboardState.from_config(config, "mock-server")
         state.update_observation({"images": {"front": "abc123"}})
 
@@ -57,13 +57,13 @@ class WebUITests(unittest.TestCase):
         self.assertIn("data:image/jpeg;base64,abc123", rendered)
 
     def test_launch_dashboard_disabled_returns_none(self) -> None:
-        config = load_config("configs/debug_mock_robot.yaml")
+        config = load_config("configs/debug/debug_mock_robot.yaml")
         state = DashboardState.from_config(config, "mock-server")
 
         self.assertIsNone(launch_dashboard(config, state))
 
     def test_launch_dashboard_missing_gradio_returns_none(self) -> None:
-        config = load_config("configs/debug_mock_robot.yaml")
+        config = load_config("configs/debug/debug_mock_robot.yaml")
         config = replace(config, webui=replace(config.webui, enabled=True))
         state = DashboardState.from_config(config, "mock-server")
 

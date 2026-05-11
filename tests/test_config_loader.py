@@ -15,7 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 class ConfigLoaderTests(unittest.TestCase):
     def test_load_remote_inference_config(self) -> None:
-        config = load_config(ROOT / "configs" / "remote_inference_so101_smolvla.yaml")
+        config = load_config(ROOT / "configs" / "remote_inference" / "so101_smolvla.yaml")
 
         self.assertEqual(config.mode, "remote_inference")
         self.assertEqual(config.robot.type, "so101_follower")
@@ -26,7 +26,7 @@ class ConfigLoaderTests(unittest.TestCase):
         self.assertTrue(config.webui.enabled)
 
     def test_load_local_inference_config(self) -> None:
-        config = load_config(ROOT / "configs" / "local_inference_so101_smolvla.yaml")
+        config = load_config(ROOT / "configs" / "local_inference" / "so101_smolvla.yaml")
 
         self.assertEqual(config.mode, "local_inference")
         self.assertEqual(config.network.server_host, "127.0.0.1")
@@ -34,7 +34,7 @@ class ConfigLoaderTests(unittest.TestCase):
         self.assertEqual(config.safety.max_action_delta, 2.0)
 
     def test_load_local_starai_teleop_safety_config(self) -> None:
-        config = load_config(ROOT / "configs" / "local_teleop_starai_tcp.yaml")
+        config = load_config(ROOT / "configs" / "teleop" / "local_starai_tcp.yaml")
 
         self.assertEqual(config.safety.max_action_delta, 1.0)
         self.assertEqual(config.safety.max_first_action_delta, 12.0)
@@ -121,21 +121,21 @@ camera:
                 sys.executable,
                 "scripts/run_local.py",
                 "--config",
-                "configs/local_inference_so101_smolvla.yaml",
+                "configs/local_inference/so101_smolvla.yaml",
                 "--dry-run",
             ],
             [
                 sys.executable,
                 "scripts/run_server.py",
                 "--config",
-                "configs/remote_inference_so101_smolvla.yaml",
+                "configs/remote_inference/so101_smolvla.yaml",
                 "--dry-run",
             ],
             [
                 sys.executable,
                 "scripts/run_client.py",
                 "--config",
-                "configs/remote_inference_so101_smolvla.yaml",
+                "configs/remote_inference/so101_smolvla.yaml",
                 "--dry-run",
             ],
         ]

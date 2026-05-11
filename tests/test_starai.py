@@ -98,7 +98,7 @@ class StarAITests(unittest.TestCase):
         self.assertTrue(is_starai_leader_type("starai_violin_leader"))
 
     def test_starai_remote_teleop_config_is_supported(self) -> None:
-        config = load_config("configs/remote_teleop_starai_tcp.yaml")
+        config = load_config("configs/teleop/remote_starai_tcp.yaml")
 
         settings = tcp_teleop_settings(config)
 
@@ -106,7 +106,7 @@ class StarAITests(unittest.TestCase):
         self.assertEqual(settings.follower_id, "my_starai_viola_follower")
 
     def test_build_starai_follower_and_leader_devices(self) -> None:
-        config = load_config("configs/remote_teleop_starai_tcp.yaml")
+        config = load_config("configs/teleop/remote_starai_tcp.yaml")
 
         follower = build_starai_follower_robot(config)
         leader = build_starai_leader_device(config)
@@ -118,7 +118,7 @@ class StarAITests(unittest.TestCase):
         self.assertTrue(follower.moved_to_initial_position)
 
     def test_build_starai_follower_can_skip_initial_position_move(self) -> None:
-        config = load_config("configs/local_teleop_starai_tcp.yaml")
+        config = load_config("configs/teleop/local_starai_tcp.yaml")
 
         follower = build_starai_follower_robot(config)
 
@@ -130,7 +130,7 @@ class StarAITests(unittest.TestCase):
         )
 
     def test_build_starai_leader_uses_configured_calibration_dir(self) -> None:
-        config = load_config("configs/local_teleop_starai_tcp.yaml")
+        config = load_config("configs/teleop/local_starai_tcp.yaml")
 
         leader = build_starai_leader_device(config)
 
@@ -140,7 +140,7 @@ class StarAITests(unittest.TestCase):
         )
 
     def test_lerobot_factory_builds_starai_robot_config(self) -> None:
-        config = load_config("configs/remote_teleop_starai_tcp.yaml")
+        config = load_config("configs/teleop/remote_starai_tcp.yaml")
 
         robot_config = build_lerobot_robot_config(config)
 

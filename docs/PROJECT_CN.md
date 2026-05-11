@@ -26,7 +26,7 @@ SO-101 follower + OpenCV cameras + LeRobot async inference + SmolVLA
 | YAML/JSON 配置加载与校验 | 可用，入口是 `configs/*.yaml` |
 | 配置驱动 dry-run | 可用，三个 `scripts/run_*.py --dry-run` 都不会碰硬件 |
 | 配置驱动真实远程推理 | 已接入 LeRobot async config，入口是 `scripts/run_server.py` / `scripts/run_client.py` |
-| debug mock TCP roundtrip | 可用，用 `configs/debug_mock_robot.yaml` 测试协议和日志 |
+| debug mock TCP roundtrip | 可用，用 `configs/debug/debug_mock_robot.yaml` 测试协议和日志 |
 | 长度头 TCP 协议 | 可用，位于 `so101_remote/network/` |
 | 运行产物记录 | 可用，保存到 config 中的 `experiment.save_dir` |
 | 中文项目说明 | 本文档 |
@@ -45,11 +45,13 @@ SO-101 follower + OpenCV cameras + LeRobot async inference + SmolVLA
 
 ```text
 configs/
-  remote_inference_so101_smolvla.yaml   # 远程推理：服务器推理，机器人端执行
-  local_inference_so101_smolvla.yaml    # 本地推理配置，当前用于校验和后续扩展
-  remote_teleop_so101_tcp.yaml          # TCP 遥操作配置，当前用于设计和校验
-  remote_teleop_starai_tcp.yaml         # StarAI TCP 遥操作配置
-  debug_mock_robot.yaml                 # 无硬件 TCP mock 调试
+  README.md                             # 配置分类说明
+  debug/debug_mock_robot.yaml           # 无硬件 TCP mock 调试
+  local_inference/so101_smolvla.yaml    # 本地推理配置，当前用于校验和后续扩展
+  remote_inference/so101_smolvla.yaml   # 远程推理：服务器推理，机器人端执行
+  teleop/remote_so101_tcp.yaml          # SO-101 TCP 遥操作配置
+  teleop/remote_starai_tcp.yaml         # StarAI TCP 遥操作配置
+  teleop/local_starai_tcp.yaml          # 本地 StarAI TCP 遥操作配置
 
 scripts/
   run_server.py                         # 配置驱动服务器入口
@@ -72,7 +74,7 @@ legacy/
 
 ## 4. 配置文件怎么改
 
-远程推理主要改 `configs/remote_inference_so101_smolvla.yaml`：
+远程推理主要改 `configs/remote_inference/so101_smolvla.yaml`：
 
 ```yaml
 experiment:
@@ -117,7 +119,7 @@ StarAI 通过 LeRobot 后端接入。当前支持这些类型名：
 | StarAI Cello follower | `lerobot_robot_cello` | `starai_cello_follower` |
 | StarAI Violin leader | `lerobot_teleoperator_violin` | `starai_violin_leader` |
 
-示例配置见 `configs/remote_teleop_starai_tcp.yaml`：
+示例配置见 `configs/teleop/remote_starai_tcp.yaml`：
 
 ```yaml
 robot:
@@ -141,8 +143,8 @@ teleop:
 在任意一台机器上先检查配置：
 
 ```bash
-python3 scripts/run_server.py --config configs/remote_inference_so101_smolvla.yaml --dry-run
-python3 scripts/run_client.py --config configs/remote_inference_so101_smolvla.yaml --dry-run
+python3 scripts/run_server.py --config configs/remote_inference/so101_smolvla.yaml --dry-run
+python3 scripts/run_client.py --config configs/remote_inference/so101_smolvla.yaml --dry-run
 ```
 
 你应该看到 JSON summary，其中包含：
@@ -159,7 +161,7 @@ python3 scripts/run_client.py --config configs/remote_inference_so101_smolvla.ya
 在 GPU 服务器上运行：
 
 ```bash
-python3 scripts/run_server.py --config configs/remote_inference_so101_smolvla.yaml
+python3 scripts/run_server.py --config configs/remote_inference/so101_smolvla.yaml
 ```
 
 这条路径会：
@@ -177,7 +179,7 @@ python3 scripts/run_server.py --config configs/remote_inference_so101_smolvla.ya
 在机器人端电脑上运行：
 
 ```bash
-python3 scripts/run_client.py --config configs/remote_inference_so101_smolvla.yaml
+python3 scripts/run_client.py --config configs/remote_inference/so101_smolvla.yaml
 ```
 
 这条路径会：
@@ -195,13 +197,13 @@ python3 scripts/run_client.py --config configs/remote_inference_so101_smolvla.ya
 先开一个终端启动 mock server：
 
 ```bash
-python3 scripts/run_server.py --config configs/debug_mock_robot.yaml
+python3 scripts/run_server.py --config configs/debug/debug_mock_robot.yaml
 ```
 
 再开另一个终端启动 mock client：
 
 ```bash
-python3 scripts/run_client.py --config configs/debug_mock_robot.yaml
+python3 scripts/run_client.py --config configs/debug/debug_mock_robot.yaml
 ```
 
 这个模式不会加载 LeRobot，不会连接机械臂，只测试：
@@ -249,7 +251,7 @@ webui:
 服务器入口会尝试启动一个 Gradio dashboard：
 
 ```bash
-python3 scripts/run_server.py --config configs/remote_inference_so101_smolvla.yaml
+python3 scripts/run_server.py --config configs/remote_inference/so101_smolvla.yaml
 ```
 
 如果当前 Python 环境没有安装 Gradio，运行不会失败，而是记录 warning event。需要 WebUI 时安装：
@@ -281,8 +283,8 @@ pip install gradio
 
 1. `python3 -m unittest discover -s tests -v`
 2. `scripts/run_*.py --dry-run` 检查配置是否正确。
-3. `debug_mock_robot.yaml` 跑 mock TCP server/client。
-4. GPU 服务器运行 `scripts/run_server.py --config configs/remote_inference_so101_smolvla.yaml`。
+3. `configs/debug/debug_mock_robot.yaml` 跑 mock TCP server/client。
+4. GPU 服务器运行 `scripts/run_server.py --config configs/remote_inference/so101_smolvla.yaml`。
 5. 机器人端确认串口、相机、校准 id 后运行 client。
 6. 如果失败，先看终端错误，再看对应 run directory 的 `events.jsonl` 和 `metadata.json`。
 
@@ -300,10 +302,10 @@ pip install gradio
 
 ```bash
 # server
-python3 scripts/run_server.py --config configs/remote_inference_so101_smolvla.yaml
+python3 scripts/run_server.py --config configs/remote_inference/so101_smolvla.yaml
 
 # client
-python3 scripts/run_client.py --config configs/remote_inference_so101_smolvla.yaml
+python3 scripts/run_client.py --config configs/remote_inference/so101_smolvla.yaml
 ```
 
 如果你只想验证旧的最小 LeRobot async 路径，也可以继续使用常量版：
@@ -316,13 +318,13 @@ python3 robot_client.py
 如果你要运行 TCP 远程遥操作，先在 follower 机器上启动 server：
 
 ```bash
-python3 scripts/run_server.py --config configs/remote_teleop_so101_tcp.yaml
+python3 scripts/run_server.py --config configs/teleop/remote_so101_tcp.yaml
 ```
 
 再在 leader 机器上启动 client：
 
 ```bash
-python3 scripts/run_client.py --config configs/remote_teleop_so101_tcp.yaml
+python3 scripts/run_client.py --config configs/teleop/remote_so101_tcp.yaml
 ```
 
 配置里 `robot.port` 是 follower 机器上的串口，`teleop.port` 是 leader 机器上的串口。两台机器各自只需要改自己本机实际存在的串口。`network.server_host` 必须是 follower 机器在局域网或 Tailscale 中可访问的 IP。
@@ -331,10 +333,10 @@ StarAI 遥操作使用对应配置：
 
 ```bash
 # follower 机器
-python3 scripts/run_server.py --config configs/remote_teleop_starai_tcp.yaml
+python3 scripts/run_server.py --config configs/teleop/remote_starai_tcp.yaml
 
 # leader 机器
-python3 scripts/run_client.py --config configs/remote_teleop_starai_tcp.yaml
+python3 scripts/run_client.py --config configs/teleop/remote_starai_tcp.yaml
 ```
 
 如果你要做旧 UDP 遥操作参考实验，仍可使用：

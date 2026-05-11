@@ -12,7 +12,7 @@ conda activate lerobot
 配置文件：
 
 ```text
-configs/local_teleop_starai_tcp.yaml
+configs/teleop/local_starai_tcp.yaml
 ```
 
 项目内标定文件：
@@ -44,7 +44,7 @@ teleop:
 第一个终端：
 
 ```bash
-python3 scripts/run_server.py --config configs/local_teleop_starai_tcp.yaml
+python3 scripts/run_server.py --config configs/teleop/local_starai_tcp.yaml
 ```
 
 期望看到：
@@ -60,7 +60,7 @@ StarAI follower startup initial-position move skipped by config.
 第二个终端：
 
 ```bash
-python3 scripts/run_client.py --config configs/local_teleop_starai_tcp.yaml
+python3 scripts/run_client.py --config configs/teleop/local_starai_tcp.yaml
 ```
 
 期望看到类似：
@@ -97,8 +97,8 @@ safety:
 不连接硬件，只验证配置能被脚本正常读取：
 
 ```bash
-python3 scripts/run_server.py --config configs/local_teleop_starai_tcp.yaml --dry-run
-python3 scripts/run_client.py --config configs/local_teleop_starai_tcp.yaml --dry-run
+python3 scripts/run_server.py --config configs/teleop/local_starai_tcp.yaml --dry-run
+python3 scripts/run_client.py --config configs/teleop/local_starai_tcp.yaml --dry-run
 ```
 
 期望输出包含：
@@ -127,7 +127,7 @@ python3 -m unittest tests.test_config_loader -v
 
 验证内容：
 
-- `local_teleop_starai_tcp.yaml` 可以被解析；
+- `configs/teleop/local_starai_tcp.yaml` 可以被解析；
 - StarAI 本地配置启用了 `skip_initial_position`；
 - 项目内 robot/teleop 标定目录配置正确；
 - leader action 打印配置正确。
