@@ -45,6 +45,13 @@ runtime:
   safety_stop_on_timeout: true
   hold_last_action_on_timeout: true
 
+safety:
+  max_action_delta: 2.0
+  max_first_action_delta: 25.0
+  action_min: -180
+  action_max: 180
+  require_action_keys_match: true
+
 webui:
   enabled: true
   host: 0.0.0.0
