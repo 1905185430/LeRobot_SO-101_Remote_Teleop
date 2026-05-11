@@ -82,6 +82,8 @@ def build_starai_leader_device(config: PlatformConfig) -> Any:
 def _load_starai_follower_api(robot_type: str) -> tuple[type, type]:
     module_names = _starai_follower_modules(robot_type)
     class_pairs = (
+        ("StaraiViola", "StaraiViolaConfig"),
+        ("StaraiCello", "StaraiCelloConfig"),
         ("StarAIRobot", "StarAIRobotConfig"),
         ("StarAIFollower", "StarAIFollowerConfig"),
         ("LerobotRobotViola", "LerobotRobotViolaConfig"),
@@ -96,6 +98,7 @@ def _load_starai_follower_api(robot_type: str) -> tuple[type, type]:
 def _load_starai_leader_api(teleop_type: str | None) -> tuple[type, type]:
     module_names = _starai_leader_modules(teleop_type)
     class_pairs = (
+        ("StaraiViolin", "StaraiViolinConfig"),
         ("StarAILeader", "StarAILeaderConfig"),
         ("StarAITeleoperator", "StarAITeleoperatorConfig"),
         ("LerobotTeleoperatorViolin", "LerobotTeleoperatorViolinConfig"),
@@ -108,8 +111,19 @@ def _load_starai_leader_api(teleop_type: str | None) -> tuple[type, type]:
 def _starai_follower_modules(robot_type: str) -> tuple[str, ...]:
     normalized = robot_type.replace("-", "_")
     modules = [
+        normalized,
+        f"{normalized}.config_starai_viola",
+        f"{normalized}.config_starai_cello",
+        f"{normalized}.starai_viola",
+        f"{normalized}.starai_cello",
         f"lerobot.robots.{normalized}",
         f"lerobot.robots.{normalized}.configuration_{normalized}",
+        "lerobot_robot_viola",
+        "lerobot_robot_viola.config_starai_viola",
+        "lerobot_robot_viola.starai_viola",
+        "lerobot_robot_cello",
+        "lerobot_robot_cello.config_starai_cello",
+        "lerobot_robot_cello.starai_cello",
         "lerobot.robots.starai",
         "lerobot.robots.starai.configuration_starai",
         "lerobot.robots.lerobot_robot_viola",
@@ -125,8 +139,14 @@ def _starai_follower_modules(robot_type: str) -> tuple[str, ...]:
 def _starai_leader_modules(teleop_type: str | None) -> tuple[str, ...]:
     normalized = (teleop_type or "starai_violin_leader").replace("-", "_")
     modules = [
+        normalized,
+        f"{normalized}.config_starai_violin",
+        f"{normalized}.starai_violin",
         f"lerobot.teleoperators.{normalized}",
         f"lerobot.teleoperators.{normalized}.configuration_{normalized}",
+        "lerobot_teleoperator_violin",
+        "lerobot_teleoperator_violin.config_starai_violin",
+        "lerobot_teleoperator_violin.starai_violin",
         "lerobot.teleoperators.starai",
         "lerobot.teleoperators.starai.configuration_starai",
         "lerobot.teleoperators.lerobot_teleoperator_violin",

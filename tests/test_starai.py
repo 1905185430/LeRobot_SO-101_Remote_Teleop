@@ -43,23 +43,23 @@ def install_fake_starai_modules() -> None:
     opencv_config_module = types.ModuleType("lerobot.cameras.opencv.configuration_opencv")
     opencv_config_module.OpenCVCameraConfig = FakeConfig
 
-    starai_robot_module = types.ModuleType("lerobot.robots.lerobot_robot_viola")
-    starai_robot_module.LerobotRobotViola = FakeRobot
-    starai_robot_module.LerobotRobotViolaConfig = FakeConfig
+    starai_robot_module = types.ModuleType("lerobot_robot_viola")
+    starai_robot_module.StaraiViola = FakeRobot
+    starai_robot_module.StaraiViolaConfig = FakeConfig
 
     teleoperators_module = types.ModuleType("lerobot.teleoperators")
-    starai_leader_module = types.ModuleType("lerobot.teleoperators.lerobot_teleoperator_violin")
-    starai_leader_module.LerobotTeleoperatorViolin = FakeLeader
-    starai_leader_module.LerobotTeleoperatorViolinConfig = FakeConfig
+    starai_leader_module = types.ModuleType("lerobot_teleoperator_violin")
+    starai_leader_module.StaraiViolin = FakeLeader
+    starai_leader_module.StaraiViolinConfig = FakeConfig
 
     patcher = mock.patch.dict(
         sys.modules,
         {
             "lerobot": lerobot_module,
             "lerobot.robots": robots_module,
-            "lerobot.robots.lerobot_robot_viola": starai_robot_module,
+            "lerobot_robot_viola": starai_robot_module,
             "lerobot.teleoperators": teleoperators_module,
-            "lerobot.teleoperators.lerobot_teleoperator_violin": starai_leader_module,
+            "lerobot_teleoperator_violin": starai_leader_module,
             "lerobot.cameras": cameras_module,
             "lerobot.cameras.opencv": opencv_module,
             "lerobot.cameras.opencv.configuration_opencv": opencv_config_module,

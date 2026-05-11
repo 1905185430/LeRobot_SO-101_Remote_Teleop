@@ -70,6 +70,7 @@ Progress: [██████████] 100%
 | 2026-05-11 | Implement config driven TCP teleoperation runtime | Complete |
 | 2026-05-11 | Add StarAI robot support scaffold | Complete |
 | 2026-05-11 | Add local StarAI TCP teleoperation config | Complete |
+| 2026-05-11 | Fix StarAI LeRobot module discovery | Complete |
 
 ## Accumulated Context
 
