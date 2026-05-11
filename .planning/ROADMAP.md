@@ -12,7 +12,7 @@ The roadmap turns the current two-script playground into a lightweight remote VL
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Package And Environment Baseline** - Establish the lightweight package, thin entrypoints, constants documentation, and environment setup guide.
+- [x] **Phase 1: Package And Environment Baseline** - Establish the lightweight package, thin entrypoints, constants documentation, and environment setup guide. (completed 2026-05-11)
 - [ ] **Phase 2: Metrics And Run Artifacts** - Build communication metric collection, structured storage, run directories, and lightweight summaries.
 - [ ] **Phase 3: Dry Run, Adapters, And Reliability Hooks** - Add mock execution, minimal adapter boundaries, and practical error/recovery recording.
 - [ ] **Phase 4: SO-101 SmolVLA Runtime Integration** - Wire the real LeRobot async inference server/client path through the new structure.
@@ -34,11 +34,11 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 Plans:
 **Wave 1**
-- [ ] 01-01: Create `so101_remote/` package skeleton and thin entrypoint handoff.
-- [ ] 01-03: Write environment setup guide and constant-editing documentation.
+- [x] 01-01: Create `so101_remote/` package skeleton and thin entrypoint handoff.
+- [x] 01-03: Write environment setup guide and constant-editing documentation.
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 01-02: Preserve legacy package boundaries and update tests/imports after restructure.
+- [x] 01-02: Preserve legacy package boundaries and update tests/imports after restructure.
 
 ### Phase 2: Metrics And Run Artifacts
 **Goal**: Make communication measurements first-class outputs with terminal summaries, structured files, run metadata, and basic Markdown summaries.
@@ -113,7 +113,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Package And Environment Baseline | 0/3 | Not started | - |
+| 1. Package And Environment Baseline | 3/3 | Complete   | 2026-05-11 |
 | 2. Metrics And Run Artifacts | 0/3 | Not started | - |
 | 3. Dry Run, Adapters, And Reliability Hooks | 0/3 | Not started | - |
 | 4. SO-101 SmolVLA Runtime Integration | 0/3 | Not started | - |

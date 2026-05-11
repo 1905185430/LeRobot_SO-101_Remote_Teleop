@@ -9,10 +9,10 @@ Requirements for the first practical release. v1 is intentionally layered: the c
 
 ### Structure
 
-- [ ] **STRC-01**: Developer can import a small `so101_remote/` package containing runtime, metrics, recorder, adapter, and dry-run modules.
-- [ ] **STRC-02**: Operator can still start the server through `policy_server.py`, with the script acting as a thin entrypoint.
-- [ ] **STRC-03**: Operator can still start the robot client through `robot_client.py`, with the script acting as a thin entrypoint.
-- [ ] **STRC-04**: Existing legacy teleoperation code remains under `legacy/` and is not broken by the package restructure.
+- [x] **STRC-01**: Developer can import a small `so101_remote/` package containing runtime, metrics, recorder, adapter, and dry-run modules.
+- [x] **STRC-02**: Operator can still start the server through `policy_server.py`, with the script acting as a thin entrypoint.
+- [x] **STRC-03**: Operator can still start the robot client through `robot_client.py`, with the script acting as a thin entrypoint.
+- [x] **STRC-04**: Existing legacy teleoperation code remains under `legacy/` and is not broken by the package restructure.
 
 ### Inference Runtime
 
@@ -66,18 +66,18 @@ Requirements for the first practical release. v1 is intentionally layered: the c
 
 ### Documentation
 
-- [ ] **DOC-01**: Project includes an environment setup guide under `docs/`.
-- [ ] **DOC-02**: Environment guide covers GPU/server machine setup, including Python, LeRobot, CUDA/PyTorch checks, SmolVLA model path, HuggingFace access, and policy server preflight checks.
-- [ ] **DOC-03**: Environment guide covers robot-side setup, including LeRobot, SO-101 serial permissions, follower calibration id, cameras, and robot client preflight checks.
-- [ ] **DOC-04**: Environment guide covers LAN communication checks, including server IP/port, firewall, ping/basic connectivity, and time synchronization guidance for trustworthy metrics.
-- [ ] **DOC-05**: Environment guide covers dry-run/mock operation.
-- [ ] **DOC-06**: Environment guide covers common failures: LeRobot import failure, CUDA unavailable, invalid model path, camera index mismatch, serial port permission failure, server connection failure, and metrics output confusion.
+- [x] **DOC-01**: Project includes an environment setup guide under `docs/`.
+- [x] **DOC-02**: Environment guide covers GPU/server machine setup, including Python, LeRobot, CUDA/PyTorch checks, SmolVLA model path, HuggingFace access, and policy server preflight checks.
+- [x] **DOC-03**: Environment guide covers robot-side setup, including LeRobot, SO-101 serial permissions, follower calibration id, cameras, and robot client preflight checks.
+- [x] **DOC-04**: Environment guide covers LAN communication checks, including server IP/port, firewall, ping/basic connectivity, and time synchronization guidance for trustworthy metrics.
+- [x] **DOC-05**: Environment guide covers dry-run/mock operation.
+- [x] **DOC-06**: Environment guide covers common failures: LeRobot import failure, CUDA unavailable, invalid model path, camera index mismatch, serial port permission failure, server connection failure, and metrics output confusion.
 
 ### Configuration
 
-- [ ] **CONF-01**: v1 can keep script-level constants as the primary configuration path.
-- [ ] **CONF-02**: Code structure leaves a future path for CLI or YAML overrides without making that a blocker for the first working release.
-- [ ] **CONF-03**: Operator-facing constants are documented clearly enough to edit before a real run.
+- [x] **CONF-01**: v1 can keep script-level constants as the primary configuration path.
+- [x] **CONF-02**: Code structure leaves a future path for CLI or YAML overrides without making that a blocker for the first working release.
+- [x] **CONF-03**: Operator-facing constants are documented clearly enough to edit before a real run.
 
 ## v2 Requirements
 
@@ -125,10 +125,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| STRC-01 | Phase 1 | Pending |
-| STRC-02 | Phase 1 | Pending |
-| STRC-03 | Phase 1 | Pending |
-| STRC-04 | Phase 1 | Pending |
+| STRC-01 | Phase 1 | Complete |
+| STRC-02 | Phase 1 | Complete |
+| STRC-03 | Phase 1 | Complete |
+| STRC-04 | Phase 1 | Complete |
 | RUN-01 | Phase 4 | Pending |
 | RUN-02 | Phase 4 | Pending |
 | RUN-03 | Phase 4 | Pending |
@@ -161,15 +161,15 @@ Which phases cover which requirements. Updated during roadmap creation.
 | RELY-03 | Phase 4 | Pending |
 | RELY-04 | Phase 5 | Pending |
 | RELY-05 | Phase 5 | Pending |
-| DOC-01 | Phase 1 | Pending |
-| DOC-02 | Phase 1 | Pending |
-| DOC-03 | Phase 1 | Pending |
-| DOC-04 | Phase 1 | Pending |
-| DOC-05 | Phase 1 | Pending |
-| DOC-06 | Phase 1 | Pending |
-| CONF-01 | Phase 1 | Pending |
-| CONF-02 | Phase 1 | Pending |
-| CONF-03 | Phase 1 | Pending |
+| DOC-01 | Phase 1 | Complete |
+| DOC-02 | Phase 1 | Complete |
+| DOC-03 | Phase 1 | Complete |
+| DOC-04 | Phase 1 | Complete |
+| DOC-05 | Phase 1 | Complete |
+| DOC-06 | Phase 1 | Complete |
+| CONF-01 | Phase 1 | Complete |
+| CONF-02 | Phase 1 | Complete |
+| CONF-03 | Phase 1 | Complete |
 
 **Coverage:**
 - v1 requirements: 44 total
