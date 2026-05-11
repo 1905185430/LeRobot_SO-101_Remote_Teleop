@@ -20,7 +20,9 @@ from .config import (
     SERVER_ADDRESS,
     TASK,
 )
-from .recorder import build_run_metadata
+from .metrics import EVENT_EXCEPTION, EVENT_RECOVERY, MetricEvent
+from .recorder import DEFAULT_RUN_ROOT, JsonlMetricsRecorder, build_run_metadata, create_run_directory
+from .reliability import STAGE_CLIENT_STARTUP, record_exception_event
 
 
 def client_settings() -> dict[str, object]:
@@ -100,26 +102,74 @@ def build_client_config():
 
 def main() -> int:
     """Start the LeRobot async inference robot client."""
-    _OpenCVCameraConfig, _SO101FollowerConfig, _RobotClientConfig, RobotClient, visualize = (
-        _load_client_api()
-    )
-    client = RobotClient(build_client_config())
+    return run_robot_client()
 
-    if not client.start():
-        return 1
 
-    action_receiver_thread = threading.Thread(target=client.receive_actions, daemon=True)
-    action_receiver_thread.start()
-
+def run_robot_client(root: str | Path | None = None) -> int:
+    """Start the robot client while writing run artifacts and diagnostics."""
+    recorder: JsonlMetricsRecorder | None = None
+    action_receiver_thread: threading.Thread | None = None
+    client = None
+    visualize = None
     try:
-        client.control_loop(TASK)
-    except KeyboardInterrupt:
-        client.stop()
-        action_receiver_thread.join()
-        if DEBUG_VISUALIZE_QUEUE_SIZE:
-            visualize(client.action_queue_size)
-    return 0
+        run_dir = create_run_directory(root or DEFAULT_RUN_ROOT, role="robot-client")
+        metadata = build_client_metadata(run_dir)
+        recorder = JsonlMetricsRecorder(run_dir, metadata=metadata)
+        settings = client_settings()
+        print(f"Robot client settings: {settings}")
 
+        config = build_client_config()
+        _OpenCVCameraConfig, _SO101FollowerConfig, _RobotClientConfig, RobotClient, visualize = (
+            _load_client_api()
+        )
+        client = RobotClient(config)
+
+        if not client.start():
+            recorder.record_event(
+                MetricEvent(
+                    EVENT_EXCEPTION,
+                    "robot client failed to start",
+                    severity="error",
+                    details={"stage": STAGE_CLIENT_STARTUP, "component": "robot_client"},
+                )
+            )
+            recorder.write_summary()
+            return 1
+
+        recorder.record_event(
+            MetricEvent(
+                EVENT_RECOVERY,
+                "robot client startup complete",
+                details={"stage": STAGE_CLIENT_STARTUP, "component": "robot_client"},
+            )
+        )
+        action_receiver_thread = threading.Thread(target=client.receive_actions, daemon=True)
+        action_receiver_thread.start()
+        client.control_loop(TASK)
+        recorder.write_summary()
+        return 0
+    except KeyboardInterrupt:
+        if client is not None:
+            client.stop()
+        if action_receiver_thread is not None:
+            action_receiver_thread.join()
+        if DEBUG_VISUALIZE_QUEUE_SIZE and client is not None and visualize is not None:
+            visualize(client.action_queue_size)
+        if recorder is not None:
+            recorder.write_summary()
+        return 0
+    except Exception as exc:
+        if recorder is not None:
+            record_exception_event(
+                recorder,
+                stage=STAGE_CLIENT_STARTUP,
+                component="robot_client",
+                exc=exc,
+            )
+        raise
+    finally:
+        if recorder is not None:
+            recorder.close()
 
 def _load_client_api():
     """Load LeRobot client APIs lazily so imports remain test-friendly."""

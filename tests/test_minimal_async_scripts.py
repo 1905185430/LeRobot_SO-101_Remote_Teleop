@@ -8,6 +8,7 @@ import unittest
 from unittest import mock
 
 import robot_client
+import so101_remote.client as robot_client_runtime
 import so101_remote.server as policy_server
 
 
@@ -52,6 +53,11 @@ class FakeRobotClient:
 
     def stop(self) -> None:
         self.stopped = True
+
+
+class FakeBoomRobotClient(FakeRobotClient):
+    def control_loop(self, task: str) -> None:
+        raise RuntimeError("client boom")
 
 
 class FakeThread:
@@ -244,11 +250,55 @@ class MinimalAsyncScriptTests(unittest.TestCase):
 
     def test_robot_client_main_starts_and_runs_control_loop(self) -> None:
         fake_thread = mock.Mock(side_effect=FakeThread)
-        with mock.patch.object(robot_client.threading, "Thread", fake_thread):
-            exit_code = robot_client.main()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            run_dir = robot_client_runtime.Path(tmpdir)
+            with (
+                mock.patch.object(robot_client_runtime, "create_run_directory", return_value=run_dir),
+                mock.patch.object(robot_client.threading, "Thread", fake_thread),
+            ):
+                exit_code = robot_client.main()
 
         self.assertEqual(exit_code, 0)
         constructed_client = fake_thread.call_args.kwargs["target"].__self__
         self.assertTrue(constructed_client.started)
         self.assertTrue(constructed_client.received)
         self.assertEqual(constructed_client.control_task, robot_client.TASK)
+
+    def test_robot_client_runtime_writes_metadata(self) -> None:
+        fake_thread = mock.Mock(side_effect=FakeThread)
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            run_dir = robot_client_runtime.Path(tmpdir)
+            with (
+                mock.patch.object(robot_client_runtime, "create_run_directory", return_value=run_dir),
+                mock.patch.object(robot_client.threading, "Thread", fake_thread),
+            ):
+                exit_code = robot_client.main()
+
+            self.assertEqual(exit_code, 0)
+            metadata = json.loads((run_dir / "metadata.json").read_text(encoding="utf-8"))
+            events = (run_dir / "events.jsonl").read_text(encoding="utf-8")
+            self.assertEqual(metadata["role"], "robot-client")
+            self.assertEqual(metadata["robot"]["id"], robot_client.ROBOT_ID)
+            self.assertEqual(metadata["server"]["address"], robot_client.SERVER_ADDRESS)
+            self.assertTrue((run_dir / "metadata.json").exists())
+            self.assertTrue((run_dir / "events.jsonl").exists())
+            self.assertTrue((run_dir / "summary.md").exists())
+            self.assertIn('"event_type": "recovery"', events)
+
+    def test_robot_client_runtime_records_exception_and_reraises(self) -> None:
+        sys.modules["lerobot.async_inference.robot_client"].RobotClient = FakeBoomRobotClient
+        fake_thread = mock.Mock(side_effect=FakeThread)
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            run_dir = robot_client_runtime.Path(tmpdir)
+            with (
+                mock.patch.object(robot_client_runtime, "create_run_directory", return_value=run_dir),
+                mock.patch.object(robot_client.threading, "Thread", fake_thread),
+            ):
+                with self.assertRaisesRegex(RuntimeError, "client boom"):
+                    robot_client.main()
+
+            events = (run_dir / "events.jsonl").read_text(encoding="utf-8")
+            self.assertIn('"event_type": "exception"', events)
+            self.assertIn("client boom", events)
