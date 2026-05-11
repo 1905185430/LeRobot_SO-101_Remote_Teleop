@@ -71,7 +71,7 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-None yet.
+- Plan multi-arm wireless teleoperation and VLA inference — `.planning/todos/pending/2026-05-11-plan-multi-arm-wireless-teleoperation-and-vla-inference.md`
 
 ### Blockers/Concerns
 
