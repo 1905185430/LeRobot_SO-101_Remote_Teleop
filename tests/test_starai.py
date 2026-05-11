@@ -26,9 +26,15 @@ class FakeRobot:
     def __init__(self, config) -> None:
         self.config = config
         self.connected = False
+        self.moved_to_initial_position = False
 
     def connect(self) -> None:
+        self.move_to_initial_position()
         self.connected = True
+
+    def move_to_initial_position(self) -> dict[str, object]:
+        self.moved_to_initial_position = True
+        return {}
 
 
 class FakeLeader(FakeRobot):
@@ -108,6 +114,15 @@ class StarAITests(unittest.TestCase):
         self.assertTrue(leader.connected)
         self.assertEqual(follower.config.kwargs["port"], "/dev/ttyUSB1")
         self.assertEqual(leader.config.kwargs["id"], "my_starai_violin_leader")
+        self.assertTrue(follower.moved_to_initial_position)
+
+    def test_build_starai_follower_can_skip_initial_position_move(self) -> None:
+        config = load_config("configs/local_teleop_starai_tcp.yaml")
+
+        follower = build_starai_follower_robot(config)
+
+        self.assertTrue(follower.connected)
+        self.assertFalse(follower.moved_to_initial_position)
 
     def test_lerobot_factory_builds_starai_robot_config(self) -> None:
         config = load_config("configs/remote_teleop_starai_tcp.yaml")

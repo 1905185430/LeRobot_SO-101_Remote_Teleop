@@ -9,6 +9,7 @@ robot:
   port: /dev/ttyUSB1
   id: my_starai_viola_follower
   calibration_dir: null
+  skip_initial_position: true
 
 teleop:
   enabled: true

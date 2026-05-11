@@ -62,6 +62,8 @@ def build_starai_follower_robot(config: PlatformConfig) -> Any:
     RobotClass, ConfigClass = _load_starai_follower_api(config.robot.type)
     robot_config = _instantiate_config(ConfigClass, port=config.robot.port, robot_id=config.robot.id)
     robot = RobotClass(robot_config)
+    if config.robot.skip_initial_position:
+        _disable_initial_position_move(robot)
     robot.connect()
     return robot
 
@@ -93,6 +95,19 @@ def _load_starai_follower_api(robot_type: str) -> tuple[type, type]:
         ("Robot", "RobotConfig"),
     )
     return _load_class_pair(module_names, class_pairs, "StarAI follower")
+
+
+def _disable_initial_position_move(robot: Any) -> None:
+    """Disable StarAI follower startup pose movement for safer teleoperation startup."""
+    move_to_initial_position = getattr(robot, "move_to_initial_position", None)
+    if not callable(move_to_initial_position):
+        return
+
+    def skip_move_to_initial_position() -> dict[str, object]:
+        print("StarAI follower startup initial-position move skipped by config.", flush=True)
+        return {}
+
+    setattr(robot, "move_to_initial_position", skip_move_to_initial_position)
 
 
 def _load_starai_leader_api(teleop_type: str | None) -> tuple[type, type]:

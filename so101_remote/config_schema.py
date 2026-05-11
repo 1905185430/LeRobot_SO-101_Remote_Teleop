@@ -35,6 +35,7 @@ class RobotConfig:
     port: str | None = None
     id: str = ""
     calibration_dir: str | None = None
+    skip_initial_position: bool = False
 
 
 @dataclass(frozen=True)
@@ -218,6 +219,7 @@ def _robot(data: Mapping[str, Any]) -> RobotConfig:
         port=_optional_str(data, "port"),
         id=_str(data, "id", default=""),
         calibration_dir=_optional_str(data, "calibration_dir"),
+        skip_initial_position=_bool(data, "skip_initial_position", default=False),
     )
 
 
