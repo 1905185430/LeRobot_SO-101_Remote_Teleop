@@ -159,8 +159,8 @@ class TcpTeleopTests(unittest.TestCase):
 
         self.assertTrue(leader.connected)
         self.assertTrue(follower.connected)
-        self.assertEqual(leader.config.kwargs["id"], "so101_leader_arm")
-        self.assertEqual(follower.config.kwargs["id"], "my_awesome_follower_arm")
+        self.assertEqual(leader.config.kwargs["id"], "leader_arm")
+        self.assertEqual(follower.config.kwargs["id"], "follower_arm")
         self.assertNotIn("calibration_dir", leader.config.kwargs)
         self.assertNotIn("calibration_dir", follower.config.kwargs)
 

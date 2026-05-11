@@ -7,14 +7,14 @@ experiment:
 robot:
   type: so101_follower
   port: /dev/ttyACM0
-  id: my_awesome_follower_arm
+  id: follower_arm
   calibration_dir: null
 
 teleop:
   enabled: true
   type: so101_leader
   port: /dev/ttyACM0
-  id: so101_leader_arm
+  id: leader_arm
   calibration_dir: null
 
 model:
