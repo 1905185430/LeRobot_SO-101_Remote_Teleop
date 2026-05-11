@@ -191,6 +191,8 @@ The current v1 configuration path is still the constants in `policy_server.py` a
 
 RELY-03 requires a real LAN run because automated tests cannot exercise SO-101 hardware, camera frames, SmolVLA model loading, or the physical control loop. This check cannot be proven by unit tests alone.
 
+See `docs/VALIDATION.md` (`Validation Status`) for the full validation matrix and the current boundary between automated readiness and pending human hardware validation.
+
 Use the target GPU/server machine and robot-side computer on the same LAN:
 
 1. On the GPU/server machine, run `python3 policy_server.py`.

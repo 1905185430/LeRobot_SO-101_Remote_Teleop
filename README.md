@@ -14,6 +14,10 @@ Install LeRobot with async inference support on both machines. Follow the offici
 
 Before real hardware experiments, use [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md) to check the GPU server, robot-side computer, LAN connectivity, time synchronization, and common failure cases.
 
+## Validation Status
+
+See [docs/VALIDATION.md](docs/VALIDATION.md) for the current validation matrix. The automated suite proves unit-only, dry-run-only, and retained legacy compatibility readiness, but it does not prove real SO-101 hardware, camera frames, SmolVLA model loading, physical control-loop stability, or 10-30 minute LAN endurance.
+
 ## Run
 
 On the server or GPU machine:
@@ -96,7 +100,7 @@ It does not validate real SO-101 hardware, camera frames, real SmolVLA loading, 
 
 ## Legacy
 
-The old custom UDP teleop path is still under `legacy/`, but it is no longer the recommended path for inference experiments.
+The old custom UDP teleop path is still under `legacy/`. It is retained compatibility/reference code and not the v1 main runtime path for inference experiments.
 
 Run tests with:
 

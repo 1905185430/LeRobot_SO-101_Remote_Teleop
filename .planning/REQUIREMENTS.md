@@ -88,6 +88,7 @@ Deferred to future releases. These are in the project roadmap but should not blo
 - **TELE-01**: Legacy teleoperation can be integrated into the new runtime/metrics framework.
 - **TELE-02**: Teleoperation and model inference can be compared under shared metrics.
 - **TELE-03**: Teleoperation can optionally support fallback/manual override workflows if needed later.
+- **TELE-04**: Wireless teleoperation integration can be planned as a first-class experiment mode without replacing the v1 LeRobot async inference path.
 
 ### Reporting
 
@@ -105,7 +106,14 @@ Deferred to future releases. These are in the project roadmap but should not blo
 
 - **PI-01**: PI-series policy adapter is implemented and validated with at least one real PI model path.
 - **ROBOT-01**: A second robot arm adapter is implemented and validated.
+- **ROBOT-02**: Multi-arm support can select and describe multiple robot arm types without turning v1 into a heavy plugin platform.
+- **VLA-01**: VLA inference expansion beyond the first SmolVLA path can be planned and validated independently of wireless teleoperation work.
 - **NET-01**: Non-LAN deployment guidance is added for VPN or cross-network experiments.
+
+### Validation Documentation
+
+- **VAL-01**: Validation documentation separates `unit-only`, `dry-run-only`, `real LeRobot required`, `hardware-required`, and `10-30 min LAN required` checks.
+- **VAL-02**: Validation documentation keeps real LAN/hardware UAT pending unless it has actually been performed.
 
 ## Out of Scope
 

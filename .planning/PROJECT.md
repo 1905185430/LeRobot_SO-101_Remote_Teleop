@@ -32,6 +32,9 @@ SO-101 + SmolVLA remote inference must run stably while producing trustworthy co
 - ✓ Server and client startup write per-side run artifacts with metadata, resolved constants, diagnostic events, and summaries under `logs/experiments/` — validated in Phase 04.
 - ✓ Runtime startup/control-loop failures are recorded as diagnostic events and re-raised where appropriate — validated in Phase 04.
 - ✓ Documentation describes real runtime artifacts and the 10-30 minute LAN validation required for RELY-03 — validated in Phase 04.
+- ✓ Existing unit tests continue to pass after the package restructure — validated in Phase 05.
+- ✓ Legacy teleoperation tests continue to pass so retained compatibility is protected — validated in Phase 05.
+- ✓ Validation documentation separates unit-only, dry-run-only, real LeRobot required, hardware-required, and 10-30 minute LAN required checks — validated in Phase 05.
 
 ### Active
 
@@ -45,7 +48,6 @@ SO-101 + SmolVLA remote inference must run stably while producing trustworthy co
 - [ ] Create one run directory per experiment with enough metadata to connect metrics back to settings and code version.
 - [ ] Generate a lightweight Markdown experiment summary with basic statistics; charts and dashboards can wait.
 - [ ] Record timeout, disconnect, and runtime exception events clearly.
-- [ ] Keep legacy teleoperation tests passing so the old compatibility path is not accidentally broken.
 - [ ] Add an environment setup guide under `docs/`, covering GPU server setup, robot-side setup, LAN checks, time synchronization, dry-run, and common failures.
 - [ ] Document setup for Python, LeRobot, CUDA/PyTorch checks, SmolVLA model path or HuggingFace access, SO-101 serial permissions, calibration id, cameras, server IP/port, firewall, and connectivity checks.
 - [ ] Keep v1 focused on GPU server + robot-side computer on the same LAN.
@@ -98,6 +100,8 @@ An environment setup guide is part of the project, not optional documentation. R
 | Put all requested capabilities in the roadmap, but layer v1 by priority | Keeps the project comprehensive without making the first implementation too heavy | — Pending |
 | Add a dedicated environment setup guide | Real server/robot/network setup must be repeatable before metrics are meaningful | — Pending |
 | Preserve legacy teleoperation compatibility first, integrate it into the new framework later | The old path is useful reference code, but remote inference is the v1 main line | — Pending |
+| Keep validation claims layered | Automated tests cannot prove real SO-101 hardware, camera frames, SmolVLA loading, physical control-loop stability, or LAN endurance | Phase 05 documents validation layers in `docs/VALIDATION.md` |
+| Split v2 continuation items instead of treating them as one broad request | Multi-arm support, wireless teleoperation integration, VLA/PI policy expansion, YAML/CLI configuration, non-LAN deployment, and reporting/plots have different risks and validation needs | Phase 05 records them as future work, not v1 implementation scope |
 | Keep dry-run reliability checks deterministic | Retry/recovery artifacts must be testable without hardware or timing flakiness | Phase 03 implemented a one-failure dry-run connection path with no sleep |
 
 ## Evolution
