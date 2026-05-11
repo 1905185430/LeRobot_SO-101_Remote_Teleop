@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from importlib import import_module
+from pathlib import Path
 from typing import Any, Iterable
 
 from .config_schema import PlatformConfig
@@ -54,13 +55,24 @@ def is_starai_leader_type(teleop_type: str | None) -> bool:
 def build_starai_follower_config(config: PlatformConfig, cameras: dict[str, object] | None = None) -> object:
     """Build a StarAI follower config object from a platform config."""
     _RobotClass, ConfigClass = _load_starai_follower_api(config.robot.type)
-    return _instantiate_config(ConfigClass, port=config.robot.port, robot_id=config.robot.id, cameras=cameras)
+    return _instantiate_config(
+        ConfigClass,
+        port=config.robot.port,
+        robot_id=config.robot.id,
+        calibration_dir=config.robot.calibration_dir,
+        cameras=cameras,
+    )
 
 
 def build_starai_follower_robot(config: PlatformConfig) -> Any:
     """Build and connect a StarAI follower robot through LeRobot."""
     RobotClass, ConfigClass = _load_starai_follower_api(config.robot.type)
-    robot_config = _instantiate_config(ConfigClass, port=config.robot.port, robot_id=config.robot.id)
+    robot_config = _instantiate_config(
+        ConfigClass,
+        port=config.robot.port,
+        robot_id=config.robot.id,
+        calibration_dir=config.robot.calibration_dir,
+    )
     robot = RobotClass(robot_config)
     if config.robot.skip_initial_position:
         _disable_initial_position_move(robot)
@@ -75,6 +87,7 @@ def build_starai_leader_device(config: PlatformConfig) -> Any:
         ConfigClass,
         port=config.teleop.port,
         robot_id=config.teleop.id,
+        calibration_dir=config.teleop.calibration_dir,
     )
     leader = LeaderClass(leader_config)
     leader.connect()
@@ -200,17 +213,23 @@ def _instantiate_config(
     *,
     port: str | None,
     robot_id: str,
+    calibration_dir: str | None = None,
     cameras: dict[str, object] | None = None,
 ) -> object:
     attempts: list[dict[str, object]] = []
     base: dict[str, object] = {"port": port, "id": robot_id}
+    if calibration_dir is not None:
+        base["calibration_dir"] = Path(calibration_dir)
     if cameras is not None:
         attempts.append({**base, "cameras": cameras})
     attempts.append(base)
-    attempts.append({"port": port, "robot_id": robot_id})
+    robot_id_base: dict[str, object] = {"port": port, "robot_id": robot_id}
+    if calibration_dir is not None:
+        robot_id_base["calibration_dir"] = Path(calibration_dir)
+    attempts.append(robot_id_base)
     for kwargs in attempts:
         try:
             return ConfigClass(**kwargs)
         except TypeError:
             continue
-    return ConfigClass(port=port, id=robot_id)
+    return ConfigClass(**base)

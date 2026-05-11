@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from pathlib import Path
 import sys
 import types
 import unittest
@@ -123,6 +124,20 @@ class StarAITests(unittest.TestCase):
 
         self.assertTrue(follower.connected)
         self.assertFalse(follower.moved_to_initial_position)
+        self.assertEqual(
+            follower.config.kwargs["calibration_dir"],
+            Path("calibrations/robots/starai_viola"),
+        )
+
+    def test_build_starai_leader_uses_configured_calibration_dir(self) -> None:
+        config = load_config("configs/local_teleop_starai_tcp.yaml")
+
+        leader = build_starai_leader_device(config)
+
+        self.assertEqual(
+            leader.config.kwargs["calibration_dir"],
+            Path("calibrations/teleoperators/starai_violin"),
+        )
 
     def test_lerobot_factory_builds_starai_robot_config(self) -> None:
         config = load_config("configs/remote_teleop_starai_tcp.yaml")

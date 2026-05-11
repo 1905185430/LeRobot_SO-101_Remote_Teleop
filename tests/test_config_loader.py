@@ -42,6 +42,8 @@ class ConfigLoaderTests(unittest.TestCase):
         self.assertEqual(config.safety.action_max, 100)
         self.assertTrue(config.safety.require_action_keys_match)
         self.assertTrue(config.robot.skip_initial_position)
+        self.assertEqual(config.robot.calibration_dir, "calibrations/robots/starai_viola")
+        self.assertEqual(config.teleop.calibration_dir, "calibrations/teleoperators/starai_violin")
         self.assertTrue(config.logging.print_leader_actions)
         self.assertEqual(config.logging.print_action_interval, 10)
 

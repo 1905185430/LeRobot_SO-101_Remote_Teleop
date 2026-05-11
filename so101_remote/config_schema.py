@@ -44,6 +44,7 @@ class TeleopConfig:
     type: str | None = None
     port: str | None = None
     id: str = ""
+    calibration_dir: str | None = None
 
 
 @dataclass(frozen=True)
@@ -229,6 +230,7 @@ def _teleop(data: Mapping[str, Any]) -> TeleopConfig:
         type=_optional_str(data, "type"),
         port=_optional_str(data, "port"),
         id=_str(data, "id", default=""),
+        calibration_dir=_optional_str(data, "calibration_dir"),
     )
 
 
