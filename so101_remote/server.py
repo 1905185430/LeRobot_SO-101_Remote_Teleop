@@ -2,7 +2,29 @@
 
 from __future__ import annotations
 
-from .config import HOST, PORT
+from pathlib import Path
+
+from .config import HOST, POLICY_DEVICE, POLICY_TYPE, PORT, PRETRAINED_NAME_OR_PATH
+from .recorder import build_run_metadata
+
+
+def server_settings() -> dict[str, object]:
+    """Return resolved policy server settings for logs and metadata."""
+    return {"host": HOST, "port": PORT, "endpoint": f"{HOST}:{PORT}"}
+
+
+def build_server_metadata(run_dir: str | Path) -> dict[str, object]:
+    """Build reproducibility metadata for a policy server run."""
+    return build_run_metadata(
+        role="policy-server",
+        server=server_settings(),
+        policy={
+            "type": POLICY_TYPE,
+            "pretrained_name_or_path": PRETRAINED_NAME_OR_PATH,
+            "device": POLICY_DEVICE,
+        },
+        extra={"resolved_settings": server_settings(), "run_dir": str(run_dir)},
+    )
 
 
 def build_server_config():

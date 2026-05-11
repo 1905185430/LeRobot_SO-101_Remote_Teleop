@@ -5,8 +5,8 @@ import types
 import unittest
 from unittest import mock
 
-import policy_server
 import robot_client
+import so101_remote.server as policy_server
 
 
 class FakePolicyServerConfig:
@@ -122,6 +122,24 @@ class MinimalAsyncScriptTests(unittest.TestCase):
         config = policy_server.build_server_config()
         self.assertIsInstance(config, FakePolicyServerConfig)
         self.assertEqual(config.kwargs, {"host": policy_server.HOST, "port": policy_server.PORT})
+
+    def test_policy_server_settings_are_resolved(self) -> None:
+        self.assertEqual(
+            policy_server.server_settings(),
+            {
+                "host": policy_server.HOST,
+                "port": policy_server.PORT,
+                "endpoint": f"{policy_server.HOST}:{policy_server.PORT}",
+            },
+        )
+
+    def test_policy_server_metadata_includes_resolved_settings(self) -> None:
+        metadata = policy_server.build_server_metadata("/tmp/server-run")
+
+        self.assertEqual(metadata["role"], "policy-server")
+        self.assertEqual(metadata["server"]["endpoint"], f"{policy_server.HOST}:{policy_server.PORT}")
+        self.assertEqual(metadata["policy"]["type"], "smolvla")
+        self.assertEqual(metadata["extra"]["resolved_settings"]["port"], policy_server.PORT)
 
     def test_top_level_wrappers_export_expected_helpers(self) -> None:
         self.assertTrue(callable(policy_server.build_server_config))
