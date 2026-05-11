@@ -187,6 +187,21 @@ For real LeRobot startup, `python3 policy_server.py` creates a `policy-server` r
 
 The current v1 configuration path is still the constants in `policy_server.py` and `robot_client.py`. Keep those constants as the source of truth for Phase 4 runs; do not expect a YAML file or CLI override layer.
 
+## 10-30 Minute LAN Experiment Readiness
+
+RELY-03 requires a real LAN run because automated tests cannot exercise SO-101 hardware, camera frames, SmolVLA model loading, or the physical control loop. This check cannot be proven by unit tests alone.
+
+Use the target GPU/server machine and robot-side computer on the same LAN:
+
+1. On the GPU/server machine, run `python3 policy_server.py`.
+2. On the robot-side machine, run `python3 robot_client.py`.
+3. Let the pair run for 10-30 minutes under the intended local network conditions.
+4. Confirm a `policy-server` run directory and a `robot-client` run directory exist under `logs/experiments/`.
+5. Inspect each run directory's `metadata.json`, `events.jsonl`, and `summary.md`.
+6. Record whether any application-level crashes occurred during the run, including server startup failures, robot client startup failures, disconnects, unhandled exceptions, or control-loop failures.
+
+Treat this as hardware validation, not unit-test proof. A passing unit-test suite only proves the artifact and reliability paths are wired and testable without LeRobot installed.
+
 ## Common Failures
 
 ### LeRobot Import Failure
