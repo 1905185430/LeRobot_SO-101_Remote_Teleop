@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from importlib import import_module
 import math
+from pathlib import Path
 import socket
 import time
 from typing import Any, Mapping
@@ -408,7 +409,12 @@ class TcpTeleopFollowerServer:
 def build_so101_leader_device(config: PlatformConfig) -> Any:
     """Build and connect a LeRobot SO-101 leader teleop device."""
     SO101Leader, SO101LeaderConfig = _load_so101_leader_api()
-    leader_config = SO101LeaderConfig(port=config.teleop.port, id=config.teleop.id)
+    leader_config = _build_lerobot_device_config(
+        SO101LeaderConfig,
+        port=config.teleop.port,
+        device_id=config.teleop.id,
+        calibration_dir=config.teleop.calibration_dir,
+    )
     leader = SO101Leader(leader_config)
     leader.connect()
     return leader
@@ -417,10 +423,32 @@ def build_so101_leader_device(config: PlatformConfig) -> Any:
 def build_so101_follower_robot(config: PlatformConfig) -> Any:
     """Build and connect a LeRobot SO-101 follower robot."""
     SO101Follower, SO101FollowerConfig = _load_so101_follower_api()
-    follower_config = SO101FollowerConfig(port=config.robot.port, id=config.robot.id)
+    follower_config = _build_lerobot_device_config(
+        SO101FollowerConfig,
+        port=config.robot.port,
+        device_id=config.robot.id,
+        calibration_dir=config.robot.calibration_dir,
+    )
     follower = SO101Follower(follower_config)
     follower.connect()
     return follower
+
+
+def _build_lerobot_device_config(
+    ConfigClass: type,
+    *,
+    port: str | None,
+    device_id: str,
+    calibration_dir: str | None,
+) -> object:
+    kwargs: dict[str, object] = {"port": port, "id": device_id}
+    if calibration_dir is not None:
+        kwargs["calibration_dir"] = Path(calibration_dir)
+    try:
+        return ConfigClass(**kwargs)
+    except TypeError:
+        kwargs.pop("calibration_dir", None)
+        return ConfigClass(**kwargs)
 
 
 def build_teleop_leader_device(config: PlatformConfig) -> Any:

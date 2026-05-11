@@ -81,6 +81,7 @@ Progress: [██████████] 100%
 | 2026-05-11 | Organize configs into type directories | Complete |
 | 2026-05-11 | Align remote StarAI teleop config with validated local setup | Complete |
 | 2026-05-11 | Document successful local StarAI TCP teleoperation | Complete |
+| 2026-05-11 | Fill SO101 teleop calibration IDs in config | Complete |
 
 ## Accumulated Context
 

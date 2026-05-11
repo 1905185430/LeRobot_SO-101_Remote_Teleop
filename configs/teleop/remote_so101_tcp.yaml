@@ -7,14 +7,15 @@ experiment:
 robot:
   type: so101_follower
   port: /dev/ttyACM0
-  id: my_blue_follower_arm
-  calibration_dir: null
+  id: my_awesome_follower_arm
+  calibration_dir: calibrations/robots/so_follower
 
 teleop:
   enabled: true
   type: so101_leader
-  port: /dev/ttyACM1
+  port: /dev/ttyACM0
   id: so101_leader_arm
+  calibration_dir: calibrations/teleoperators/so_leader
 
 model:
   type: mock

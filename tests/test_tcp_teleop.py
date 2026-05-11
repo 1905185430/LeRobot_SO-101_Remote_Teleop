@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 from dataclasses import replace
+from pathlib import Path
 import socket
+import sys
 import threading
 import time
+import types
 import unittest
 from tempfile import TemporaryDirectory
 from unittest import mock
@@ -13,6 +16,8 @@ from so101_remote.runtime import run_configured_client, run_configured_server
 from so101_remote.teleop_tcp import (
     TcpTeleopFollowerServer,
     TcpTeleopLeaderClient,
+    build_so101_follower_robot,
+    build_so101_leader_device,
     tcp_teleop_settings,
     validate_action_values,
 )
@@ -51,6 +56,20 @@ class FakeFollower:
 
     def get_observation(self) -> dict[str, float]:
         return {key: 0.0 for key in JOINTS}
+
+
+class FakeDeviceConfig:
+    def __init__(self, **kwargs) -> None:
+        self.kwargs = kwargs
+
+
+class FakeConnectedDevice:
+    def __init__(self, config) -> None:
+        self.config = config
+        self.connected = False
+
+    def connect(self) -> None:
+        self.connected = True
 
 
 def free_local_endpoint() -> tuple[str, int]:
@@ -119,6 +138,36 @@ class TcpTeleopTests(unittest.TestCase):
 
         printer.assert_called_once()
         self.assertIn("Leader action frame=0", printer.call_args.args[0])
+
+    def test_so101_builders_pass_project_calibration_dirs(self) -> None:
+        config = load_config("configs/teleop/remote_so101_tcp.yaml")
+        so_leader_module = types.ModuleType("lerobot.teleoperators.so_leader")
+        so_leader_module.SO101Leader = FakeConnectedDevice
+        so_leader_module.SO101LeaderConfig = FakeDeviceConfig
+        so_follower_module = types.ModuleType("lerobot.robots.so_follower")
+        so_follower_module.SO101Follower = FakeConnectedDevice
+        so_follower_module.SO101FollowerConfig = FakeDeviceConfig
+
+        with mock.patch.dict(
+            sys.modules,
+            {
+                "lerobot.teleoperators.so_leader": so_leader_module,
+                "lerobot.robots.so_follower": so_follower_module,
+            },
+        ):
+            leader = build_so101_leader_device(config)
+            follower = build_so101_follower_robot(config)
+
+        self.assertTrue(leader.connected)
+        self.assertTrue(follower.connected)
+        self.assertEqual(
+            leader.config.kwargs["calibration_dir"],
+            Path("calibrations/teleoperators/so_leader"),
+        )
+        self.assertEqual(
+            follower.config.kwargs["calibration_dir"],
+            Path("calibrations/robots/so_follower"),
+        )
 
     def test_follower_rejects_duplicate_frames(self) -> None:
         config = load_config("configs/teleop/remote_so101_tcp.yaml")
