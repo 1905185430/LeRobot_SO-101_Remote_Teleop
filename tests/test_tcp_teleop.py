@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
+from pathlib import Path
 import socket
 import sys
 import threading
@@ -138,7 +139,7 @@ class TcpTeleopTests(unittest.TestCase):
         printer.assert_called_once()
         self.assertIn("Leader action frame=0", printer.call_args.args[0])
 
-    def test_so101_builders_use_cache_calibration_by_default(self) -> None:
+    def test_so101_builders_pass_project_calibration_dirs(self) -> None:
         config = load_config("configs/teleop/remote_so101_tcp.yaml")
         so_leader_module = types.ModuleType("lerobot.teleoperators.so_leader")
         so_leader_module.SO101Leader = FakeConnectedDevice
@@ -161,8 +162,14 @@ class TcpTeleopTests(unittest.TestCase):
         self.assertTrue(follower.connected)
         self.assertEqual(leader.config.kwargs["id"], "leader_arm")
         self.assertEqual(follower.config.kwargs["id"], "follower_arm")
-        self.assertNotIn("calibration_dir", leader.config.kwargs)
-        self.assertNotIn("calibration_dir", follower.config.kwargs)
+        self.assertEqual(
+            leader.config.kwargs["calibration_dir"],
+            Path("calibrations/teleoperators/so_leader"),
+        )
+        self.assertEqual(
+            follower.config.kwargs["calibration_dir"],
+            Path("calibrations/robots/so_follower"),
+        )
 
     def test_follower_rejects_duplicate_frames(self) -> None:
         config = load_config("configs/teleop/remote_so101_tcp.yaml")

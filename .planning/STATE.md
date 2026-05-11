@@ -86,6 +86,7 @@ Progress: [██████████] 100%
 | 2026-05-11 | Improve first action delta diagnostics | Complete |
 | 2026-05-11 | Use cached SO101 calibration paths in teleop config | Complete |
 | 2026-05-11 | Correct SO101 teleop cache calibration pair | Complete |
+| 2026-05-11 | Copy correct SO101 calibration pair into repository | Complete |
 
 ## Accumulated Context
 
