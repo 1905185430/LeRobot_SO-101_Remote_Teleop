@@ -72,6 +72,10 @@ Recent decisions affecting current work:
 - Phase 03: Reliability helpers accept both in-memory collectors and JSONL recorders as event sinks.
 - Phase 03: Dry-run retry behavior is deterministic so reliability artifacts are testable without hardware.
 
+### Pending Todos
+
+- Plan configurable TCP local and web UI platform — `.planning/todos/pending/2026-05-11-plan-configurable-tcp-local-and-web-ui-platform.md`
+
 ### Completed Todos
 
 - Plan multi-arm wireless teleoperation and VLA inference — folded into Phase 05 v2 continuation documentation and moved to `.planning/todos/completed/2026-05-11-plan-multi-arm-wireless-teleoperation-and-vla-inference.md`
