@@ -23,22 +23,23 @@ SO-101 + SmolVLA remote inference must run stably while producing trustworthy co
 - ✓ Unit tests cover the current minimal async scripts with fake LeRobot modules — existing.
 - ✓ Unit tests keep the legacy UDP demo behavior reachable from top-level test discovery — existing.
 - ✓ Codebase map exists in `.planning/codebase/` — generated during initialization.
+- ✓ Minimal adapter boundaries for robot and policy/model integration exist, with SO-101/SmolVLA as first concrete locations and PI-series/other arms as placeholders — validated in Phase 03.
+- ✓ Dry-run/mock mode runs on one machine without SO-101 hardware and produces real run artifacts while stating its validation boundary — validated in Phase 03.
+- ✓ Runtime diagnostic helpers record exception, retry, and recovery events with stage/component context — validated in Phase 03.
+- ✓ Simple bounded retry/recovery behavior exists without a complex state machine — validated in Phase 03.
 
 ### Active
 
 - [ ] Reorganize the code into a small `so101_remote/` package while keeping `policy_server.py` and `robot_client.py` as thin entrypoints.
 - [ ] Keep v1 lightweight: no plugin registry, no dashboard, no complex experiment platform, and no overbuilt configuration system.
 - [ ] Preserve the real SO-101 + SmolVLA path through LeRobot official async inference.
-- [ ] Add minimal adapter boundaries for robot and policy/model integration so SO-101/SmolVLA is the first implementation and PI-series policies or other robot arms can be added later.
 - [ ] Add communication metrics for latency, RTT, jitter, timeout/disconnect events, control frequency, action chunk arrival intervals, and queue state where the LeRobot APIs expose enough signal.
 - [ ] Print communication metrics at runtime in a readable terminal format.
 - [ ] Save communication metrics locally as JSONL and/or CSV.
 - [ ] Store experiment outputs under a local run/log directory such as `runs/` or `logs/experiments/`.
 - [ ] Create one run directory per experiment with enough metadata to connect metrics back to settings and code version.
 - [ ] Generate a lightweight Markdown experiment summary with basic statistics; charts and dashboards can wait.
-- [ ] Add dry-run/mock mode for single-machine validation without SO-101 hardware or a real policy.
 - [ ] Record timeout, disconnect, and runtime exception events clearly.
-- [ ] Implement simple retry/recovery behavior where it is practical without introducing a complex state machine.
 - [ ] Keep legacy teleoperation tests passing so the old compatibility path is not accidentally broken.
 - [ ] Add an environment setup guide under `docs/`, covering GPU server setup, robot-side setup, LAN checks, time synchronization, dry-run, and common failures.
 - [ ] Document setup for Python, LeRobot, CUDA/PyTorch checks, SmolVLA model path or HuggingFace access, SO-101 serial permissions, calibration id, cameras, server IP/port, firewall, and connectivity checks.
@@ -92,6 +93,7 @@ An environment setup guide is part of the project, not optional documentation. R
 | Put all requested capabilities in the roadmap, but layer v1 by priority | Keeps the project comprehensive without making the first implementation too heavy | — Pending |
 | Add a dedicated environment setup guide | Real server/robot/network setup must be repeatable before metrics are meaningful | — Pending |
 | Preserve legacy teleoperation compatibility first, integrate it into the new framework later | The old path is useful reference code, but remote inference is the v1 main line | — Pending |
+| Keep dry-run reliability checks deterministic | Retry/recovery artifacts must be testable without hardware or timing flakiness | Phase 03 implemented a one-failure dry-run connection path with no sleep |
 
 ## Evolution
 
@@ -111,4 +113,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-11 after initialization*
+*Last updated: 2026-05-11 after Phase 03 completion*
