@@ -9,6 +9,7 @@ __all__ = [
     "config_schema",
     "dryrun",
     "metrics",
+    "network",
     "recorder",
     "reliability",
     "server",

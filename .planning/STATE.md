@@ -63,6 +63,7 @@ Progress: [██████████] 100%
 | Date | Task | Status |
 |------|------|--------|
 | 2026-05-11 | Add unified config loader and script entrypoints for local and remote modes | Complete |
+| 2026-05-11 | Add minimal TCP protocol client server mock roundtrip | Complete |
 
 ## Accumulated Context
 

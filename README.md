@@ -78,6 +78,16 @@ python3 scripts/run_client.py --config configs/remote_teleop_so101_tcp.yaml --dr
 
 Current config-driven scripts are dry-run scaffolding only. They load and validate config shape, runtime mode, TCP endpoint, robot/model choices, camera names, and WebUI flags; real TCP transport, WebUI, and hardware execution are later platform work.
 
+## TCP Protocol Preview
+
+The first TCP layer lives in `so101_remote.network`. It uses a 4-byte big-endian length header followed by one JSON payload:
+
+```text
+[4-byte message length][JSON payload]
+```
+
+Supported message types are `OBSERVATION`, `ACTION`, `HEARTBEAT`, `RESET`, `STOP`, `ERROR`, and `ACK`. The current implementation is a testable mock layer for protocol and client/server round trips; image bytes, msgpack, real policy inference, and WebUI streaming are later work.
+
 ## Experiment Artifacts
 
 Phase 2 stores local experiment runs under `logs/experiments/<run_id>/` by default.
