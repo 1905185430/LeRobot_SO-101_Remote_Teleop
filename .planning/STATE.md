@@ -77,6 +77,7 @@ Progress: [██████████] 100%
 | 2026-05-11 | Print TCP teleop leader actions | Complete |
 | 2026-05-11 | Disable StarAI follower startup pose move | Complete |
 | 2026-05-11 | Store StarAI calibration files in project directory | Complete |
+| 2026-05-11 | Document config categories and validation reproduction commands | Complete |
 
 ## Accumulated Context
 
