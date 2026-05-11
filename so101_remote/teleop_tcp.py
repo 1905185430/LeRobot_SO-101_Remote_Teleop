@@ -140,10 +140,7 @@ class TcpTeleopLeaderClient:
 
     def build_action_message(self) -> dict[str, object]:
         """Read one leader action and convert it to protocol message."""
-        try:
-            action = normalize_teleop_action(self.leader_device.get_action())
-        except LegacyProtocolError as exc:
-            raise ProtocolError(str(exc)) from exc
+        action = self.read_safe_leader_action()
         frame_id = self.seq
         self.seq += 1
         return {
@@ -153,6 +150,25 @@ class TcpTeleopLeaderClient:
             "leader_id": self.settings.leader_id,
             "action": action,
         }
+
+    def read_safe_leader_action(self) -> dict[str, float]:
+        """Read and validate one leader action before network send."""
+        try:
+            raw_action = self.leader_device.get_action()
+            action = normalize_teleop_action(raw_action)
+            validate_action_values(
+                action,
+                action_min=self.settings.action_min,
+                action_max=self.settings.action_max,
+            )
+        except Exception as exc:
+            raise RuntimeError(
+                "Failed to read a safe leader action. No command was sent to the follower. "
+                "For StarAI this usually means one or more leader motors returned no position. "
+                "Check the leader serial port, power, motor IDs, calibration, and StarAI/FashionStar "
+                "SDK hotfixes before retrying."
+            ) from exc
+        return action
 
     def _validate_ack(self, ack: Mapping[str, object], frame_id: object) -> None:
         if ack.get("type") != MSG_ACK:

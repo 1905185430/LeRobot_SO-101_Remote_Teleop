@@ -37,6 +37,11 @@ class FakeLeader:
         return {key: value + self.actions_read for key, value in JOINTS.items()}
 
 
+class FailingLeader:
+    def get_action(self):
+        raise TypeError("'>=' not supported between instances of 'NoneType' and 'int'")
+
+
 class FakeFollower:
     def __init__(self) -> None:
         self.actions: list[dict[str, float]] = []
@@ -89,6 +94,13 @@ class TcpTeleopTests(unittest.TestCase):
         self.assertEqual(message["type"], "ACTION")
         self.assertEqual(message["frame_id"], 0)
         self.assertEqual(sorted(message["action"]), sorted(JOINTS))
+
+    def test_leader_read_failure_is_wrapped_before_send(self) -> None:
+        config = load_config("configs/remote_teleop_so101_tcp.yaml")
+        client = TcpTeleopLeaderClient(FailingLeader(), tcp_teleop_settings(config))
+
+        with self.assertRaisesRegex(RuntimeError, "Failed to read a safe leader action"):
+            client.build_action_message()
 
     def test_follower_rejects_duplicate_frames(self) -> None:
         config = load_config("configs/remote_teleop_so101_tcp.yaml")

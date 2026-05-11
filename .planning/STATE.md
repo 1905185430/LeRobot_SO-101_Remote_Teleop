@@ -73,6 +73,7 @@ Progress: [██████████] 100%
 | 2026-05-11 | Fix StarAI LeRobot module discovery | Complete |
 | 2026-05-11 | Add TCP teleop action delta safety limit | Complete |
 | 2026-05-11 | Add TCP teleop safety checks | Complete |
+| 2026-05-11 | Add StarAI leader read safety diagnostics | Complete |
 
 ## Accumulated Context
 
