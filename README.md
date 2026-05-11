@@ -1,91 +1,65 @@
-# LeRobot SO-101 Remote Teleop
+# SO-101 LeRobot Async Inference Playground
 
-Minimal UDP bridge for running an SO-101 leader arm and follower arm on different computers with LeRobot.
+This repo is now set up for the smallest possible LeRobot async inference workflow while you explore SmolVLA wireless inference:
 
-The bridge preserves LeRobot's native SO-101 action format: joint-name dictionaries such as
-`{"shoulder_pan.pos": ..., "gripper.pos": ...}`.
+- run `policy_server.py` on the server or GPU machine
+- run `robot_client.py` on the robot-side computer
+- keep `legacy/` around as the old custom UDP teleop reference
 
-It also supports ping-like latency monitoring:
-- the follower immediately sends a UDP ACK for every valid action packet
-- the leader measures round-trip time (RTT) with its own monotonic clock
-- this RTT output does not depend on the two machines having synchronized system clocks
+There is no local config layer in the main path now. You edit a few constants at the top of each file and run them directly.
 
-## Files
+## Install
 
-- `leader_sender.py`: reads `SO101Leader.get_action()` and streams validated JSON packets over UDP
-- `follower_receiver.py`: receives packets, holds the last valid target on timeout, and forwards to `SO101Follower.send_action()`
-- `protocol.py`: wire schema, encoding, decoding, and validation
-- `logging_utils.py`: shared logging setup
+Install LeRobot with async inference support on both machines. Follow the official LeRobot install instructions for your version.
 
-The follower terminal also prints periodic link timing stats:
-- `latest`: most recent one-way packet age derived from `sent_at_ns`
-- `avg` / `max`: running averages over all received packets
-- `stream_age`: time since the last valid packet arrived, based on the follower's monotonic clock
-
-If the two machines are not time-synchronized, the follower will detect negative wall-clock deltas and switch the terminal output to `Clock skew detected ... stream_age=...` instead of showing misleading negative latency numbers. In that case, `stream_age` is the reliable freshness signal, and syncing both machines with NTP or `chrony` will restore meaningful one-way latency stats.
-
-For the most stable delay metric, watch the leader terminal RTT logs. They behave more like `ping`:
-- `latest`: latest measured round-trip time
-- `avg` / `min` / `max`: running RTT statistics
-- `in_flight`: action packets that have been sent but not yet acknowledged
-
-## Wire Format
-
-Leader packets are JSON objects with an `action` dictionary:
-
-```json
-{
-  "msg_type": "action_v1",
-  "seq": 12,
-  "sent_at_ns": 1710000000000000000,
-  "leader_id": "so_leader",
-  "action": {
-    "shoulder_pan.pos": 0.0,
-    "shoulder_lift.pos": 1.2,
-    "elbow_flex.pos": 2.3,
-    "wrist_flex.pos": 0.4,
-    "wrist_roll.pos": 1.1,
-    "gripper.pos": 0.0
-  }
-}
-```
-
-## Requirements
-
-- Python 3.10+
-- `lerobot` installed on both machines
-- Both SO-101 arms calibrated with the same ids you pass at runtime
+Before real hardware experiments, use [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md) to check the GPU server, robot-side computer, LAN connectivity, time synchronization, and common failure cases.
 
 ## Run
 
-Start the follower machine first:
+On the server or GPU machine:
 
 ```bash
-python3 follower_receiver.py \
-  --follower-port /dev/ttyACM0 \
-  --follower-id follower_arm \
-  --bind-ip 0.0.0.0 \
-  --udp-port 5005 \
-  --hz 50 \
-  --timeout-ms 200 \
-  --latency-log-interval 1.0
+python3 policy_server.py
 ```
 
-Then start the leader machine:
+Before running it, edit these constants in [policy_server.py](/home/xuan/Documents/VLA+无线通信/LeRobot_SO-101_Remote_Teleop/policy_server.py:5):
+
+- `HOST`
+- `PORT`
+
+On the robot-side machine:
 
 ```bash
-python3 leader_sender.py \
-  --leader-port /dev/ttyACM0 \
-  --leader-id leader_arm \
-  --follower-ip 192.168.1.100 \
-  --udp-port 5005 \
-  --hz 50 \
-  --rtt-log-interval 1.0
+python3 robot_client.py
 ```
 
-## Test
+Before running it, edit these constants in [robot_client.py](/home/xuan/Documents/VLA+无线通信/LeRobot_SO-101_Remote_Teleop/robot_client.py:8):
 
-This project uses the standard library `unittest` runner so it works even if `pytest` is not installed:
+- `SERVER_ADDRESS`
+- `ROBOT_PORT`
+- `ROBOT_ID`
+- `CAMERAS`
+- `TASK`
+- `POLICY_TYPE`
+- `PRETRAINED_NAME_OR_PATH`
+- `POLICY_DEVICE`
+- `ACTIONS_PER_CHUNK`
+- `CHUNK_SIZE_THRESHOLD`
+- `AGGREGATE_FN_NAME`
+- `DEBUG_VISUALIZE_QUEUE_SIZE`
+
+## SO-101 Notes
+
+- `ROBOT_ID` must match your follower calibration id.
+- Camera keys in `CAMERAS` must match the keys expected by the model you trained or downloaded.
+- `TASK` should stay close to the instruction wording used in your data collection or fine-tuning.
+- `ACTIONS_PER_CHUNK` should not exceed what the policy supports.
+
+## Legacy
+
+The old custom UDP teleop path is still under `legacy/`, but it is no longer the recommended path for inference experiments.
+
+Run tests with:
 
 ```bash
 python3 -m unittest discover -s tests -v
