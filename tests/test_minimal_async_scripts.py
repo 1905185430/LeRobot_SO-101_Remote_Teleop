@@ -152,6 +152,27 @@ class MinimalAsyncScriptTests(unittest.TestCase):
     def test_top_level_wrappers_export_expected_helpers(self) -> None:
         self.assertTrue(callable(policy_server.build_server_config))
         self.assertTrue(callable(policy_server.main))
+        self.assertEqual(robot_client.SERVER_ADDRESS, robot_client_runtime.SERVER_ADDRESS)
+        self.assertEqual(robot_client.ROBOT_PORT, robot_client_runtime.ROBOT_PORT)
+        self.assertEqual(robot_client.ROBOT_ID, robot_client_runtime.ROBOT_ID)
+        self.assertEqual(robot_client.CAMERAS, robot_client_runtime.CAMERAS)
+        self.assertEqual(robot_client.TASK, robot_client_runtime.TASK)
+        self.assertEqual(robot_client.POLICY_TYPE, robot_client_runtime.POLICY_TYPE)
+        self.assertEqual(
+            robot_client.PRETRAINED_NAME_OR_PATH,
+            robot_client_runtime.PRETRAINED_NAME_OR_PATH,
+        )
+        self.assertEqual(robot_client.POLICY_DEVICE, robot_client_runtime.POLICY_DEVICE)
+        self.assertEqual(robot_client.ACTIONS_PER_CHUNK, robot_client_runtime.ACTIONS_PER_CHUNK)
+        self.assertEqual(
+            robot_client.CHUNK_SIZE_THRESHOLD,
+            robot_client_runtime.CHUNK_SIZE_THRESHOLD,
+        )
+        self.assertEqual(robot_client.AGGREGATE_FN_NAME, robot_client_runtime.AGGREGATE_FN_NAME)
+        self.assertEqual(
+            robot_client.DEBUG_VISUALIZE_QUEUE_SIZE,
+            robot_client_runtime.DEBUG_VISUALIZE_QUEUE_SIZE,
+        )
         self.assertTrue(callable(robot_client.build_camera_configs))
         self.assertTrue(callable(robot_client.build_robot_config))
         self.assertTrue(callable(robot_client.build_client_config))

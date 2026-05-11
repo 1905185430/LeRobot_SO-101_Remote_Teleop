@@ -171,6 +171,7 @@ def run_robot_client(root: str | Path | None = None) -> int:
         if recorder is not None:
             recorder.close()
 
+
 def _load_client_api():
     """Load LeRobot client APIs lazily so imports remain test-friendly."""
     try:
