@@ -74,12 +74,15 @@ Validate the remote teleoperation config:
 ```bash
 python3 scripts/run_server.py --config configs/remote_teleop_so101_tcp.yaml --dry-run
 python3 scripts/run_client.py --config configs/remote_teleop_so101_tcp.yaml --dry-run
+python3 scripts/run_server.py --config configs/remote_teleop_starai_tcp.yaml --dry-run
+python3 scripts/run_client.py --config configs/remote_teleop_starai_tcp.yaml --dry-run
 ```
 
 Config-driven scripts now support two executable paths:
 
 - `remote_inference` builds real LeRobot async inference server/client configs for the first supported path, SO-101 follower + SmolVLA.
 - `remote_teleoperation` runs a config-driven TCP SO-101 leader/follower action stream.
+- StarAI arms are supported through LeRobot-backed type names such as `lerobot_robot_viola`, `lerobot_robot_cello`, and `lerobot_teleoperator_violin`, plus aliases like `starai_viola_follower` and `starai_violin_leader`.
 - `debug_mock` runs a hardware-free TCP mock observation/action round trip.
 - Server-side `webui.enabled: true` launches an optional Gradio dashboard when Gradio is installed; if Gradio is missing, runtime startup continues and records a warning event.
 

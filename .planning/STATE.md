@@ -68,6 +68,7 @@ Progress: [██████████] 100%
 | 2026-05-11 | Wire config driven real and mock runtime with Chinese guide | Complete |
 | 2026-05-11 | Add lightweight server WebUI state and dashboard | Complete |
 | 2026-05-11 | Implement config driven TCP teleoperation runtime | Complete |
+| 2026-05-11 | Add StarAI robot support scaffold | Complete |
 
 ## Accumulated Context
 

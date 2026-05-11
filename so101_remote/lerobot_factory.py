@@ -9,8 +9,9 @@ from __future__ import annotations
 from importlib import import_module
 
 from .config_schema import ConfigError, PlatformConfig
+from .starai import STARAI_FOLLOWER_TYPES, build_starai_follower_config, is_starai_follower_type
 
-SUPPORTED_ROBOT_TYPES = {"so101_follower"}
+SUPPORTED_ROBOT_TYPES = {"so101_follower", *STARAI_FOLLOWER_TYPES}
 SUPPORTED_POLICY_TYPES = {"smolvla"}
 
 
@@ -43,9 +44,7 @@ def describe_lerobot_runtime(config: PlatformConfig) -> dict[str, object]:
 def build_lerobot_camera_configs(config: PlatformConfig) -> dict[str, object]:
     """Build LeRobot OpenCV camera configs from platform config."""
     _ensure_robot_supported(config)
-    OpenCVCameraConfig, _SO101FollowerConfig, _RobotClientConfig, _PolicyServerConfig = (
-        _load_lerobot_config_api()
-    )
+    OpenCVCameraConfig = _load_opencv_camera_config()
     return {
         name: OpenCVCameraConfig(
             index_or_path=camera.index,
@@ -58,10 +57,12 @@ def build_lerobot_camera_configs(config: PlatformConfig) -> dict[str, object]:
 
 
 def build_lerobot_robot_config(config: PlatformConfig) -> object:
-    """Build a LeRobot SO-101 follower config from platform config."""
+    """Build a LeRobot robot config from platform config."""
     _ensure_robot_supported(config)
     if not config.robot.port:
-        raise ConfigError("robot.port is required for so101_follower.")
+        raise ConfigError(f"robot.port is required for {config.robot.type}.")
+    if is_starai_follower_type(config.robot.type):
+        return build_starai_follower_config(config, cameras=build_lerobot_camera_configs(config))
     _OpenCVCameraConfig, SO101FollowerConfig, _RobotClientConfig, _PolicyServerConfig = (
         _load_lerobot_config_api()
     )
@@ -133,6 +134,16 @@ def _load_lerobot_config_api() -> tuple[type, type, type, type]:
         ) from exc
 
     return OpenCVCameraConfig, SO101FollowerConfig, RobotClientConfig, PolicyServerConfig
+
+
+def _load_opencv_camera_config() -> type:
+    try:
+        return import_module("lerobot.cameras.opencv.configuration_opencv").OpenCVCameraConfig
+    except ImportError as exc:
+        raise RuntimeError(
+            "LeRobot OpenCV camera config is not available. Install lerobot before building "
+            "real runtime configs."
+        ) from exc
 
 
 def _load_so101_follower_config() -> type:

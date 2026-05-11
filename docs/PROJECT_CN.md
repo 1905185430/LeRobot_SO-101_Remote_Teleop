@@ -39,7 +39,7 @@ SO-101 follower + OpenCV cameras + LeRobot async inference + SmolVLA
 | 配置驱动 TCP 遥操作 `remote_teleoperation` | 已实现 SO-101 leader/follower ACTION/ACK 流 |
 | WebUI 实时显示 | 已有可选 Gradio dashboard 边界；mock TCP 可更新关节、动作和延迟；真实 LeRobot observation 流尚未接入 |
 | 图像二进制传输优化 | 当前 TCP mock 用 JSON，后续再接 JPEG/msgpack |
-| 多机械臂适配 | 代码边界已预留，当前真实支持 SO-101 follower |
+| 多机械臂适配 | 已加入 StarAI LeRobot-backed 类型名和 TCP 遥操作配置骨架 |
 
 ## 3. 目录结构
 
@@ -48,6 +48,7 @@ configs/
   remote_inference_so101_smolvla.yaml   # 远程推理：服务器推理，机器人端执行
   local_inference_so101_smolvla.yaml    # 本地推理配置，当前用于校验和后续扩展
   remote_teleop_so101_tcp.yaml          # TCP 遥操作配置，当前用于设计和校验
+  remote_teleop_starai_tcp.yaml         # StarAI TCP 遥操作配置
   debug_mock_robot.yaml                 # 无硬件 TCP mock 调试
 
 scripts/
@@ -105,6 +106,33 @@ network:
 - `network.server_host`: GPU 服务器在局域网或 Tailscale 中的 IP。
 - `network.server_port`: LeRobot async inference server 监听端口。
 - `camera.cameras`: 相机名称必须和模型训练/推理期望的 observation key 对齐。
+
+### StarAI 配置
+
+StarAI 通过 LeRobot 后端接入。当前支持这些类型名：
+
+| 用途 | 推荐类型名 | 可读别名 |
+| --- | --- | --- |
+| StarAI Viola follower | `lerobot_robot_viola` | `starai_viola_follower` |
+| StarAI Cello follower | `lerobot_robot_cello` | `starai_cello_follower` |
+| StarAI Violin leader | `lerobot_teleoperator_violin` | `starai_violin_leader` |
+
+示例配置见 `configs/remote_teleop_starai_tcp.yaml`：
+
+```yaml
+robot:
+  type: lerobot_robot_viola
+  port: /dev/ttyUSB1
+  id: my_starai_viola_follower
+
+teleop:
+  enabled: true
+  type: lerobot_teleoperator_violin
+  port: /dev/ttyUSB0
+  id: my_starai_violin_leader
+```
+
+真实运行前需要安装带 StarAI 支持的 LeRobot 版本或 fork，使用 `lerobot-find-port` 找到 USB 端口，并分别完成 leader/follower 校准。
 
 ## 5. 使用方式
 
@@ -298,6 +326,16 @@ python3 scripts/run_client.py --config configs/remote_teleop_so101_tcp.yaml
 ```
 
 配置里 `robot.port` 是 follower 机器上的串口，`teleop.port` 是 leader 机器上的串口。两台机器各自只需要改自己本机实际存在的串口。`network.server_host` 必须是 follower 机器在局域网或 Tailscale 中可访问的 IP。
+
+StarAI 遥操作使用对应配置：
+
+```bash
+# follower 机器
+python3 scripts/run_server.py --config configs/remote_teleop_starai_tcp.yaml
+
+# leader 机器
+python3 scripts/run_client.py --config configs/remote_teleop_starai_tcp.yaml
+```
 
 如果你要做旧 UDP 遥操作参考实验，仍可使用：
 

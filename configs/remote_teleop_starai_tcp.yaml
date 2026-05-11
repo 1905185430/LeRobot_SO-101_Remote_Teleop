@@ -1,0 +1,61 @@
+experiment:
+  name: starai_remote_teleop_tcp
+  mode: remote_teleoperation
+  task_name: teleop_starai
+  save_dir: runs/starai_remote_teleop_tcp
+
+robot:
+  type: lerobot_robot_viola
+  port: /dev/ttyUSB1
+  id: my_starai_viola_follower
+  calibration_dir: null
+
+teleop:
+  enabled: true
+  type: lerobot_teleoperator_violin
+  port: /dev/ttyUSB0
+  id: my_starai_violin_leader
+
+model:
+  type: mock
+  model_path: ""
+  device: cpu
+  dtype: float32
+  action_horizon: 1
+  inference_frequency: 30
+
+camera:
+  enabled: false
+  fps: 30
+  cameras:
+
+network:
+  protocol: tcp
+  server_host: 192.168.1.151
+  server_port: 9002
+  timeout_ms: 200
+  reconnect: true
+  max_packet_size_mb: 4
+
+runtime:
+  control_frequency: 50
+  observation_frequency: 50
+  action_send_frequency: 50
+  safety_stop_on_timeout: true
+  hold_last_action_on_timeout: true
+
+webui:
+  enabled: true
+  host: 0.0.0.0
+  port: 7862
+  show_images: false
+  show_joint_states: true
+  show_latency: true
+  show_actions: true
+
+logging:
+  save_video: false
+  save_metrics: true
+  save_observations: false
+  save_actions: true
+  log_level: info

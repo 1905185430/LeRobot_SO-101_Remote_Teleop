@@ -9,13 +9,24 @@ import time
 from typing import Any, Mapping
 
 from legacy.protocol import ProtocolError as LegacyProtocolError
-from legacy.protocol import normalize_action
+from legacy.protocol import DEFAULT_ACTION_KEYS, normalize_action
 
 from .config_schema import ConfigError, PlatformConfig
 from .metrics import EVENT_EXCEPTION, EVENT_RECOVERY, LATENCY_MS, MetricEvent, MetricSample
 from .network.protocol import MSG_ACK, MSG_ACTION, ProtocolError, recv_message, send_message
 from .recorder import JsonlMetricsRecorder
+from .starai import (
+    STARAI_FOLLOWER_TYPES,
+    STARAI_LEADER_TYPES,
+    build_starai_follower_robot,
+    build_starai_leader_device,
+    is_starai_follower_type,
+    is_starai_leader_type,
+)
 from .webui import DashboardState
+
+SUPPORTED_TELEOP_FOLLOWER_TYPES = {"so101_follower", *STARAI_FOLLOWER_TYPES}
+SUPPORTED_TELEOP_LEADER_TYPES = {"so101_leader", *STARAI_LEADER_TYPES}
 
 
 @dataclass(frozen=True)
@@ -39,10 +50,16 @@ def tcp_teleop_settings(config: PlatformConfig) -> TcpTeleopSettings:
         raise ConfigError("TCP teleoperation requires experiment.mode=remote_teleoperation.")
     if not config.teleop.enabled:
         raise ConfigError("TCP teleoperation requires teleop.enabled=true.")
-    if config.teleop.type != "so101_leader":
-        raise ConfigError("TCP teleoperation currently supports teleop.type=so101_leader.")
-    if config.robot.type != "so101_follower":
-        raise ConfigError("TCP teleoperation currently supports robot.type=so101_follower.")
+    if config.teleop.type not in SUPPORTED_TELEOP_LEADER_TYPES:
+        raise ConfigError(
+            "TCP teleoperation currently supports teleop.type one of: "
+            f"{', '.join(sorted(SUPPORTED_TELEOP_LEADER_TYPES))}."
+        )
+    if config.robot.type not in SUPPORTED_TELEOP_FOLLOWER_TYPES:
+        raise ConfigError(
+            "TCP teleoperation currently supports robot.type one of: "
+            f"{', '.join(sorted(SUPPORTED_TELEOP_FOLLOWER_TYPES))}."
+        )
     if not config.robot.port:
         raise ConfigError("TCP teleoperation server requires robot.port for the follower.")
     if not config.teleop.port:
@@ -114,7 +131,7 @@ class TcpTeleopLeaderClient:
     def build_action_message(self) -> dict[str, object]:
         """Read one leader action and convert it to protocol message."""
         try:
-            action = normalize_action(self.leader_device.get_action())
+            action = normalize_teleop_action(self.leader_device.get_action())
         except LegacyProtocolError as exc:
             raise ProtocolError(str(exc)) from exc
         frame_id = self.seq
@@ -205,7 +222,7 @@ class TcpTeleopFollowerServer:
                 f"Out-of-order or duplicate ACTION frame_id={frame_id}, last={self.last_frame_id}."
             )
         try:
-            action = normalize_action(message.get("action"))
+            action = normalize_teleop_action(message.get("action"))
         except LegacyProtocolError as exc:
             raise ProtocolError(str(exc)) from exc
 
@@ -267,6 +284,35 @@ def build_so101_follower_robot(config: PlatformConfig) -> Any:
     follower = SO101Follower(follower_config)
     follower.connect()
     return follower
+
+
+def build_teleop_leader_device(config: PlatformConfig) -> Any:
+    """Build and connect the configured leader teleoperator."""
+    if is_starai_leader_type(config.teleop.type):
+        return build_starai_leader_device(config)
+    return build_so101_leader_device(config)
+
+
+def build_teleop_follower_robot(config: PlatformConfig) -> Any:
+    """Build and connect the configured follower robot."""
+    if is_starai_follower_type(config.robot.type):
+        return build_starai_follower_robot(config)
+    return build_so101_follower_robot(config)
+
+
+def normalize_teleop_action(action: Any) -> dict[str, float]:
+    """Normalize teleoperation actions while allowing non-SO-101 dict keys."""
+    if isinstance(action, Mapping):
+        if all(key in action for key in DEFAULT_ACTION_KEYS):
+            return normalize_action(action)
+        try:
+            return {str(key): float(value) for key, value in action.items()}
+        except (TypeError, ValueError) as exc:
+            raise ProtocolError("Action dict values must be numeric.") from exc
+    try:
+        return normalize_action(action)
+    except LegacyProtocolError as exc:
+        raise ProtocolError(str(exc)) from exc
 
 
 def _load_so101_leader_api() -> tuple[type, type]:

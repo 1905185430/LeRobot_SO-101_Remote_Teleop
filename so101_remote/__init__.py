@@ -15,6 +15,7 @@ __all__ = [
     "reliability",
     "runtime",
     "server",
+    "starai",
     "teleop_tcp",
     "webui",
 ]

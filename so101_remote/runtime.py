@@ -29,8 +29,8 @@ from .reliability import (
 from .teleop_tcp import (
     TcpTeleopFollowerServer,
     TcpTeleopLeaderClient,
-    build_so101_follower_robot,
-    build_so101_leader_device,
+    build_teleop_follower_robot,
+    build_teleop_leader_device,
     tcp_teleop_settings,
 )
 from .webui import DashboardState, launch_dashboard
@@ -193,7 +193,7 @@ def run_tcp_teleop_follower_server(config: PlatformConfig) -> int:
         _maybe_launch_dashboard(config, state, recorder)
         print(f"Run directory: {run_dir}")
         print(f"TCP teleop follower listening on {settings.host}:{settings.port}")
-        follower = build_so101_follower_robot(config)
+        follower = build_teleop_follower_robot(config)
         server = TcpTeleopFollowerServer(
             follower_robot=follower,
             settings=settings,
@@ -236,7 +236,7 @@ def run_tcp_teleop_leader_client(config: PlatformConfig) -> int:
         state = DashboardState.from_config(config, "tcp-teleop-leader")
         print(f"Run directory: {run_dir}")
         print(f"TCP teleop leader connecting to {settings.host}:{settings.port}")
-        leader = build_so101_leader_device(config)
+        leader = build_teleop_leader_device(config)
         client = TcpTeleopLeaderClient(
             leader_device=leader,
             settings=settings,
