@@ -44,17 +44,17 @@ Requirements for the first practical release. v1 is intentionally layered: the c
 
 ### Dry Run
 
-- [ ] **DRY-01**: Developer can run a dry-run/mock mode on one machine without SO-101 hardware.
+- [x] **DRY-01**: Developer can run a dry-run/mock mode on one machine without SO-101 hardware.
 - [x] **DRY-02**: Dry-run mode exercises the runtime and metrics recorder enough to validate log and run-directory behavior.
-- [ ] **DRY-03**: Dry-run mode does not pretend to validate real hardware, camera, model loading, or physical control behavior.
+- [x] **DRY-03**: Dry-run mode does not pretend to validate real hardware, camera, model loading, or physical control behavior.
 
 ### Adapters
 
-- [ ] **ADPT-01**: Code defines a minimal robot adapter boundary sufficient to isolate SO-101-specific setup from runtime orchestration.
-- [ ] **ADPT-02**: Code defines a minimal policy/model adapter boundary sufficient to keep SmolVLA-specific setup from blocking later PI-series support.
-- [ ] **ADPT-03**: SO-101 + SmolVLA is implemented as the first concrete path without requiring a heavy plugin registry.
-- [ ] **ADPT-04**: PI-series model support has a clear placeholder or extension point, but no real PI backend is required in early v1.
-- [ ] **ADPT-05**: Other robot arm support has a clear placeholder or extension point, but no second hardware backend is required in early v1.
+- [x] **ADPT-01**: Code defines a minimal robot adapter boundary sufficient to isolate SO-101-specific setup from runtime orchestration.
+- [x] **ADPT-02**: Code defines a minimal policy/model adapter boundary sufficient to keep SmolVLA-specific setup from blocking later PI-series support.
+- [x] **ADPT-03**: SO-101 + SmolVLA is implemented as the first concrete path without requiring a heavy plugin registry.
+- [x] **ADPT-04**: PI-series model support has a clear placeholder or extension point, but no real PI backend is required in early v1.
+- [x] **ADPT-05**: Other robot arm support has a clear placeholder or extension point, but no second hardware backend is required in early v1.
 
 ### Reliability
 
@@ -148,14 +148,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | EXP-03 | Phase 2 | Complete |
 | EXP-04 | Phase 2 | Complete |
 | EXP-05 | Phase 2 | Complete |
-| DRY-01 | Phase 3 | Pending |
+| DRY-01 | Phase 3 | Complete |
 | DRY-02 | Phase 3 | Complete |
-| DRY-03 | Phase 3 | Pending |
-| ADPT-01 | Phase 3 | Pending |
-| ADPT-02 | Phase 3 | Pending |
-| ADPT-03 | Phase 3 | Pending |
-| ADPT-04 | Phase 3 | Pending |
-| ADPT-05 | Phase 3 | Pending |
+| DRY-03 | Phase 3 | Complete |
+| ADPT-01 | Phase 3 | Complete |
+| ADPT-02 | Phase 3 | Complete |
+| ADPT-03 | Phase 3 | Complete |
+| ADPT-04 | Phase 3 | Complete |
+| ADPT-05 | Phase 3 | Complete |
 | RELY-01 | Phase 3 | Complete |
 | RELY-02 | Phase 3 | Complete |
 | RELY-03 | Phase 4 | Pending |
