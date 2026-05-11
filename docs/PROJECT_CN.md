@@ -36,7 +36,7 @@ SO-101 follower + OpenCV cameras + LeRobot async inference + SmolVLA
 | 能力 | 当前边界 |
 | --- | --- |
 | 本地真实推理 `local_inference` | 配置和 dry-run 已有，真实本地 policy loop 尚未接 LeRobot 本地 API |
-| 配置驱动 TCP 遥操作 `remote_teleoperation` | 配置已定义，真实运行仍建议使用 `legacy/` 旧 UDP 路径 |
+| 配置驱动 TCP 遥操作 `remote_teleoperation` | 已实现 SO-101 leader/follower ACTION/ACK 流 |
 | WebUI 实时显示 | 已有可选 Gradio dashboard 边界；mock TCP 可更新关节、动作和延迟；真实 LeRobot observation 流尚未接入 |
 | 图像二进制传输优化 | 当前 TCP mock 用 JSON，后续再接 JPEG/msgpack |
 | 多机械臂适配 | 代码边界已预留，当前真实支持 SO-101 follower |
@@ -243,6 +243,7 @@ pip install gradio
 当前限制：
 
 - `debug_mock` TCP server 会更新关节、action 和 latency；
+- `remote_teleoperation` TCP server 会更新 action 和 latency；
 - 真实 LeRobot async server 目前只能显示启动配置和状态；
 - 真实相机图像、关节和模型输出还需要从 LeRobot observation/action 流接入 dashboard state。
 
@@ -284,7 +285,21 @@ python3 policy_server.py
 python3 robot_client.py
 ```
 
-如果你要做旧遥操作参考实验，当前仍使用：
+如果你要运行 TCP 远程遥操作，先在 follower 机器上启动 server：
+
+```bash
+python3 scripts/run_server.py --config configs/remote_teleop_so101_tcp.yaml
+```
+
+再在 leader 机器上启动 client：
+
+```bash
+python3 scripts/run_client.py --config configs/remote_teleop_so101_tcp.yaml
+```
+
+配置里 `robot.port` 是 follower 机器上的串口，`teleop.port` 是 leader 机器上的串口。两台机器各自只需要改自己本机实际存在的串口。`network.server_host` 必须是 follower 机器在局域网或 Tailscale 中可访问的 IP。
+
+如果你要做旧 UDP 遥操作参考实验，仍可使用：
 
 ```bash
 python3 legacy/leader_sender.py --help
@@ -299,5 +314,5 @@ python3 legacy/follower_receiver.py --help
 2. 把真实运行日志中的异常和 LeRobot 输出整理进 run artifacts。
 3. 把真实 LeRobot observation/action 流接入现有 Gradio WebUI 状态。
 4. 接入本地真实推理 `local_inference`，作为无线远程推理的 baseline。
-5. 实现配置驱动 TCP 遥操作，并把 `legacy/` 的安全逻辑迁移过来。
+5. 给 TCP 遥操作补 reconnect、heartbeat 和更完整的 emergency stop。
 6. 优化图像传输，从 JSON/base64 过渡到 msgpack + JPEG bytes。

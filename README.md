@@ -79,10 +79,11 @@ python3 scripts/run_client.py --config configs/remote_teleop_so101_tcp.yaml --dr
 Config-driven scripts now support two executable paths:
 
 - `remote_inference` builds real LeRobot async inference server/client configs for the first supported path, SO-101 follower + SmolVLA.
+- `remote_teleoperation` runs a config-driven TCP SO-101 leader/follower action stream.
 - `debug_mock` runs a hardware-free TCP mock observation/action round trip.
 - Server-side `webui.enabled: true` launches an optional Gradio dashboard when Gradio is installed; if Gradio is missing, runtime startup continues and records a warning event.
 
-`local_inference`, config-driven TCP teleoperation, and real LeRobot observation streaming into WebUI are still explicit next steps. The config layer exposes LeRobot object construction through `so101_remote.lerobot_factory` and keeps lazy imports, so tests can run without LeRobot installed.
+`local_inference` and real LeRobot observation streaming into WebUI are still explicit next steps. The config layer exposes LeRobot object construction through `so101_remote.lerobot_factory` and keeps lazy imports, so tests can run without LeRobot installed.
 
 ## TCP Protocol Preview
 

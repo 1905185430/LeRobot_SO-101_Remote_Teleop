@@ -26,6 +26,13 @@ from .reliability import (
     STAGE_SERVER_STARTUP,
     record_exception_event,
 )
+from .teleop_tcp import (
+    TcpTeleopFollowerServer,
+    TcpTeleopLeaderClient,
+    build_so101_follower_robot,
+    build_so101_leader_device,
+    tcp_teleop_settings,
+)
 from .webui import DashboardState, launch_dashboard
 
 
@@ -44,10 +51,7 @@ def run_configured_server(config: PlatformConfig) -> int:
     if config.mode == "remote_inference":
         return run_lerobot_policy_server(config)
     if config.mode == "remote_teleoperation":
-        raise RuntimeError(
-            "Config-driven TCP remote teleoperation runtime is not implemented yet. "
-            "Use legacy/leader_sender.py and legacy/follower_receiver.py for the retained UDP path."
-        )
+        return run_tcp_teleop_follower_server(config)
     raise RuntimeError(f"Config mode '{config.mode}' is not a server runtime mode.")
 
 
@@ -58,10 +62,7 @@ def run_configured_client(config: PlatformConfig) -> int:
     if config.mode == "remote_inference":
         return run_lerobot_robot_client(config)
     if config.mode == "remote_teleoperation":
-        raise RuntimeError(
-            "Config-driven TCP remote teleoperation runtime is not implemented yet. "
-            "Use legacy/leader_sender.py and legacy/follower_receiver.py for the retained UDP path."
-        )
+        return run_tcp_teleop_leader_client(config)
     raise RuntimeError(f"Config mode '{config.mode}' is not a client runtime mode.")
 
 
@@ -174,6 +175,93 @@ def run_lerobot_robot_client(config: PlatformConfig) -> int:
             )
         raise
     finally:
+        if recorder is not None:
+            recorder.close()
+
+
+def run_tcp_teleop_follower_server(config: PlatformConfig) -> int:
+    """Start a config-driven TCP teleoperation follower server."""
+    recorder: JsonlMetricsRecorder | None = None
+    follower = None
+    try:
+        settings = tcp_teleop_settings(config)
+        run_dir = _create_configured_run_dir(config, "tcp-teleop-follower")
+        metadata = _build_configured_metadata("tcp-teleop-follower", config, run_dir)
+        recorder = JsonlMetricsRecorder(run_dir, metadata=metadata)
+        _copy_source_config(config, run_dir)
+        state = DashboardState.from_config(config, "tcp-teleop-follower")
+        _maybe_launch_dashboard(config, state, recorder)
+        print(f"Run directory: {run_dir}")
+        print(f"TCP teleop follower listening on {settings.host}:{settings.port}")
+        follower = build_so101_follower_robot(config)
+        server = TcpTeleopFollowerServer(
+            follower_robot=follower,
+            settings=settings,
+            recorder=recorder,
+            state=state,
+        )
+        result = server.run()
+        recorder.write_summary()
+        return result
+    except KeyboardInterrupt:
+        if recorder is not None:
+            recorder.write_summary()
+        return 0
+    except Exception as exc:
+        if recorder is not None:
+            record_exception_event(
+                recorder,
+                stage=STAGE_NETWORK,
+                component="tcp_teleop_follower",
+                exc=exc,
+            )
+        raise
+    finally:
+        if follower is not None:
+            _disconnect_best_effort(follower)
+        if recorder is not None:
+            recorder.close()
+
+
+def run_tcp_teleop_leader_client(config: PlatformConfig) -> int:
+    """Start a config-driven TCP teleoperation leader client."""
+    recorder: JsonlMetricsRecorder | None = None
+    leader = None
+    try:
+        settings = tcp_teleop_settings(config)
+        run_dir = _create_configured_run_dir(config, "tcp-teleop-leader")
+        metadata = _build_configured_metadata("tcp-teleop-leader", config, run_dir)
+        recorder = JsonlMetricsRecorder(run_dir, metadata=metadata)
+        _copy_source_config(config, run_dir)
+        state = DashboardState.from_config(config, "tcp-teleop-leader")
+        print(f"Run directory: {run_dir}")
+        print(f"TCP teleop leader connecting to {settings.host}:{settings.port}")
+        leader = build_so101_leader_device(config)
+        client = TcpTeleopLeaderClient(
+            leader_device=leader,
+            settings=settings,
+            recorder=recorder,
+            state=state,
+        )
+        result = client.run()
+        recorder.write_summary()
+        return result
+    except KeyboardInterrupt:
+        if recorder is not None:
+            recorder.write_summary()
+        return 0
+    except Exception as exc:
+        if recorder is not None:
+            record_exception_event(
+                recorder,
+                stage=STAGE_NETWORK,
+                component="tcp_teleop_leader",
+                exc=exc,
+            )
+        raise
+    finally:
+        if leader is not None:
+            _disconnect_best_effort(leader)
         if recorder is not None:
             recorder.close()
 
@@ -342,6 +430,15 @@ def _maybe_launch_dashboard(
                 details={"component": "webui"},
             )
         )
+
+
+def _disconnect_best_effort(device: object) -> None:
+    disconnect = getattr(device, "disconnect", None)
+    if callable(disconnect):
+        try:
+            disconnect()
+        except Exception:
+            pass
 
 
 def _mock_joint_positions() -> dict[str, float]:
