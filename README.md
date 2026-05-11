@@ -61,6 +61,17 @@ The run artifact set is:
 
 Real LeRobot runtime hooks are wired in later phases; this artifact layout is the local contract those hooks will write into.
 
+## Dry Run
+
+Run a local dry-run without SO-101 hardware or LeRobot:
+
+```bash
+python3 -c "from so101_remote.dryrun import run_dry_run; print(run_dry_run())"
+```
+
+Dry-run validates the code path, metrics plumbing, and artifact generation only.
+It does not validate real SO-101 hardware, camera frames, real SmolVLA loading, inference quality, or physical safety behavior.
+
 ## SO-101 Notes
 
 - `ROBOT_ID` must match your follower calibration id.
