@@ -102,8 +102,8 @@ class StarAITests(unittest.TestCase):
 
         settings = tcp_teleop_settings(config)
 
-        self.assertEqual(settings.leader_id, "my_starai_violin_leader")
-        self.assertEqual(settings.follower_id, "my_starai_viola_follower")
+        self.assertEqual(settings.leader_id, "my_awesome_staraiviolin_arm")
+        self.assertEqual(settings.follower_id, "my_awesome_staraiviola_arm")
 
     def test_build_starai_follower_and_leader_devices(self) -> None:
         config = load_config("configs/teleop/remote_starai_tcp.yaml")
@@ -114,8 +114,8 @@ class StarAITests(unittest.TestCase):
         self.assertTrue(follower.connected)
         self.assertTrue(leader.connected)
         self.assertEqual(follower.config.kwargs["port"], "/dev/ttyUSB1")
-        self.assertEqual(leader.config.kwargs["id"], "my_starai_violin_leader")
-        self.assertTrue(follower.moved_to_initial_position)
+        self.assertEqual(leader.config.kwargs["id"], "my_awesome_staraiviolin_arm")
+        self.assertFalse(follower.moved_to_initial_position)
 
     def test_build_starai_follower_can_skip_initial_position_move(self) -> None:
         config = load_config("configs/teleop/local_starai_tcp.yaml")
@@ -145,7 +145,7 @@ class StarAITests(unittest.TestCase):
         robot_config = build_lerobot_robot_config(config)
 
         self.assertEqual(robot_config.kwargs["port"], "/dev/ttyUSB1")
-        self.assertEqual(robot_config.kwargs["id"], "my_starai_viola_follower")
+        self.assertEqual(robot_config.kwargs["id"], "my_awesome_staraiviola_arm")
 
     def test_normalize_teleop_action_accepts_starai_dict_keys(self) -> None:
         action = {"joint_1.pos": 1, "joint_2.pos": "2.5", "gripper.pos": 0}
