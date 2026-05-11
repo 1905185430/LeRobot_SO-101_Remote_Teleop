@@ -102,6 +102,24 @@ class TcpTeleopTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "Failed to read a safe leader action"):
             client.build_action_message()
 
+    def test_leader_prints_actions_when_enabled(self) -> None:
+        config = replace(
+            load_config("configs/remote_teleop_so101_tcp.yaml"),
+            logging=replace(
+                load_config("configs/remote_teleop_so101_tcp.yaml").logging,
+                print_leader_actions=True,
+                print_action_interval=1,
+            ),
+        )
+        client = TcpTeleopLeaderClient(FakeLeader(), tcp_teleop_settings(config))
+        message = client.build_action_message()
+
+        with mock.patch("builtins.print") as printer:
+            client.maybe_print_leader_action(message)
+
+        printer.assert_called_once()
+        self.assertIn("Leader action frame=0", printer.call_args.args[0])
+
     def test_follower_rejects_duplicate_frames(self) -> None:
         config = load_config("configs/remote_teleop_so101_tcp.yaml")
         server = TcpTeleopFollowerServer(FakeFollower(), tcp_teleop_settings(config))

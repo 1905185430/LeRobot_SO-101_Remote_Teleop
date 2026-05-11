@@ -66,3 +66,5 @@ logging:
   save_observations: false
   save_actions: true
   log_level: info
+  print_leader_actions: true
+  print_action_interval: 10

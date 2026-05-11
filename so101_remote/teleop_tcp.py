@@ -47,6 +47,8 @@ class TcpTeleopSettings:
     action_min: float
     action_max: float
     require_action_keys_match: bool
+    print_leader_actions: bool
+    print_action_interval: int
 
 
 def tcp_teleop_settings(config: PlatformConfig) -> TcpTeleopSettings:
@@ -85,6 +87,8 @@ def tcp_teleop_settings(config: PlatformConfig) -> TcpTeleopSettings:
         action_min=config.safety.action_min,
         action_max=config.safety.action_max,
         require_action_keys_match=config.safety.require_action_keys_match,
+        print_leader_actions=config.logging.print_leader_actions,
+        print_action_interval=config.logging.print_action_interval,
     )
 
 
@@ -119,6 +123,7 @@ class TcpTeleopLeaderClient:
             while max_messages is None or sent < max_messages:
                 started = time.perf_counter()
                 message = self.build_action_message()
+                self.maybe_print_leader_action(message)
                 send_message(sock, message, max_size=self.settings.max_packet_size)
                 ack = recv_message(sock, max_size=self.settings.max_packet_size)
                 self._validate_ack(ack, message["frame_id"])
@@ -169,6 +174,21 @@ class TcpTeleopLeaderClient:
                 "SDK hotfixes before retrying."
             ) from exc
         return action
+
+    def maybe_print_leader_action(self, message: Mapping[str, object]) -> None:
+        """Print outgoing leader action at a configured interval."""
+        if not self.settings.print_leader_actions:
+            return
+        frame_id = message.get("frame_id")
+        if not isinstance(frame_id, int):
+            return
+        if frame_id % self.settings.print_action_interval != 0:
+            return
+        action = message.get("action", {})
+        if not isinstance(action, Mapping):
+            return
+        formatted = ", ".join(f"{key}={float(value):.3f}" for key, value in sorted(action.items()))
+        print(f"Leader action frame={frame_id}: {formatted}", flush=True)
 
     def _validate_ack(self, ack: Mapping[str, object], frame_id: object) -> None:
         if ack.get("type") != MSG_ACK:

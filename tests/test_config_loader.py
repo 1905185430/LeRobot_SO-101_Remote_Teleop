@@ -41,6 +41,8 @@ class ConfigLoaderTests(unittest.TestCase):
         self.assertEqual(config.safety.action_min, -100)
         self.assertEqual(config.safety.action_max, 100)
         self.assertTrue(config.safety.require_action_keys_match)
+        self.assertTrue(config.logging.print_leader_actions)
+        self.assertEqual(config.logging.print_action_interval, 10)
 
     def test_remote_teleoperation_requires_enabled_teleop(self) -> None:
         data = {
@@ -74,6 +76,17 @@ class ConfigLoaderTests(unittest.TestCase):
         }
 
         with self.assertRaisesRegex(ConfigError, "safety.action_min"):
+            platform_config_from_mapping(data)
+
+    def test_invalid_print_action_interval_is_rejected(self) -> None:
+        data = {
+            "experiment": {"name": "bad", "mode": "debug_mock"},
+            "robot": {"type": "mock"},
+            "model": {"type": "mock"},
+            "logging": {"print_action_interval": 0},
+        }
+
+        with self.assertRaisesRegex(ConfigError, "print_action_interval"):
             platform_config_from_mapping(data)
 
     def test_simple_yaml_parser_handles_nested_mapping_and_scalars(self) -> None:

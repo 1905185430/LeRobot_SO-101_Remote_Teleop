@@ -121,6 +121,8 @@ class LoggingConfig:
     save_observations: bool = False
     save_actions: bool = True
     log_level: str = "info"
+    print_leader_actions: bool = False
+    print_action_interval: int = 10
 
 
 @dataclass(frozen=True)
@@ -326,13 +328,18 @@ def _webui(data: Mapping[str, Any]) -> WebUIConfig:
 
 
 def _logging(data: Mapping[str, Any]) -> LoggingConfig:
-    return LoggingConfig(
+    logging = LoggingConfig(
         save_video=_bool(data, "save_video", default=False),
         save_metrics=_bool(data, "save_metrics", default=True),
         save_observations=_bool(data, "save_observations", default=False),
         save_actions=_bool(data, "save_actions", default=True),
         log_level=_str(data, "log_level", default="info"),
+        print_leader_actions=_bool(data, "print_leader_actions", default=False),
+        print_action_interval=_int(data, "print_action_interval", default=10),
     )
+    if logging.print_action_interval <= 0:
+        raise ConfigError("logging.print_action_interval must be > 0.")
+    return logging
 
 
 def _validate_mode(experiment: ExperimentConfig, teleop: TeleopConfig) -> None:

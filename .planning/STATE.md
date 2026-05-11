@@ -74,6 +74,7 @@ Progress: [██████████] 100%
 | 2026-05-11 | Add TCP teleop action delta safety limit | Complete |
 | 2026-05-11 | Add TCP teleop safety checks | Complete |
 | 2026-05-11 | Add StarAI leader read safety diagnostics | Complete |
+| 2026-05-11 | Print TCP teleop leader actions | Complete |
 
 ## Accumulated Context
 
