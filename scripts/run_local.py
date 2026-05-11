@@ -12,6 +12,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from so101_remote.config_loader import load_config
 from so101_remote.config_schema import ConfigError
+from so101_remote.runtime import configured_runtime_summary, run_configured_local
 
 
 def parse_args() -> argparse.Namespace:
@@ -37,11 +38,11 @@ def main() -> int:
         print(f"Config mode '{config.mode}' is not a local mode.", file=sys.stderr)
         return 2
 
-    print(json.dumps({"role": "local", "config": config.summary()}, indent=2, sort_keys=True))
+    print(json.dumps(configured_runtime_summary("local", config), indent=2, sort_keys=True))
     if args.dry_run:
         return 0
 
-    raise RuntimeError("Config-driven local runtime is not implemented yet; use --dry-run.")
+    return run_configured_local(config)
 
 
 if __name__ == "__main__":

@@ -14,7 +14,7 @@ The next platform layer has started: `configs/*.yaml` plus `scripts/run_client.p
 
 Install LeRobot with async inference support on both machines. Follow the official LeRobot install instructions for your version.
 
-Before real hardware experiments, use [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md) to check the GPU server, robot-side computer, LAN connectivity, time synchronization, and common failure cases.
+Before real hardware experiments, use [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md) to check the GPU server, robot-side computer, LAN connectivity, time synchronization, and common failure cases. For a Chinese project-level guide, see [docs/PROJECT_CN.md](docs/PROJECT_CN.md).
 
 ## Validation Status
 
@@ -76,9 +76,12 @@ python3 scripts/run_server.py --config configs/remote_teleop_so101_tcp.yaml --dr
 python3 scripts/run_client.py --config configs/remote_teleop_so101_tcp.yaml --dry-run
 ```
 
-Current config-driven scripts are dry-run scaffolding only. They load and validate config shape, runtime mode, TCP endpoint, robot/model choices, camera names, and WebUI flags; real TCP transport, WebUI, and hardware execution are later platform work.
+Config-driven scripts now support two executable paths:
 
-The config layer can now build LeRobot config objects for the first supported real path, SO-101 follower + SmolVLA. This is exposed through `so101_remote.lerobot_factory` and still uses lazy imports, so tests can run without LeRobot installed.
+- `remote_inference` builds real LeRobot async inference server/client configs for the first supported path, SO-101 follower + SmolVLA.
+- `debug_mock` runs a hardware-free TCP mock observation/action round trip.
+
+`local_inference`, config-driven TCP teleoperation, and WebUI rendering are still explicit next steps. The config layer exposes LeRobot object construction through `so101_remote.lerobot_factory` and keeps lazy imports, so tests can run without LeRobot installed.
 
 ## TCP Protocol Preview
 
