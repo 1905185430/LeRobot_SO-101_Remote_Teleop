@@ -8,8 +8,8 @@ import socket
 import time
 from typing import Any
 
-from logging_utils import configure_logging, get_logger
-from protocol import AckMessage, ActionMessage, ProtocolError, decode_action_message, encode_ack_message
+from .logging_utils import configure_logging, get_logger
+from .protocol import AckMessage, ActionMessage, ProtocolError, decode_action_message, encode_ack_message
 
 
 DEFAULT_BIND_IP = "0.0.0.0"

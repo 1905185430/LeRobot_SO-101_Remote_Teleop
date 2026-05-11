@@ -8,8 +8,8 @@ import socket
 import time
 from typing import Any
 
-from logging_utils import configure_logging, get_logger
-from protocol import ActionMessage, ProtocolError, encode_action_message, normalize_action
+from .logging_utils import configure_logging, get_logger
+from .protocol import ActionMessage, ProtocolError, encode_action_message, normalize_action
 
 
 DEFAULT_HZ = 50.0
@@ -82,7 +82,7 @@ class LeaderSender:
         return message
 
     def handle_ack(self, payload: bytes) -> float | None:
-        from protocol import decode_ack_message
+        from .protocol import decode_ack_message
 
         ack = decode_ack_message(payload)
         send_time_ns = self.pending_send_times_ns.pop(ack.seq, None)

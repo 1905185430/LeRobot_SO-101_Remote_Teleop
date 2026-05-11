@@ -6,9 +6,9 @@ import time
 import unittest
 from unittest import mock
 
-from follower_receiver import FollowerReceiver
-from leader_sender import LeaderSender
-from protocol import (
+from legacy.follower_receiver import FollowerReceiver
+from legacy.leader_sender import LeaderSender
+from legacy.protocol import (
     AckMessage,
     ActionMessage,
     DEFAULT_ACTION_KEYS,
@@ -353,8 +353,9 @@ class FollowerReceiverTests(unittest.TestCase):
 
         sender.pending_send_times_ns[3] = 1_000_000_000
 
-        with mock.patch("leader_sender.time.monotonic_ns", return_value=1_012_000_000):
+        with mock.patch("legacy.leader_sender.time.monotonic_ns", return_value=1_012_000_000):
             rtt_ms = sender.handle_ack(b'{"msg_type":"action_ack_v1","seq":3,"follower_id":"follower_arm"}')
+
 
         self.assertAlmostEqual(rtt_ms or 0.0, 12.0)
         self.assertAlmostEqual(sender.last_rtt_ms or 0.0, 12.0)

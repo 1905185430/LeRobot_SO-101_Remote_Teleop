@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from protocol import (
+from legacy.protocol import (
     AckMessage,
     ActionMessage,
     DEFAULT_ACTION_KEYS,

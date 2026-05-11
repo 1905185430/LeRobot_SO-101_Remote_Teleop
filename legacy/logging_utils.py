@@ -23,3 +23,4 @@ def get_logger(name: str) -> logging.Logger:
     """Return a named logger with shared configuration."""
 
     return logging.getLogger(name)
+
