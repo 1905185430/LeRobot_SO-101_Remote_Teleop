@@ -8,5 +8,6 @@ __all__ = [
     "dryrun",
     "metrics",
     "recorder",
+    "reliability",
     "server",
 ]
