@@ -10,7 +10,7 @@ This project uses layered validation. Automated tests can prove that the Python 
 | `dry-run-only` | A hardware-free path can create run directories, metadata, metrics, events, CSV, summaries, and deterministic retry/recovery events. | Passing through `tests/test_dryrun.py`. | SO-101 movement, physical safety, camera frames, real inference quality, or real network behavior. |
 | `real LeRobot required` | The installed LeRobot version can import the async inference APIs and construct real server/client runtime objects. | Pending operator validation in the target Python environments. | Hardware control quality or long-running LAN stability by itself. |
 | `hardware-required` | SO-101 serial access, follower calibration id, camera access, observation shape, and physical control-loop behavior. | Pending human validation on the robot-side computer. | General network endurance or future robot arms. |
-| `10-30 min LAN required` | The GPU/server process and robot-side process can remain free of expected application-level crashes under the intended local network conditions. | Pending human validation through the procedure in `docs/ENVIRONMENT.md`. | Public internet, VPN, non-LAN deployment, or future wireless teleoperation integration. |
+| `10-30 min LAN required` | The GPU/server process and robot-side process can remain free of expected application-level crashes under the intended local network conditions. | Pending human validation through the procedure in `docs/setup/ENVIRONMENT.md`. | Public internet, VPN, non-LAN deployment, or future wireless teleoperation integration. |
 
 ## v1 Completion Boundary
 

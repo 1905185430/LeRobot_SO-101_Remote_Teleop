@@ -14,11 +14,11 @@ The next platform layer has started: `configs/*.yaml` plus `scripts/run_client.p
 
 Install LeRobot with async inference support on both machines. Follow the official LeRobot install instructions for your version.
 
-Before real hardware experiments, use [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md) to check the GPU server, robot-side computer, LAN connectivity, time synchronization, and common failure cases. For a Chinese project-level guide, see [docs/PROJECT_CN.md](docs/PROJECT_CN.md).
+Before real hardware experiments, use [docs/setup/ENVIRONMENT.md](docs/setup/ENVIRONMENT.md) to check the GPU server, robot-side computer, LAN connectivity, time synchronization, and common failure cases. For a Chinese project-level guide, see [docs/project/PROJECT_CN.md](docs/project/PROJECT_CN.md).
 
 ## Validation Status
 
-See [docs/VALIDATION.md](docs/VALIDATION.md) for the current validation matrix. The automated suite proves unit-only, dry-run-only, and retained legacy compatibility readiness, but it does not prove real SO-101 hardware, camera frames, SmolVLA model loading, physical control-loop stability, or 10-30 minute LAN endurance.
+See [docs/validation/VALIDATION.md](docs/validation/VALIDATION.md) for the current validation matrix. The automated suite proves unit-only, dry-run-only, and retained legacy compatibility readiness, but it does not prove real SO-101 hardware, camera frames, SmolVLA model loading, physical control-loop stability, or 10-30 minute LAN endurance.
 
 ## Run
 
