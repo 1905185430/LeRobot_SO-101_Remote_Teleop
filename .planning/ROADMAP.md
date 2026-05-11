@@ -33,9 +33,12 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 3 plans
 
 Plans:
+**Wave 1**
 - [ ] 01-01: Create `so101_remote/` package skeleton and thin entrypoint handoff.
-- [ ] 01-02: Preserve legacy package boundaries and update tests/imports after restructure.
 - [ ] 01-03: Write environment setup guide and constant-editing documentation.
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 01-02: Preserve legacy package boundaries and update tests/imports after restructure.
 
 ### Phase 2: Metrics And Run Artifacts
 **Goal**: Make communication measurements first-class outputs with terminal summaries, structured files, run metadata, and basic Markdown summaries.
