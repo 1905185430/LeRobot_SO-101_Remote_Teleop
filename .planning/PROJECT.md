@@ -27,6 +27,11 @@ SO-101 + SmolVLA remote inference must run stably while producing trustworthy co
 - ✓ Dry-run/mock mode runs on one machine without SO-101 hardware and produces real run artifacts while stating its validation boundary — validated in Phase 03.
 - ✓ Runtime diagnostic helpers record exception, retry, and recovery events with stage/component context — validated in Phase 03.
 - ✓ Simple bounded retry/recovery behavior exists without a complex state machine — validated in Phase 03.
+- ✓ Real policy server runtime is routed through `so101_remote.server` while preserving LeRobot official `serve(config)` and the thin `policy_server.py` entrypoint — validated in Phase 04.
+- ✓ Real SO-101 robot client runtime is routed through `so101_remote.client` while preserving LeRobot official `RobotClient` and the thin `robot_client.py` entrypoint — validated in Phase 04.
+- ✓ Server and client startup write per-side run artifacts with metadata, resolved constants, diagnostic events, and summaries under `logs/experiments/` — validated in Phase 04.
+- ✓ Runtime startup/control-loop failures are recorded as diagnostic events and re-raised where appropriate — validated in Phase 04.
+- ✓ Documentation describes real runtime artifacts and the 10-30 minute LAN validation required for RELY-03 — validated in Phase 04.
 
 ### Active
 
@@ -85,11 +90,11 @@ An environment setup guide is part of the project, not optional documentation. R
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Use LeRobot official async inference as the v1 transport path | Avoid maintaining a custom transport before the real SO-101 + SmolVLA path is stable | — Pending |
-| Build a small `so101_remote/` package with thin `policy_server.py` and `robot_client.py` entrypoints | Keeps current scripts usable while making metrics, dry-run, and adapters testable | — Pending |
+| Use LeRobot official async inference as the v1 transport path | Avoid maintaining a custom transport before the real SO-101 + SmolVLA path is stable | Phase 04 preserved `serve(config)` and `RobotClient(config)` as the runtime path |
+| Build a small `so101_remote/` package with thin `policy_server.py` and `robot_client.py` entrypoints | Keeps current scripts usable while making metrics, dry-run, and adapters testable | Phase 04 routed both real entrypoints through package modules |
 | Keep v1 lightweight and avoid a highly integrated platform | The project needs reliable experiments, not a general robotics framework | — Pending |
 | Add minimal robot/policy adapter boundaries | Future PI-series and other robot arms need a place to attach without overbuilding plugin machinery | — Pending |
-| Treat communication metrics as a first-class deliverable | The project is for wireless communication experiments, so latency/RTT/jitter and related stats must be recorded | — Pending |
+| Treat communication metrics as a first-class deliverable | The project is for wireless communication experiments, so latency/RTT/jitter and related stats must be recorded | Phase 04 real startup paths now create structured artifact directories with resolved settings and diagnostic events |
 | Put all requested capabilities in the roadmap, but layer v1 by priority | Keeps the project comprehensive without making the first implementation too heavy | — Pending |
 | Add a dedicated environment setup guide | Real server/robot/network setup must be repeatable before metrics are meaningful | — Pending |
 | Preserve legacy teleoperation compatibility first, integrate it into the new framework later | The old path is useful reference code, but remote inference is the v1 main line | — Pending |
@@ -113,4 +118,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-11 after Phase 03 completion*
+*Last updated: 2026-05-11 after Phase 04 completion*
