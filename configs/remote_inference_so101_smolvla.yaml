@@ -1,0 +1,70 @@
+experiment:
+  name: so101_remote_smolvla_pickplace
+  mode: remote_inference
+  task_name: pick_place_cube
+  save_dir: runs/so101_remote_smolvla_pickplace
+
+robot:
+  type: so101_follower
+  port: /dev/ttyACM0
+  id: my_blue_follower_arm
+  calibration_dir: null
+
+teleop:
+  enabled: false
+
+model:
+  type: smolvla
+  model_path: HF_USER/FINETUNE_MODEL_NAME
+  device: cuda
+  dtype: bfloat16
+  action_horizon: 30
+  inference_frequency: 10
+
+camera:
+  enabled: true
+  fps: 30
+  cameras:
+    front:
+      type: opencv
+      index: 0
+      width: 640
+      height: 480
+      fps: 30
+    wrist:
+      type: opencv
+      index: 1
+      width: 640
+      height: 480
+      fps: 30
+
+network:
+  protocol: tcp
+  server_host: 192.168.1.151
+  server_port: 9000
+  timeout_ms: 200
+  reconnect: true
+  max_packet_size_mb: 16
+
+runtime:
+  control_frequency: 30
+  observation_frequency: 30
+  action_send_frequency: 30
+  safety_stop_on_timeout: true
+  hold_last_action_on_timeout: true
+
+webui:
+  enabled: true
+  host: 0.0.0.0
+  port: 7860
+  show_images: true
+  show_joint_states: true
+  show_latency: true
+  show_actions: true
+
+logging:
+  save_video: true
+  save_metrics: true
+  save_observations: false
+  save_actions: true
+  log_level: info

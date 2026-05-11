@@ -5,6 +5,8 @@ from __future__ import annotations
 __all__ = [
     "client",
     "config",
+    "config_loader",
+    "config_schema",
     "dryrun",
     "metrics",
     "recorder",

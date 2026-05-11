@@ -58,6 +58,12 @@ Progress: [██████████] 100%
 | Phase 05 P01 | 6 min | 3 tasks | 0 files |
 | Phase 05 P02 | 5 min | 4 tasks | 7 files |
 
+## Quick Tasks Completed
+
+| Date | Task | Status |
+|------|------|--------|
+| 2026-05-11 | Add unified config loader and script entrypoints for local and remote modes | Complete |
+
 ## Accumulated Context
 
 ### Decisions

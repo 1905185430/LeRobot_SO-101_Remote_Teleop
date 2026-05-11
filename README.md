@@ -8,6 +8,8 @@ This repo is now set up for the smallest possible LeRobot async inference workfl
 
 There is no local config layer in the main path now. You edit a few constants at the top of each file and run them directly.
 
+The next platform layer has started: `configs/*.yaml` plus `scripts/run_client.py`, `scripts/run_server.py`, and `scripts/run_local.py` can validate named platform configs with `--dry-run`. The real LeRobot runtime still uses the existing thin entrypoints until the TCP/WebUI runners are implemented.
+
 ## Install
 
 Install LeRobot with async inference support on both machines. Follow the official LeRobot install instructions for your version.
@@ -51,6 +53,30 @@ Before running it, edit these constants in [robot_client.py](/home/xuan/Document
 - `CHUNK_SIZE_THRESHOLD`
 - `AGGREGATE_FN_NAME`
 - `DEBUG_VISUALIZE_QUEUE_SIZE`
+
+## Config-Driven Platform Preview
+
+Validate a local inference config without touching hardware:
+
+```bash
+python3 scripts/run_local.py --config configs/local_inference_so101_smolvla.yaml --dry-run
+```
+
+Validate the remote inference server/client configs:
+
+```bash
+python3 scripts/run_server.py --config configs/remote_inference_so101_smolvla.yaml --dry-run
+python3 scripts/run_client.py --config configs/remote_inference_so101_smolvla.yaml --dry-run
+```
+
+Validate the remote teleoperation config:
+
+```bash
+python3 scripts/run_server.py --config configs/remote_teleop_so101_tcp.yaml --dry-run
+python3 scripts/run_client.py --config configs/remote_teleop_so101_tcp.yaml --dry-run
+```
+
+Current config-driven scripts are dry-run scaffolding only. They load and validate config shape, runtime mode, TCP endpoint, robot/model choices, camera names, and WebUI flags; real TCP transport, WebUI, and hardware execution are later platform work.
 
 ## Experiment Artifacts
 

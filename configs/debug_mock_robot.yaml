@@ -1,0 +1,56 @@
+experiment:
+  name: debug_mock_robot
+  mode: debug_mock
+  task_name: debug
+  save_dir: runs/debug_mock_robot
+
+robot:
+  type: mock
+  id: mock_follower
+
+teleop:
+  enabled: false
+
+model:
+  type: mock
+  model_path: ""
+  device: cpu
+  dtype: float32
+  action_horizon: 1
+  inference_frequency: 10
+
+camera:
+  enabled: false
+  fps: 30
+  cameras:
+
+network:
+  protocol: tcp
+  server_host: 127.0.0.1
+  server_port: 9000
+  timeout_ms: 200
+  reconnect: false
+  max_packet_size_mb: 1
+
+runtime:
+  control_frequency: 10
+  observation_frequency: 10
+  action_send_frequency: 10
+  safety_stop_on_timeout: true
+  hold_last_action_on_timeout: false
+
+webui:
+  enabled: false
+  host: 127.0.0.1
+  port: 7860
+  show_images: false
+  show_joint_states: true
+  show_latency: true
+  show_actions: true
+
+logging:
+  save_video: false
+  save_metrics: true
+  save_observations: false
+  save_actions: true
+  log_level: debug
