@@ -338,15 +338,27 @@ class TcpTeleopFollowerServer:
         """Block startup when leader/follower poses are too far apart."""
         if self.last_frame_id is not None or self.last_action is None:
             return
-        max_delta = max(
-            abs(float(value) - self.last_action[key])
-            for key, value in action.items()
-            if key in self.last_action
-        )
+        max_key = ""
+        max_delta = 0.0
+        max_leader_value = 0.0
+        max_follower_value = 0.0
+        for key, value in action.items():
+            if key not in self.last_action:
+                continue
+            leader_value = float(value)
+            follower_value = self.last_action[key]
+            delta = abs(leader_value - follower_value)
+            if delta > max_delta:
+                max_key = key
+                max_delta = delta
+                max_leader_value = leader_value
+                max_follower_value = follower_value
         if max_delta > self.settings.max_first_action_delta:
             raise ProtocolError(
                 "First ACTION is too far from follower startup position "
-                f"({max_delta:.3f} > {self.settings.max_first_action_delta:.3f}). "
+                f"({max_key}: leader={max_leader_value:.3f}, "
+                f"follower={max_follower_value:.3f}, "
+                f"delta={max_delta:.3f} > {self.settings.max_first_action_delta:.3f}). "
                 "Move leader and follower to similar safe poses or fix calibration/mapping before teleoperation."
             )
 

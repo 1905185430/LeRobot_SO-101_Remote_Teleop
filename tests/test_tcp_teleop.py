@@ -212,7 +212,7 @@ class TcpTeleopTests(unittest.TestCase):
         server = TcpTeleopFollowerServer(FakeFollower(), tcp_teleop_settings(config))
         server.initialize_action_baseline()
 
-        with self.assertRaisesRegex(ValueError, "First ACTION is too far"):
+        with self.assertRaisesRegex(ValueError, "First ACTION is too far.*shoulder_pan.pos"):
             server.handle_action_message(
                 {
                     "type": "ACTION",
