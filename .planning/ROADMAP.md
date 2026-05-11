@@ -103,7 +103,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 05-01: Update and run unit tests for thin entrypoints, package modules, metrics, dry-run, and legacy compatibility.
+- [x] 05-01: Update and run unit tests for thin entrypoints, package modules, metrics, dry-run, and legacy compatibility.
 - [ ] 05-02: Document validation status, residual hardware risks, and v2 continuation path.
 
 ## Progress

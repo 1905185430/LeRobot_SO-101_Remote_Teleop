@@ -61,8 +61,8 @@ Requirements for the first practical release. v1 is intentionally layered: the c
 - [x] **RELY-01**: Runtime records errors with enough context to diagnose server startup, client startup, LeRobot import, model path, camera, serial port, network, and timeout failures.
 - [x] **RELY-02**: Runtime includes simple retry or recovery behavior where practical without a complex state machine.
 - [ ] **RELY-03**: Runtime can be used for a 10-30 minute LAN experiment without expected application-level crashes.
-- [ ] **RELY-04**: Existing unit tests continue to pass after the package restructure.
-- [ ] **RELY-05**: Legacy teleoperation tests continue to pass so retained compatibility is protected.
+- [x] **RELY-04**: Existing unit tests continue to pass after the package restructure.
+- [x] **RELY-05**: Legacy teleoperation tests continue to pass so retained compatibility is protected.
 
 ### Documentation
 
@@ -159,8 +159,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | RELY-01 | Phase 3 | Complete |
 | RELY-02 | Phase 3 | Complete |
 | RELY-03 | Phase 4 | Pending |
-| RELY-04 | Phase 5 | Pending |
-| RELY-05 | Phase 5 | Pending |
+| RELY-04 | Phase 5 | Complete |
+| RELY-05 | Phase 5 | Complete |
 | DOC-01 | Phase 1 | Complete |
 | DOC-02 | Phase 1 | Complete |
 | DOC-03 | Phase 1 | Complete |
