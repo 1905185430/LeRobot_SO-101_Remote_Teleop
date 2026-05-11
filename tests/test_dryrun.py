@@ -40,6 +40,7 @@ class DryRunTests(unittest.TestCase):
 
             metadata = json.loads((run_dir / "metadata.json").read_text(encoding="utf-8"))
             metrics = (run_dir / "metrics.jsonl").read_text(encoding="utf-8")
+            events = (run_dir / "events.jsonl").read_text(encoding="utf-8")
             summary = (run_dir / "summary.md").read_text(encoding="utf-8")
 
             self.assertEqual(metadata["role"], "dry-run")
@@ -47,6 +48,9 @@ class DryRunTests(unittest.TestCase):
             self.assertIn("loop_interval_ms", metrics)
             self.assertIn("latency_ms", metrics)
             self.assertIn("queue_size", metrics)
+            self.assertIn('"event_type": "retry"', events)
+            self.assertIn('"event_type": "recovery"', events)
+            self.assertIn("simulated dry-run connection delay", events)
             self.assertIn("# Run Summary", summary)
 
 

@@ -15,6 +15,7 @@ from .metrics import (
     MetricSample,
 )
 from .recorder import JsonlMetricsRecorder, build_run_metadata, create_run_directory
+from .reliability import STAGE_NETWORK, run_with_retries
 
 
 @dataclass
@@ -80,7 +81,23 @@ def run_dry_run(root: str | Path | None = None, iterations: int = 5) -> Path:
     )
 
     with JsonlMetricsRecorder(run_dir, metadata=metadata) as recorder:
-        robot.connect()
+        connection_attempts = 0
+
+        def connect_after_simulated_delay() -> None:
+            nonlocal connection_attempts
+            connection_attempts += 1
+            if connection_attempts == 1:
+                raise RuntimeError("simulated dry-run connection delay")
+            robot.connect()
+
+        run_with_retries(
+            connect_after_simulated_delay,
+            recorder,
+            attempts=2,
+            component="dry-run robot",
+            stage=STAGE_NETWORK,
+            sleep_s=0.0,
+        )
         policy.load()
         recorder.record_event(
             MetricEvent(
