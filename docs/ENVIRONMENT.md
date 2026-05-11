@@ -174,6 +174,17 @@ Dry-run does not validate:
 
 It is only for checking the code path and metrics plumbing before a hardware session.
 
+## Metrics Artifact Check
+
+After a run or dry-run, inspect `logs/experiments/<run_id>/summary.md`.
+Confirm the same run directory also contains:
+
+- `metadata.json`
+- `metrics.jsonl`
+- `events.jsonl`
+
+Phase 2 defines the artifact layout and summary generation. Real LeRobot runtime hooks are wired in later phases.
+
 ## Common Failures
 
 ### LeRobot Import Failure
@@ -248,4 +259,4 @@ Fix:
 - Confirm the current phase actually records the metric you expect.
 - Check whether LeRobot exposes the required timing or queue signal.
 - Check time synchronization before trusting one-way latency.
-- Prefer structured run artifacts once metrics and run directories are implemented.
+- Check `logs/experiments/<run_id>/summary.md`, `metrics.jsonl`, and `events.jsonl` once metrics and run directories are enabled.

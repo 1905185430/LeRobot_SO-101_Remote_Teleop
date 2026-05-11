@@ -48,6 +48,19 @@ Before running it, edit these constants in [robot_client.py](/home/xuan/Document
 - `AGGREGATE_FN_NAME`
 - `DEBUG_VISUALIZE_QUEUE_SIZE`
 
+## Experiment Artifacts
+
+Phase 2 stores local experiment runs under `logs/experiments/<run_id>/` by default.
+The run artifact set is:
+
+- `metadata.json`
+- `metrics.jsonl`
+- `events.jsonl`
+- `metrics.csv`
+- `summary.md`
+
+Real LeRobot runtime hooks are wired in later phases; this artifact layout is the local contract those hooks will write into.
+
 ## SO-101 Notes
 
 - `ROBOT_ID` must match your follower calibration id.

@@ -8,10 +8,10 @@ import json
 from pathlib import Path
 import subprocess
 from types import TracebackType
-from typing import Iterable, Mapping
+from typing import Iterable, Mapping, Sequence
 from uuid import uuid4
 
-from .metrics import MetricEvent, MetricSample
+from .metrics import MetricEvent, MetricSample, compute_stats, count_events
 
 DEFAULT_RUN_ROOT = Path("logs/experiments")
 
@@ -148,6 +148,9 @@ class JsonlMetricsRecorder:
         for event in events:
             self.record_event(event)
 
+    def write_summary(self) -> Path:
+        return write_summary_markdown(self.run_dir, self.metadata, self.samples, self.events)
+
     def close(self) -> None:
         self._metrics_file.close()
         self._events_file.close()
@@ -164,3 +167,80 @@ class JsonlMetricsRecorder:
         traceback: TracebackType | None,
     ) -> None:
         self.close()
+
+
+def write_summary_markdown(
+    run_dir: str | Path,
+    metadata: Mapping[str, object] | None,
+    samples: Sequence[MetricSample],
+    events: Sequence[MetricEvent],
+) -> Path:
+    """Write a lightweight Markdown run summary."""
+    run_path = Path(run_dir)
+    run_path.mkdir(parents=True, exist_ok=True)
+    summary_path = run_path / "summary.md"
+
+    grouped: dict[str, list[MetricSample]] = {}
+    for sample in samples:
+        grouped.setdefault(sample.name, []).append(sample)
+
+    lines = [
+        "# Run Summary",
+        "",
+        "## Metadata",
+        "",
+        "| Key | Value |",
+        "|-----|-------|",
+    ]
+    for key, value in sorted(dict(metadata or {}).items()):
+        lines.append(f"| {key} | {_markdown_value(value)} |")
+
+    lines.extend(
+        [
+            "",
+            "## Metric Statistics",
+            "",
+            "| Metric | Unit | Count | Min | Max | Mean | P95 |",
+            "|--------|------|-------|-----|-----|------|-----|",
+        ]
+    )
+    for name in sorted(grouped):
+        metric_samples = grouped[name]
+        stats = compute_stats(sample.value for sample in metric_samples)
+        unit = metric_samples[0].unit if metric_samples else ""
+        lines.append(
+            f"| {name} | {unit} | {stats.count} | {_fmt(stats.min)} | {_fmt(stats.max)} | "
+            f"{_fmt(stats.mean)} | {_fmt(stats.p95)} |"
+        )
+
+    lines.extend(
+        [
+            "",
+            "## Event Counts",
+            "",
+            "| Event | Count |",
+            "|-------|-------|",
+        ]
+    )
+    for event_type, count in sorted(count_events(events).items()):
+        lines.append(f"| {event_type} | {count} |")
+
+    lines.extend(["", "## Files", ""])
+    for artifact in ("metadata.json", "metrics.jsonl", "events.jsonl", "metrics.csv"):
+        if (run_path / artifact).exists():
+            lines.append(f"- `{artifact}`")
+
+    summary_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return summary_path
+
+
+def _markdown_value(value: object) -> str:
+    if isinstance(value, (dict, list, tuple)):
+        return json.dumps(value, sort_keys=True)
+    return "" if value is None else str(value)
+
+
+def _fmt(value: float | None) -> str:
+    if value is None:
+        return "n/a"
+    return f"{value:.3f}".rstrip("0").rstrip(".")

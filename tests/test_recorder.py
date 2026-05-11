@@ -69,6 +69,31 @@ class RecorderTests(unittest.TestCase):
             self.assertIn('"event_type": "timeout"', events_text)
             self.assertTrue(csv_text.startswith("timestamp,name,value,unit,tags"))
 
+    def test_write_summary_markdown_contains_stats_events_and_files(self) -> None:
+        with TemporaryDirectory() as tmpdir:
+            run_dir = Path(tmpdir) / "run"
+            metadata = build_run_metadata(
+                role="client",
+                created_at="2026-05-11T03:00:00+00:00",
+                git_commit="abc1234",
+            )
+
+            with JsonlMetricsRecorder(run_dir, metadata=metadata) as recorder:
+                recorder.record_sample(MetricSample(LATENCY_MS, 10, "ms"))
+                recorder.record_sample(MetricSample(LATENCY_MS, 20, "ms"))
+                recorder.record_sample(MetricSample(LATENCY_MS, 30, "ms"))
+                recorder.record_event(MetricEvent(EVENT_TIMEOUT, "heartbeat missed"))
+                summary_path = recorder.write_summary()
+
+            summary = summary_path.read_text(encoding="utf-8")
+            self.assertIn("# Run Summary", summary)
+            self.assertIn("latency_ms", summary)
+            self.assertIn("| Metric | Unit | Count | Min | Max | Mean | P95 |", summary)
+            self.assertIn("timeout", summary)
+            self.assertIn("metadata.json", summary)
+            self.assertIn("metrics.jsonl", summary)
+            self.assertIn("events.jsonl", summary)
+
 
 if __name__ == "__main__":
     unittest.main()
