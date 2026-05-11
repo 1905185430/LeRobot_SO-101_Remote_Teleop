@@ -8,6 +8,7 @@ __all__ = [
     "config_loader",
     "config_schema",
     "dryrun",
+    "lerobot_factory",
     "metrics",
     "network",
     "recorder",

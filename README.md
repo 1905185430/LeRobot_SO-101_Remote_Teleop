@@ -78,6 +78,8 @@ python3 scripts/run_client.py --config configs/remote_teleop_so101_tcp.yaml --dr
 
 Current config-driven scripts are dry-run scaffolding only. They load and validate config shape, runtime mode, TCP endpoint, robot/model choices, camera names, and WebUI flags; real TCP transport, WebUI, and hardware execution are later platform work.
 
+The config layer can now build LeRobot config objects for the first supported real path, SO-101 follower + SmolVLA. This is exposed through `so101_remote.lerobot_factory` and still uses lazy imports, so tests can run without LeRobot installed.
+
 ## TCP Protocol Preview
 
 The first TCP layer lives in `so101_remote.network`. It uses a 4-byte big-endian length header followed by one JSON payload:
