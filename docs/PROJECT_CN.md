@@ -37,7 +37,7 @@ SO-101 follower + OpenCV cameras + LeRobot async inference + SmolVLA
 | --- | --- |
 | 本地真实推理 `local_inference` | 配置和 dry-run 已有，真实本地 policy loop 尚未接 LeRobot 本地 API |
 | 配置驱动 TCP 遥操作 `remote_teleoperation` | 配置已定义，真实运行仍建议使用 `legacy/` 旧 UDP 路径 |
-| WebUI 实时显示 | config 已保留 `webui` 字段，真实 Gradio/FastAPI UI 尚未实现 |
+| WebUI 实时显示 | 已有可选 Gradio dashboard 边界；mock TCP 可更新关节、动作和延迟；真实 LeRobot observation 流尚未接入 |
 | 图像二进制传输优化 | 当前 TCP mock 用 JSON，后续再接 JPEG/msgpack |
 | 多机械臂适配 | 代码边界已预留，当前真实支持 SO-101 follower |
 
@@ -207,7 +207,46 @@ runs/so101_remote_smolvla_pickplace/
 - `metrics.csv`: 方便后续画图或导入表格。
 - `summary.md`: 本次运行的简要统计。
 
-## 7. 调试顺序
+## 7. WebUI 使用
+
+如果配置里：
+
+```yaml
+webui:
+  enabled: true
+  host: 0.0.0.0
+  port: 7860
+```
+
+服务器入口会尝试启动一个 Gradio dashboard：
+
+```bash
+python3 scripts/run_server.py --config configs/remote_inference_so101_smolvla.yaml
+```
+
+如果当前 Python 环境没有安装 Gradio，运行不会失败，而是记录 warning event。需要 WebUI 时安装：
+
+```bash
+pip install gradio
+```
+
+当前 dashboard 是只读调试面板，显示：
+
+- 实验名、模式、角色、模型、机械臂、endpoint；
+- 连接状态；
+- 最新关节状态；
+- 最新 action；
+- latency / inference 占位指标；
+- 最近事件；
+- base64 图像 HTML 预览。
+
+当前限制：
+
+- `debug_mock` TCP server 会更新关节、action 和 latency；
+- 真实 LeRobot async server 目前只能显示启动配置和状态；
+- 真实相机图像、关节和模型输出还需要从 LeRobot observation/action 流接入 dashboard state。
+
+## 8. 调试顺序
 
 建议按下面顺序排查：
 
@@ -226,7 +265,7 @@ runs/so101_remote_smolvla_pickplace/
 - 相机打不开：检查 `camera.cameras.*.index`。
 - 模型加载失败：检查 `model.model_path`、GPU 环境、LeRobot/Transformers 依赖。
 
-## 8. 当前推荐工作流
+## 9. 当前推荐工作流
 
 真实实验优先使用配置驱动入口：
 
@@ -252,13 +291,13 @@ python3 legacy/leader_sender.py --help
 python3 legacy/follower_receiver.py --help
 ```
 
-## 9. 后续优先级
+## 10. 后续优先级
 
 建议下一步按这个顺序继续：
 
 1. 在真实 LeRobot 环境跑通 `remote_inference` 的 server/client 启动。
 2. 把真实运行日志中的异常和 LeRobot 输出整理进 run artifacts。
-3. 实现 Gradio WebUI，只读显示最新图像、关节、动作、RTT 和错误。
+3. 把真实 LeRobot observation/action 流接入现有 Gradio WebUI 状态。
 4. 接入本地真实推理 `local_inference`，作为无线远程推理的 baseline。
 5. 实现配置驱动 TCP 遥操作，并把 `legacy/` 的安全逻辑迁移过来。
 6. 优化图像传输，从 JSON/base64 过渡到 msgpack + JPEG bytes。

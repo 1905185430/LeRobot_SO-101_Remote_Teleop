@@ -15,4 +15,5 @@ __all__ = [
     "reliability",
     "runtime",
     "server",
+    "webui",
 ]

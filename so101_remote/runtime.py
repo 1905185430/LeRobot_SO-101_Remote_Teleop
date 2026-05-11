@@ -26,6 +26,7 @@ from .reliability import (
     STAGE_SERVER_STARTUP,
     record_exception_event,
 )
+from .webui import DashboardState, launch_dashboard
 
 
 def configured_runtime_summary(role: str, config: PlatformConfig) -> dict[str, object]:
@@ -92,6 +93,8 @@ def run_lerobot_policy_server(config: PlatformConfig) -> int:
                 details={"stage": STAGE_SERVER_STARTUP, "component": "policy_server"},
             )
         )
+        state = DashboardState.from_config(config, "policy-server")
+        _maybe_launch_dashboard(config, state, recorder)
         print(f"Run directory: {run_dir}")
         print(f"LeRobot policy server: {config.network.endpoint}")
         server_config = build_lerobot_policy_server_config(config)
@@ -179,8 +182,10 @@ def run_mock_tcp_server(config: PlatformConfig) -> int:
     """Serve one mock TCP observation/action exchange."""
     run_dir = _create_configured_run_dir(config, "mock-server")
     metadata = _build_configured_metadata("mock-server", config, run_dir)
+    state = DashboardState.from_config(config, "mock-server")
     with JsonlMetricsRecorder(run_dir, metadata=metadata) as recorder:
         _copy_source_config(config, run_dir)
+        _maybe_launch_dashboard(config, state, recorder)
         recorder.record_event(
             MetricEvent(
                 EVENT_RECOVERY,
@@ -190,19 +195,29 @@ def run_mock_tcp_server(config: PlatformConfig) -> int:
         )
         print(f"Run directory: {run_dir}")
         print(f"Mock TCP server listening on {config.network.endpoint}")
+
+        def handle_observation(observation: dict[str, Any]) -> dict[str, Any]:
+            state.update_connection("client connected")
+            state.update_observation(observation)
+            action = mirror_joint_action(observation)
+            state.update_action(action)
+            return action
+
         server = TcpServer(
             config.network.server_host,
             config.network.server_port,
-            mirror_joint_action,
+            handle_observation,
             timeout_s=config.network.timeout_ms / 1000.0,
             max_packet_size=config.network.max_packet_size_mb * 1024 * 1024,
         )
         start = time.perf_counter()
         server.serve_once()
+        latency_ms = (time.perf_counter() - start) * 1000.0
+        state.update_latency(latency_ms)
         recorder.record_sample(
             MetricSample(
                 LATENCY_MS,
-                (time.perf_counter() - start) * 1000.0,
+                latency_ms,
                 "ms",
                 tags={"component": "mock_tcp_server"},
             )
@@ -310,6 +325,23 @@ def _create_configured_run_dir(config: PlatformConfig, role: str) -> Path:
 def _copy_source_config(config: PlatformConfig, run_dir: Path) -> None:
     if config.source_path is not None and config.source_path.exists():
         shutil.copy2(config.source_path, run_dir / "config.yaml")
+
+
+def _maybe_launch_dashboard(
+    config: PlatformConfig,
+    state: DashboardState,
+    recorder: JsonlMetricsRecorder,
+) -> None:
+    dashboard = launch_dashboard(config, state)
+    if dashboard is None and config.webui.enabled:
+        recorder.record_event(
+            MetricEvent(
+                EVENT_EXCEPTION,
+                "webui requested but gradio is not installed",
+                severity="warning",
+                details={"component": "webui"},
+            )
+        )
 
 
 def _mock_joint_positions() -> dict[str, float]:

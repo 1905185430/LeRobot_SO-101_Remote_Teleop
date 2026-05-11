@@ -66,6 +66,7 @@ Progress: [██████████] 100%
 | 2026-05-11 | Add minimal TCP protocol client server mock roundtrip | Complete |
 | 2026-05-11 | Add config driven LeRobot robot policy factories | Complete |
 | 2026-05-11 | Wire config driven real and mock runtime with Chinese guide | Complete |
+| 2026-05-11 | Add lightweight server WebUI state and dashboard | Complete |
 
 ## Accumulated Context
 
