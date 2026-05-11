@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import json
 import sys
+import tempfile
 import types
 import unittest
 from unittest import mock
@@ -151,12 +153,47 @@ class MinimalAsyncScriptTests(unittest.TestCase):
 
     def test_policy_server_main_calls_serve(self) -> None:
         serve = sys.modules["lerobot.async_inference.policy_server"].serve
-        exit_code = policy_server.main()
-        self.assertEqual(exit_code, 0)
-        serve.assert_called_once()
-        called_config = serve.call_args.args[0]
-        self.assertEqual(called_config.kwargs["host"], policy_server.HOST)
-        self.assertEqual(called_config.kwargs["port"], policy_server.PORT)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with mock.patch.object(policy_server, "create_run_directory", return_value=tmpdir):
+                exit_code = policy_server.main()
+            self.assertEqual(exit_code, 0)
+            self.assertTrue((policy_server.Path(tmpdir) / "summary.md").exists())
+            serve.assert_called_once()
+            called_config = serve.call_args.args[0]
+            self.assertEqual(called_config.kwargs["host"], policy_server.HOST)
+            self.assertEqual(called_config.kwargs["port"], policy_server.PORT)
+
+    def test_policy_server_runtime_writes_metadata(self) -> None:
+        serve = sys.modules["lerobot.async_inference.policy_server"].serve
+        with tempfile.TemporaryDirectory() as tmpdir:
+            run_dir = policy_server.Path(tmpdir)
+            with mock.patch.object(policy_server, "create_run_directory", return_value=run_dir):
+                exit_code = policy_server.main()
+
+            self.assertEqual(exit_code, 0)
+            serve.assert_called_once()
+            metadata = json.loads((run_dir / "metadata.json").read_text(encoding="utf-8"))
+            events = (run_dir / "events.jsonl").read_text(encoding="utf-8")
+            self.assertEqual(metadata["role"], "policy-server")
+            self.assertEqual(metadata["server"]["endpoint"], f"{policy_server.HOST}:{policy_server.PORT}")
+            self.assertTrue((run_dir / "metadata.json").exists())
+            self.assertTrue((run_dir / "events.jsonl").exists())
+            self.assertTrue((run_dir / "summary.md").exists())
+            self.assertIn('"event_type": "recovery"', events)
+
+    def test_policy_server_runtime_records_exception_and_reraises(self) -> None:
+        serve = sys.modules["lerobot.async_inference.policy_server"].serve
+        serve.side_effect = RuntimeError("server boom")
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            run_dir = policy_server.Path(tmpdir)
+            with mock.patch.object(policy_server, "create_run_directory", return_value=run_dir):
+                with self.assertRaisesRegex(RuntimeError, "server boom"):
+                    policy_server.main()
+
+            events = (run_dir / "events.jsonl").read_text(encoding="utf-8")
+            self.assertIn('"event_type": "exception"', events)
+            self.assertIn("server boom", events)
 
     def test_robot_client_builds_expected_config(self) -> None:
         config = robot_client.build_client_config()

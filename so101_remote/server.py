@@ -5,7 +5,9 @@ from __future__ import annotations
 from pathlib import Path
 
 from .config import HOST, POLICY_DEVICE, POLICY_TYPE, PORT, PRETRAINED_NAME_OR_PATH
-from .recorder import build_run_metadata
+from .metrics import EVENT_RECOVERY, MetricEvent
+from .recorder import DEFAULT_RUN_ROOT, JsonlMetricsRecorder, build_run_metadata, create_run_directory
+from .reliability import STAGE_SERVER_STARTUP, record_exception_event
 
 
 def server_settings() -> dict[str, object]:
@@ -35,10 +37,42 @@ def build_server_config():
 
 def main() -> int:
     """Start the LeRobot async inference policy server."""
-    _PolicyServerConfig, serve = _load_server_api()
-    config = build_server_config()
-    serve(config)
-    return 0
+    return run_policy_server()
+
+
+def run_policy_server(root: str | Path | None = None) -> int:
+    """Start the policy server while writing run artifacts and diagnostics."""
+    recorder: JsonlMetricsRecorder | None = None
+    try:
+        run_dir = create_run_directory(root or DEFAULT_RUN_ROOT, role="policy-server")
+        metadata = build_server_metadata(run_dir)
+        recorder = JsonlMetricsRecorder(run_dir, metadata=metadata)
+        settings = server_settings()
+        print(f"Policy server settings: {settings}")
+        recorder.record_event(
+            MetricEvent(
+                EVENT_RECOVERY,
+                "policy server startup configured",
+                details={"stage": STAGE_SERVER_STARTUP, "component": "policy_server"},
+            )
+        )
+        config = build_server_config()
+        _PolicyServerConfig, serve = _load_server_api()
+        serve(config)
+        recorder.write_summary()
+        return 0
+    except Exception as exc:
+        if recorder is not None:
+            record_exception_event(
+                recorder,
+                stage=STAGE_SERVER_STARTUP,
+                component="policy_server",
+                exc=exc,
+            )
+        raise
+    finally:
+        if recorder is not None:
+            recorder.close()
 
 
 def _load_server_api():
