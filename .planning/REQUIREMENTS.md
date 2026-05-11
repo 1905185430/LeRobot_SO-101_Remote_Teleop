@@ -24,23 +24,23 @@ Requirements for the first practical release. v1 is intentionally layered: the c
 
 ### Metrics
 
-- [ ] **METR-01**: Runtime records latency-related samples when timestamps or LeRobot hooks expose enough signal.
-- [ ] **METR-02**: Runtime records RTT or RTT-like measurements where request/response or heartbeat timing is available.
-- [ ] **METR-03**: Runtime derives jitter from recorded latency or interval samples.
-- [ ] **METR-04**: Runtime records timeout, disconnect, retry, recovery, and exception events.
-- [ ] **METR-05**: Runtime records control-loop frequency or loop interval samples.
-- [ ] **METR-06**: Runtime records action chunk arrival intervals when action chunks are received.
-- [ ] **METR-07**: Runtime records queue state or queue size when LeRobot exposes it.
-- [ ] **METR-08**: Operator can see a readable terminal metrics summary during a run.
-- [ ] **METR-09**: Metrics are saved locally as JSONL and/or CSV.
+- [x] **METR-01**: Runtime records latency-related samples when timestamps or LeRobot hooks expose enough signal.
+- [x] **METR-02**: Runtime records RTT or RTT-like measurements where request/response or heartbeat timing is available.
+- [x] **METR-03**: Runtime derives jitter from recorded latency or interval samples.
+- [x] **METR-04**: Runtime records timeout, disconnect, retry, recovery, and exception events.
+- [x] **METR-05**: Runtime records control-loop frequency or loop interval samples.
+- [x] **METR-06**: Runtime records action chunk arrival intervals when action chunks are received.
+- [x] **METR-07**: Runtime records queue state or queue size when LeRobot exposes it.
+- [x] **METR-08**: Operator can see a readable terminal metrics summary during a run.
+- [x] **METR-09**: Metrics are saved locally as JSONL and/or CSV.
 
 ### Experiments
 
-- [ ] **EXP-01**: Each experiment run writes outputs under a local `runs/` or `logs/experiments/` directory.
-- [ ] **EXP-02**: Each run has a unique run directory.
-- [ ] **EXP-03**: Each run directory includes run metadata that identifies timestamp, role, model/policy settings, robot settings, network endpoint, and git commit when available.
-- [ ] **EXP-04**: Each run directory includes structured metrics files.
-- [ ] **EXP-05**: Each run can produce a lightweight Markdown summary with basic statistics such as count, min, max, mean, and p95 for key metrics.
+- [x] **EXP-01**: Each experiment run writes outputs under a local `runs/` or `logs/experiments/` directory.
+- [x] **EXP-02**: Each run has a unique run directory.
+- [x] **EXP-03**: Each run directory includes run metadata that identifies timestamp, role, model/policy settings, robot settings, network endpoint, and git commit when available.
+- [x] **EXP-04**: Each run directory includes structured metrics files.
+- [x] **EXP-05**: Each run can produce a lightweight Markdown summary with basic statistics such as count, min, max, mean, and p95 for key metrics.
 
 ### Dry Run
 
@@ -134,20 +134,20 @@ Which phases cover which requirements. Updated during roadmap creation.
 | RUN-03 | Phase 4 | Pending |
 | RUN-04 | Phase 4 | Pending |
 | RUN-05 | Phase 4 | Pending |
-| METR-01 | Phase 2 | Pending |
-| METR-02 | Phase 2 | Pending |
-| METR-03 | Phase 2 | Pending |
-| METR-04 | Phase 2 | Pending |
-| METR-05 | Phase 2 | Pending |
-| METR-06 | Phase 2 | Pending |
-| METR-07 | Phase 2 | Pending |
-| METR-08 | Phase 2 | Pending |
-| METR-09 | Phase 2 | Pending |
-| EXP-01 | Phase 2 | Pending |
-| EXP-02 | Phase 2 | Pending |
-| EXP-03 | Phase 2 | Pending |
-| EXP-04 | Phase 2 | Pending |
-| EXP-05 | Phase 2 | Pending |
+| METR-01 | Phase 2 | Complete |
+| METR-02 | Phase 2 | Complete |
+| METR-03 | Phase 2 | Complete |
+| METR-04 | Phase 2 | Complete |
+| METR-05 | Phase 2 | Complete |
+| METR-06 | Phase 2 | Complete |
+| METR-07 | Phase 2 | Complete |
+| METR-08 | Phase 2 | Complete |
+| METR-09 | Phase 2 | Complete |
+| EXP-01 | Phase 2 | Complete |
+| EXP-02 | Phase 2 | Complete |
+| EXP-03 | Phase 2 | Complete |
+| EXP-04 | Phase 2 | Complete |
+| EXP-05 | Phase 2 | Complete |
 | DRY-01 | Phase 3 | Pending |
 | DRY-02 | Phase 3 | Pending |
 | DRY-03 | Phase 3 | Pending |
