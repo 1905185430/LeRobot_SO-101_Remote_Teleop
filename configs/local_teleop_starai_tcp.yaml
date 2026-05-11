@@ -14,7 +14,7 @@ teleop:
   enabled: true
   type: lerobot_teleoperator_violin
   port: /dev/ttyUSB0
-  id: my_starai_violin_leader
+  id: my_violin_leader
 
 model:
   type: mock
@@ -43,6 +43,13 @@ runtime:
   action_send_frequency: 50
   safety_stop_on_timeout: true
   hold_last_action_on_timeout: true
+
+safety:
+  max_action_delta: 1.0
+  max_first_action_delta: 12.0
+  action_min: -100
+  action_max: 100
+  require_action_keys_match: true
 
 webui:
   enabled: true

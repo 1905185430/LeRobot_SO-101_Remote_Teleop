@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from importlib import import_module
+import math
 import socket
 import time
 from typing import Any, Mapping
@@ -27,8 +28,6 @@ from .webui import DashboardState
 
 SUPPORTED_TELEOP_FOLLOWER_TYPES = {"so101_follower", *STARAI_FOLLOWER_TYPES}
 SUPPORTED_TELEOP_LEADER_TYPES = {"so101_leader", *STARAI_LEADER_TYPES}
-DEFAULT_MAX_ACTION_DELTA = 2.0
-
 
 @dataclass(frozen=True)
 class TcpTeleopSettings:
@@ -44,6 +43,10 @@ class TcpTeleopSettings:
     follower_id: str
     hold_last_action_on_timeout: bool
     max_action_delta: float
+    max_first_action_delta: float
+    action_min: float
+    action_max: float
+    require_action_keys_match: bool
 
 
 def tcp_teleop_settings(config: PlatformConfig) -> TcpTeleopSettings:
@@ -77,7 +80,11 @@ def tcp_teleop_settings(config: PlatformConfig) -> TcpTeleopSettings:
         leader_id=config.teleop.id,
         follower_id=config.robot.id,
         hold_last_action_on_timeout=config.runtime.hold_last_action_on_timeout,
-        max_action_delta=DEFAULT_MAX_ACTION_DELTA,
+        max_action_delta=config.safety.max_action_delta,
+        max_first_action_delta=config.safety.max_first_action_delta,
+        action_min=config.safety.action_min,
+        action_max=config.safety.action_max,
+        require_action_keys_match=config.safety.require_action_keys_match,
     )
 
 
@@ -230,7 +237,14 @@ class TcpTeleopFollowerServer:
         except LegacyProtocolError as exc:
             raise ProtocolError(str(exc)) from exc
 
+        self.validate_action_keys(action)
+        self.validate_first_action_delta(action)
         limited_action = self.limit_action_delta(action)
+        validate_action_values(
+            limited_action,
+            action_min=self.settings.action_min,
+            action_max=self.settings.action_max,
+        )
         self.last_frame_id = frame_id
         self.last_action = limited_action
         self.last_action_monotonic_ns = time.monotonic_ns()
@@ -257,12 +271,47 @@ class TcpTeleopFollowerServer:
             self.last_action = normalize_teleop_action(
                 {key: value for key, value in observation.items() if str(key).endswith(".pos")}
             )
+            validate_action_values(
+                self.last_action,
+                action_min=self.settings.action_min,
+                action_max=self.settings.action_max,
+            )
         except Exception as exc:
             raise RuntimeError(
                 "Failed to read follower startup position for TCP teleop safety. "
                 "Check follower connection/calibration before enabling teleoperation."
             ) from exc
         self._record_event(EVENT_RECOVERY, "tcp teleop follower startup position captured")
+
+    def validate_action_keys(self, action: Mapping[str, float]) -> None:
+        """Ensure incoming action keys match the follower's known joints."""
+        if not self.settings.require_action_keys_match or self.last_action is None:
+            return
+        expected = set(self.last_action)
+        actual = set(action)
+        missing = sorted(expected - actual)
+        extra = sorted(actual - expected)
+        if missing or extra:
+            raise ProtocolError(
+                "ACTION keys do not match follower joints. "
+                f"missing={missing} extra={extra}"
+            )
+
+    def validate_first_action_delta(self, action: Mapping[str, float]) -> None:
+        """Block startup when leader/follower poses are too far apart."""
+        if self.last_frame_id is not None or self.last_action is None:
+            return
+        max_delta = max(
+            abs(float(value) - self.last_action[key])
+            for key, value in action.items()
+            if key in self.last_action
+        )
+        if max_delta > self.settings.max_first_action_delta:
+            raise ProtocolError(
+                "First ACTION is too far from follower startup position "
+                f"({max_delta:.3f} > {self.settings.max_first_action_delta:.3f}). "
+                "Move leader and follower to similar safe poses or fix calibration/mapping before teleoperation."
+            )
 
     def limit_action_delta(self, target_action: Mapping[str, float]) -> dict[str, float]:
         """Clamp target action relative to the last sent follower action."""
@@ -365,6 +414,24 @@ def normalize_teleop_action(action: Any) -> dict[str, float]:
         return normalize_action(action)
     except LegacyProtocolError as exc:
         raise ProtocolError(str(exc)) from exc
+
+
+def validate_action_values(
+    action: Mapping[str, float],
+    *,
+    action_min: float,
+    action_max: float,
+) -> None:
+    """Reject non-finite or out-of-range action values."""
+    for key, value in action.items():
+        numeric = float(value)
+        if not math.isfinite(numeric):
+            raise ProtocolError(f"ACTION value for {key} is not finite: {value!r}.")
+        if numeric < action_min or numeric > action_max:
+            raise ProtocolError(
+                f"ACTION value for {key}={numeric:.3f} is outside "
+                f"[{action_min:.3f}, {action_max:.3f}]."
+            )
 
 
 def _load_so101_leader_api() -> tuple[type, type]:

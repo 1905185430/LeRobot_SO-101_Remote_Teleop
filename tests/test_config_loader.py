@@ -31,6 +31,16 @@ class ConfigLoaderTests(unittest.TestCase):
         self.assertEqual(config.mode, "local_inference")
         self.assertEqual(config.network.server_host, "127.0.0.1")
         self.assertFalse(config.webui.enabled)
+        self.assertEqual(config.safety.max_action_delta, 2.0)
+
+    def test_load_local_starai_teleop_safety_config(self) -> None:
+        config = load_config(ROOT / "configs" / "local_teleop_starai_tcp.yaml")
+
+        self.assertEqual(config.safety.max_action_delta, 1.0)
+        self.assertEqual(config.safety.max_first_action_delta, 12.0)
+        self.assertEqual(config.safety.action_min, -100)
+        self.assertEqual(config.safety.action_max, 100)
+        self.assertTrue(config.safety.require_action_keys_match)
 
     def test_remote_teleoperation_requires_enabled_teleop(self) -> None:
         data = {
@@ -52,6 +62,18 @@ class ConfigLoaderTests(unittest.TestCase):
         }
 
         with self.assertRaisesRegex(ConfigError, "Unsupported network.protocol"):
+            platform_config_from_mapping(data)
+
+    def test_invalid_safety_range_is_rejected(self) -> None:
+        data = {
+            "experiment": {"name": "bad", "mode": "remote_teleoperation"},
+            "robot": {"type": "so101_follower"},
+            "model": {"type": "mock"},
+            "teleop": {"enabled": True},
+            "safety": {"action_min": 10, "action_max": 10},
+        }
+
+        with self.assertRaisesRegex(ConfigError, "safety.action_min"):
             platform_config_from_mapping(data)
 
     def test_simple_yaml_parser_handles_nested_mapping_and_scalars(self) -> None:

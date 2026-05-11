@@ -14,6 +14,7 @@ from so101_remote.teleop_tcp import (
     TcpTeleopFollowerServer,
     TcpTeleopLeaderClient,
     tcp_teleop_settings,
+    validate_action_values,
 )
 
 
@@ -64,6 +65,10 @@ def with_endpoint(config, save_dir: str, host: str, port: int):
     )
 
 
+def with_safety(config, **kwargs):
+    return replace(config, safety=replace(config.safety, **kwargs))
+
+
 class TcpTeleopTests(unittest.TestCase):
     def test_settings_are_loaded_from_remote_teleop_config(self) -> None:
         config = load_config("configs/remote_teleop_so101_tcp.yaml")
@@ -102,7 +107,10 @@ class TcpTeleopTests(unittest.TestCase):
             server.handle_action_message(message)
 
     def test_follower_limits_large_action_delta_from_current_position(self) -> None:
-        config = load_config("configs/remote_teleop_so101_tcp.yaml")
+        config = with_safety(
+            load_config("configs/remote_teleop_so101_tcp.yaml"),
+            max_first_action_delta=200.0,
+        )
         server = TcpTeleopFollowerServer(FakeFollower(), tcp_teleop_settings(config))
         server.initialize_action_baseline()
 
@@ -116,6 +124,45 @@ class TcpTeleopTests(unittest.TestCase):
         )
 
         self.assertTrue(all(value == 2.0 for value in limited.values()))
+
+    def test_follower_rejects_first_action_too_far_from_startup_pose(self) -> None:
+        config = with_safety(
+            load_config("configs/remote_teleop_so101_tcp.yaml"),
+            max_first_action_delta=1.0,
+        )
+        server = TcpTeleopFollowerServer(FakeFollower(), tcp_teleop_settings(config))
+        server.initialize_action_baseline()
+
+        with self.assertRaisesRegex(ValueError, "First ACTION is too far"):
+            server.handle_action_message(
+                {
+                    "type": "ACTION",
+                    "frame_id": 1,
+                    "timestamp_ns": time.time_ns(),
+                    "action": {key: 10.0 for key in JOINTS},
+                }
+            )
+
+    def test_follower_rejects_mismatched_action_keys(self) -> None:
+        config = load_config("configs/remote_teleop_so101_tcp.yaml")
+        server = TcpTeleopFollowerServer(FakeFollower(), tcp_teleop_settings(config))
+        server.initialize_action_baseline()
+
+        with self.assertRaisesRegex(ValueError, "ACTION keys do not match"):
+            server.handle_action_message(
+                {
+                    "type": "ACTION",
+                    "frame_id": 1,
+                    "timestamp_ns": time.time_ns(),
+                    "action": {"wrong_joint.pos": 0.0},
+                }
+            )
+
+    def test_validate_action_values_rejects_nan_and_range(self) -> None:
+        with self.assertRaisesRegex(ValueError, "not finite"):
+            validate_action_values({"joint.pos": float("nan")}, action_min=-100, action_max=100)
+        with self.assertRaisesRegex(ValueError, "outside"):
+            validate_action_values({"joint.pos": 101.0}, action_min=-100, action_max=100)
 
     def test_tcp_teleop_roundtrip_with_fake_devices(self) -> None:
         host, port = free_local_endpoint()

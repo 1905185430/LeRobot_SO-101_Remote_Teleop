@@ -95,6 +95,15 @@ class RuntimeConfig:
 
 
 @dataclass(frozen=True)
+class SafetyConfig:
+    max_action_delta: float = 2.0
+    max_first_action_delta: float = 25.0
+    action_min: float = -100.0
+    action_max: float = 100.0
+    require_action_keys_match: bool = True
+
+
+@dataclass(frozen=True)
 class WebUIConfig:
     enabled: bool = False
     host: str = "0.0.0.0"
@@ -123,6 +132,7 @@ class PlatformConfig:
     camera: CameraConfig
     network: NetworkConfig
     runtime: RuntimeConfig
+    safety: SafetyConfig
     webui: WebUIConfig
     logging: LoggingConfig
     source_path: Path | None = None
@@ -160,6 +170,7 @@ def platform_config_from_mapping(
     camera = _camera(_section(data, "camera"))
     network = _network(_section(data, "network"))
     runtime = _runtime(_section(data, "runtime"))
+    safety = _safety(_section(data, "safety"))
     webui = _webui(_section(data, "webui"))
     logging = _logging(_section(data, "logging"))
 
@@ -172,6 +183,7 @@ def platform_config_from_mapping(
         camera=camera,
         network=network,
         runtime=runtime,
+        safety=safety,
         webui=webui,
         logging=logging,
         source_path=None if source_path is None else Path(source_path),
@@ -282,6 +294,23 @@ def _runtime(data: Mapping[str, Any]) -> RuntimeConfig:
         safety_stop_on_timeout=_bool(data, "safety_stop_on_timeout", default=True),
         hold_last_action_on_timeout=_bool(data, "hold_last_action_on_timeout", default=True),
     )
+
+
+def _safety(data: Mapping[str, Any]) -> SafetyConfig:
+    safety = SafetyConfig(
+        max_action_delta=_float(data, "max_action_delta", default=2.0),
+        max_first_action_delta=_float(data, "max_first_action_delta", default=25.0),
+        action_min=_float(data, "action_min", default=-100.0),
+        action_max=_float(data, "action_max", default=100.0),
+        require_action_keys_match=_bool(data, "require_action_keys_match", default=True),
+    )
+    if safety.max_action_delta <= 0:
+        raise ConfigError("safety.max_action_delta must be > 0.")
+    if safety.max_first_action_delta <= 0:
+        raise ConfigError("safety.max_first_action_delta must be > 0.")
+    if safety.action_min >= safety.action_max:
+        raise ConfigError("safety.action_min must be less than safety.action_max.")
+    return safety
 
 
 def _webui(data: Mapping[str, Any]) -> WebUIConfig:
