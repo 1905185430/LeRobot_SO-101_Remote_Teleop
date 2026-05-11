@@ -70,9 +70,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 03-01: Define minimal robot and policy adapter protocols plus SO-101/SmolVLA implementations.
-- [ ] 03-02: Add dry-run fake robot/policy path that exercises metrics and run artifacts.
-- [ ] 03-03: Add practical reliability hooks for errors, retries, recovery events, and diagnostics.
+- [x] 03-01: Define minimal robot and policy adapter protocols plus SO-101/SmolVLA implementations.
+- [x] 03-02: Add dry-run fake robot/policy path that exercises metrics and run artifacts.
+- [x] 03-03: Add practical reliability hooks for errors, retries, recovery events, and diagnostics.
 
 ### Phase 4: SO-101 SmolVLA Runtime Integration
 **Goal**: Route the real LeRobot async inference server and client through the new package while preserving the official transport path.

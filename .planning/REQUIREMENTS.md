@@ -45,7 +45,7 @@ Requirements for the first practical release. v1 is intentionally layered: the c
 ### Dry Run
 
 - [ ] **DRY-01**: Developer can run a dry-run/mock mode on one machine without SO-101 hardware.
-- [ ] **DRY-02**: Dry-run mode exercises the runtime and metrics recorder enough to validate log and run-directory behavior.
+- [x] **DRY-02**: Dry-run mode exercises the runtime and metrics recorder enough to validate log and run-directory behavior.
 - [ ] **DRY-03**: Dry-run mode does not pretend to validate real hardware, camera, model loading, or physical control behavior.
 
 ### Adapters
@@ -58,8 +58,8 @@ Requirements for the first practical release. v1 is intentionally layered: the c
 
 ### Reliability
 
-- [ ] **RELY-01**: Runtime records errors with enough context to diagnose server startup, client startup, LeRobot import, model path, camera, serial port, network, and timeout failures.
-- [ ] **RELY-02**: Runtime includes simple retry or recovery behavior where practical without a complex state machine.
+- [x] **RELY-01**: Runtime records errors with enough context to diagnose server startup, client startup, LeRobot import, model path, camera, serial port, network, and timeout failures.
+- [x] **RELY-02**: Runtime includes simple retry or recovery behavior where practical without a complex state machine.
 - [ ] **RELY-03**: Runtime can be used for a 10-30 minute LAN experiment without expected application-level crashes.
 - [ ] **RELY-04**: Existing unit tests continue to pass after the package restructure.
 - [ ] **RELY-05**: Legacy teleoperation tests continue to pass so retained compatibility is protected.
@@ -149,15 +149,15 @@ Which phases cover which requirements. Updated during roadmap creation.
 | EXP-04 | Phase 2 | Complete |
 | EXP-05 | Phase 2 | Complete |
 | DRY-01 | Phase 3 | Pending |
-| DRY-02 | Phase 3 | Pending |
+| DRY-02 | Phase 3 | Complete |
 | DRY-03 | Phase 3 | Pending |
 | ADPT-01 | Phase 3 | Pending |
 | ADPT-02 | Phase 3 | Pending |
 | ADPT-03 | Phase 3 | Pending |
 | ADPT-04 | Phase 3 | Pending |
 | ADPT-05 | Phase 3 | Pending |
-| RELY-01 | Phase 3 | Pending |
-| RELY-02 | Phase 3 | Pending |
+| RELY-01 | Phase 3 | Complete |
+| RELY-02 | Phase 3 | Complete |
 | RELY-03 | Phase 4 | Pending |
 | RELY-04 | Phase 5 | Pending |
 | RELY-05 | Phase 5 | Pending |
