@@ -27,6 +27,7 @@ from .webui import DashboardState
 
 SUPPORTED_TELEOP_FOLLOWER_TYPES = {"so101_follower", *STARAI_FOLLOWER_TYPES}
 SUPPORTED_TELEOP_LEADER_TYPES = {"so101_leader", *STARAI_LEADER_TYPES}
+DEFAULT_MAX_ACTION_DELTA = 2.0
 
 
 @dataclass(frozen=True)
@@ -42,6 +43,7 @@ class TcpTeleopSettings:
     leader_id: str
     follower_id: str
     hold_last_action_on_timeout: bool
+    max_action_delta: float
 
 
 def tcp_teleop_settings(config: PlatformConfig) -> TcpTeleopSettings:
@@ -75,6 +77,7 @@ def tcp_teleop_settings(config: PlatformConfig) -> TcpTeleopSettings:
         leader_id=config.teleop.id,
         follower_id=config.robot.id,
         hold_last_action_on_timeout=config.runtime.hold_last_action_on_timeout,
+        max_action_delta=DEFAULT_MAX_ACTION_DELTA,
     )
 
 
@@ -184,6 +187,7 @@ class TcpTeleopFollowerServer:
     def run(self, max_messages: int | None = None) -> int:
         """Run one-client follower receive loop."""
         processed = 0
+        self.initialize_action_baseline()
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_sock:
             server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             server_sock.bind((self.settings.host, self.settings.port))
@@ -226,8 +230,9 @@ class TcpTeleopFollowerServer:
         except LegacyProtocolError as exc:
             raise ProtocolError(str(exc)) from exc
 
+        limited_action = self.limit_action_delta(action)
         self.last_frame_id = frame_id
-        self.last_action = action
+        self.last_action = limited_action
         self.last_action_monotonic_ns = time.monotonic_ns()
         latency_ms = (time.time_ns() - int(message.get("timestamp_ns", time.time_ns()))) / 1_000_000
         if latency_ms >= 0:
@@ -235,8 +240,55 @@ class TcpTeleopFollowerServer:
             if self.state is not None:
                 self.state.update_latency(latency_ms)
         if self.state is not None:
-            self.state.update_action({"type": MSG_ACTION, "frame_id": frame_id, "action": action})
-        return action
+            self.state.update_action({"type": MSG_ACTION, "frame_id": frame_id, "action": limited_action})
+        return limited_action
+
+    def initialize_action_baseline(self) -> None:
+        """Use follower's current position as the first delta-limit baseline."""
+        observation_reader = getattr(self.follower_robot, "get_observation", None)
+        if not callable(observation_reader):
+            self._record_event(
+                EVENT_EXCEPTION,
+                "tcp teleop follower cannot read startup position; action delta limit starts after first command",
+            )
+            return
+        try:
+            observation = observation_reader()
+            self.last_action = normalize_teleop_action(
+                {key: value for key, value in observation.items() if str(key).endswith(".pos")}
+            )
+        except Exception as exc:
+            raise RuntimeError(
+                "Failed to read follower startup position for TCP teleop safety. "
+                "Check follower connection/calibration before enabling teleoperation."
+            ) from exc
+        self._record_event(EVENT_RECOVERY, "tcp teleop follower startup position captured")
+
+    def limit_action_delta(self, target_action: Mapping[str, float]) -> dict[str, float]:
+        """Clamp target action relative to the last sent follower action."""
+        if self.last_action is None:
+            return dict(target_action)
+
+        limited: dict[str, float] = {}
+        max_delta = self.settings.max_action_delta
+        clamped = False
+        for key, target_value in target_action.items():
+            previous = self.last_action.get(key)
+            if previous is None:
+                limited[key] = float(target_value)
+                continue
+            delta = float(target_value) - previous
+            if delta > max_delta:
+                limited[key] = previous + max_delta
+                clamped = True
+            elif delta < -max_delta:
+                limited[key] = previous - max_delta
+                clamped = True
+            else:
+                limited[key] = float(target_value)
+        if clamped:
+            self._record_event(EVENT_EXCEPTION, "tcp teleop action delta limited")
+        return limited
 
     def build_ack_message(self, action_message: Mapping[str, object]) -> dict[str, object]:
         """Build an ACK response for an ACTION message."""

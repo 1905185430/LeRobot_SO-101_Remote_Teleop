@@ -43,6 +43,9 @@ class FakeFollower:
     def send_action(self, action) -> None:
         self.actions.append(dict(action))
 
+    def get_observation(self) -> dict[str, float]:
+        return {key: 0.0 for key in JOINTS}
+
 
 def free_local_endpoint() -> tuple[str, int]:
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -85,6 +88,7 @@ class TcpTeleopTests(unittest.TestCase):
     def test_follower_rejects_duplicate_frames(self) -> None:
         config = load_config("configs/remote_teleop_so101_tcp.yaml")
         server = TcpTeleopFollowerServer(FakeFollower(), tcp_teleop_settings(config))
+        server.last_action = dict(JOINTS)
         message = {
             "type": "ACTION",
             "frame_id": 1,
@@ -96,6 +100,22 @@ class TcpTeleopTests(unittest.TestCase):
 
         with self.assertRaisesRegex(ValueError, "Out-of-order"):
             server.handle_action_message(message)
+
+    def test_follower_limits_large_action_delta_from_current_position(self) -> None:
+        config = load_config("configs/remote_teleop_so101_tcp.yaml")
+        server = TcpTeleopFollowerServer(FakeFollower(), tcp_teleop_settings(config))
+        server.initialize_action_baseline()
+
+        limited = server.handle_action_message(
+            {
+                "type": "ACTION",
+                "frame_id": 1,
+                "timestamp_ns": time.time_ns(),
+                "action": {key: 100.0 for key in JOINTS},
+            }
+        )
+
+        self.assertTrue(all(value == 2.0 for value in limited.values()))
 
     def test_tcp_teleop_roundtrip_with_fake_devices(self) -> None:
         host, port = free_local_endpoint()

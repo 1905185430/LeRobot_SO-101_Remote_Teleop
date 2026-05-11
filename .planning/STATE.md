@@ -71,6 +71,7 @@ Progress: [██████████] 100%
 | 2026-05-11 | Add StarAI robot support scaffold | Complete |
 | 2026-05-11 | Add local StarAI TCP teleoperation config | Complete |
 | 2026-05-11 | Fix StarAI LeRobot module discovery | Complete |
+| 2026-05-11 | Add TCP teleop action delta safety limit | Complete |
 
 ## Accumulated Context
 
