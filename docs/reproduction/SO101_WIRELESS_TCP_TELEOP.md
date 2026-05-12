@@ -112,6 +112,30 @@ conda activate lerobot
 python3 scripts/run_client.py --config configs/teleop/remote_so101_tcp.yaml
 ```
 
+## 停止顺序
+
+正常停止时建议按下面顺序操作：
+
+1. 先在 leader/client 终端按 `Ctrl+C`。
+2. 确认 follower 从臂没有继续接收新动作，也没有持续运动。
+3. 再在 follower/server 终端按 `Ctrl+C`。
+4. 停止后让两台机械臂保持在安全姿态，必要时手动断开机械臂电源或释放扭矩。
+
+不要先关闭 follower/server 再让 client 继续发送动作。这样虽然 TCP 会断开，但排查日志时会混入连接关闭错误，不利于判断真正问题。
+
+停止后建议检查本次运行目录：
+
+```text
+runs/so101_remote_teleop_tcp/<timestamp>-tcp-teleop-follower-xxxx/
+runs/so101_remote_teleop_tcp/<timestamp>-tcp-teleop-leader-xxxx/
+```
+
+重点查看：
+
+- `events.jsonl` 是否有 `exception`；
+- `metadata.json` 里的 config、robot id、teleop id、endpoint 是否正确；
+- `summary.md` 是否正常生成。
+
 ## 网络检查命令
 
 在 leader/client 机器上：
