@@ -3,7 +3,7 @@
 本文档记录当前已通过的本地复现步骤和验证命令。所有命令默认在项目根目录执行：
 
 ```bash
-cd ~/Documents/VLA+无线通信/LeRobot_SO-101_Remote_Teleop
+cd ~/Documents/VLA+无线通信/lerobot-remote-vla-teleop
 conda activate lerobot
 ```
 

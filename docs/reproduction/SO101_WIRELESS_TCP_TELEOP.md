@@ -91,7 +91,7 @@ safety:
 在连接 SO-101 follower 的机器上运行：
 
 ```bash
-cd ~/wjx/LeRobot_SO-101_Remote_Teleop
+cd ~/wjx/lerobot-remote-vla-teleop
 conda activate lerobot
 python3 scripts/run_server.py --config configs/teleop/remote_so101_tcp.yaml
 ```
@@ -107,7 +107,7 @@ TCP teleop follower listening on 192.168.1.151:9001
 在连接 SO-101 leader 的机器上运行：
 
 ```bash
-cd ~/Documents/VLA+无线通信/LeRobot_SO-101_Remote_Teleop
+cd ~/Documents/VLA+无线通信/lerobot-remote-vla-teleop
 conda activate lerobot
 python3 scripts/run_client.py --config configs/teleop/remote_so101_tcp.yaml
 ```

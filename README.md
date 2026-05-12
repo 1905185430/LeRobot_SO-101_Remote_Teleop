@@ -1,6 +1,8 @@
-# SO-101 LeRobot Async Inference Playground
+# lerobot-remote-vla-teleop
 
-This repo is now set up for the smallest possible LeRobot async inference workflow while you explore SmolVLA wireless inference:
+This repo is a lightweight LeRobot remote VLA inference and TCP teleoperation experiment framework. It started from SO-101 + SmolVLA wireless inference, and now also records validated TCP teleoperation paths for SO-101 and StarAI arms.
+
+The original minimal LeRobot async inference workflow is still available:
 
 - run `policy_server.py` on the server or GPU machine
 - run `robot_client.py` on the robot-side computer
@@ -28,7 +30,7 @@ On the server or GPU machine:
 python3 policy_server.py
 ```
 
-Before running it, edit these constants in [policy_server.py](/home/xuan/Documents/VLA+无线通信/LeRobot_SO-101_Remote_Teleop/policy_server.py:5):
+Before running it, edit these constants in [policy_server.py](policy_server.py):
 
 - `HOST`
 - `PORT`
@@ -39,7 +41,7 @@ On the robot-side machine:
 python3 robot_client.py
 ```
 
-Before running it, edit these constants in [robot_client.py](/home/xuan/Documents/VLA+无线通信/LeRobot_SO-101_Remote_Teleop/robot_client.py:8):
+Before running it, edit these constants in [robot_client.py](robot_client.py):
 
 - `SERVER_ADDRESS`
 - `ROBOT_PORT`

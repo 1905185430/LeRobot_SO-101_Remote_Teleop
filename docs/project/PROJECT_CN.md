@@ -1,8 +1,8 @@
-# SO-101 Remote VLA / Teleoperation Platform 中文说明
+# lerobot-remote-vla-teleop 中文说明
 
 ## 1. 项目定位
 
-本项目是一个面向 SO-101 机械臂的轻量级远程 VLA 推理实验框架。当前第一条真实运行路径是：
+本项目是一个基于 LeRobot 的轻量级远程 VLA 推理与 TCP 遥操作实验框架。当前第一条真实 VLA 推理路径是：
 
 ```text
 SO-101 follower + OpenCV cameras + LeRobot async inference + SmolVLA
@@ -15,6 +15,8 @@ SO-101 follower + OpenCV cameras + LeRobot async inference + SmolVLA
 - 真实 LeRobot 路径可以从配置构建 runtime config；
 - 没有硬件时可以用 mock TCP 路径调试通信；
 - 每次运行保存 metadata、events、metrics 和 summary，方便复现实验。
+
+仓库名 `lerobot-remote-vla-teleop` 表示当前定位：围绕 LeRobot，把远程 VLA 推理、无线/TCP 遥操作、多机械臂实验和复现文档放在同一个轻量级实验框架里。
 
 ## 2. 当前支持能力
 

@@ -78,7 +78,7 @@ robot:
 所有命令从项目根目录运行：
 
 ```bash
-cd ~/Documents/VLA+无线通信/LeRobot_SO-101_Remote_Teleop
+cd ~/Documents/VLA+无线通信/lerobot-remote-vla-teleop
 conda activate lerobot
 ```
 
