@@ -107,6 +107,7 @@ Recent decisions affecting current work:
 ### Pending Todos
 
 - Plan configurable TCP local and web UI platform — `.planning/todos/pending/2026-05-11-plan-configurable-tcp-local-and-web-ui-platform.md`
+- Generalize so101_remote package architecture — `.planning/todos/pending/2026-05-12-generalize-so101-remote-package-architecture.md`
 
 ### Completed Todos
 
