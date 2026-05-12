@@ -121,10 +121,13 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 
 ### Phase 6: Generalize package architecture from so101_remote to lerobot_remote
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** Rename the implementation package to `lerobot_remote` and fully split the architecture into config, runtime, teleop, robots, network, recording, policies, and webui layers without breaking existing validated commands.
+**Requirements**: Package architecture generalization; existing SO-101/StarAI/debug mock behavior preservation
 **Depends on:** Phase 5
-**Plans:** 0 plans
+**Plans:** 4 plans
 
 Plans:
-- [ ] TBD (run /gsd-plan-phase 6 to break down)
+- [ ] 06-01: Create `lerobot_remote` package foundation and move config, recording, network, adapter, and reliability modules.
+- [ ] 06-02: Extract robot, policy, and TCP teleoperation layers.
+- [ ] 06-03: Split runtime and WebUI modules, then update thin entrypoint imports.
+- [ ] 06-04: Update tests and docs, remove old package, and run required validation.
