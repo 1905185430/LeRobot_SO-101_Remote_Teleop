@@ -113,6 +113,10 @@ Recent decisions affecting current work:
 
 - Plan multi-arm wireless teleoperation and VLA inference — folded into Phase 05 v2 continuation documentation and moved to `.planning/todos/completed/2026-05-11-plan-multi-arm-wireless-teleoperation-and-vla-inference.md`
 
+### Roadmap Evolution
+
+- Phase 6 added: Generalize package architecture from so101_remote to lerobot_remote
+
 ### Blockers/Concerns
 
 - GSD subagents are installed and enabled for Codex runtime.

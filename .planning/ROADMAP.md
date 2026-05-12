@@ -118,3 +118,13 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 | 3. Dry Run, Adapters, And Reliability Hooks | 3/3 | Complete   | 2026-05-11 |
 | 4. SO-101 SmolVLA Runtime Integration | 3/3 | Complete   | 2026-05-11 |
 | 5. Validation And Compatibility Hardening | 2/2 | Complete | 2026-05-11 |
+
+### Phase 6: Generalize package architecture from so101_remote to lerobot_remote
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 5
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 6 to break down)
