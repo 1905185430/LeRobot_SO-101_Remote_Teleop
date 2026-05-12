@@ -7,7 +7,7 @@ from pathlib import Path
 import re
 from typing import Any
 
-from .config_schema import ConfigError, PlatformConfig, platform_config_from_mapping
+from .schema import ConfigError, PlatformConfig, platform_config_from_mapping
 
 _INT_RE = re.compile(r"^[+-]?[0-9]+$")
 _FLOAT_RE = re.compile(r"^[+-]?([0-9]+\.[0-9]+|[0-9]+[eE][+-]?[0-9]+)$")

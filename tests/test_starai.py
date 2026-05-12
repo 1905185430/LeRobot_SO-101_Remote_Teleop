@@ -6,16 +6,16 @@ import types
 import unittest
 from unittest import mock
 
-from so101_remote.config_loader import load_config
-from so101_remote.lerobot_factory import build_lerobot_robot_config
-from so101_remote.starai import (
+from lerobot_remote.config.loader import load_config
+from lerobot_remote.policies.lerobot_async import build_lerobot_robot_config
+from lerobot_remote.robots.starai import (
     StarAILeRobotAdapter,
     build_starai_follower_robot,
     build_starai_leader_device,
     is_starai_follower_type,
     is_starai_leader_type,
 )
-from so101_remote.teleop_tcp import normalize_teleop_action, tcp_teleop_settings
+from lerobot_remote.teleop import normalize_teleop_action, tcp_teleop_settings
 
 
 class FakeConfig:

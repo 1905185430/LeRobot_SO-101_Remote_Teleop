@@ -7,7 +7,7 @@ from importlib import import_module
 from pathlib import Path
 from typing import Any, Iterable
 
-from .config_schema import PlatformConfig
+from ..config.schema import PlatformConfig
 
 STARAI_FOLLOWER_TYPES = {
     "starai",

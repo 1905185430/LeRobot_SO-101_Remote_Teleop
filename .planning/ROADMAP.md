@@ -127,7 +127,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 **Plans:** 4 plans
 
 Plans:
-- [ ] 06-01: Create `lerobot_remote` package foundation and move config, recording, network, adapter, and reliability modules.
-- [ ] 06-02: Extract robot, policy, and TCP teleoperation layers.
-- [ ] 06-03: Split runtime and WebUI modules, then update thin entrypoint imports.
-- [ ] 06-04: Update tests and docs, remove old package, and run required validation.
+- [x] 06-01: Create `lerobot_remote` package foundation and move config, recording, network, adapter, and reliability modules.
+- [x] 06-02: Extract robot, policy, and TCP teleoperation layers.
+- [x] 06-03: Split runtime and WebUI modules, then update thin entrypoint imports.
+- [x] 06-04: Update tests and docs, remove old package, and run required validation.

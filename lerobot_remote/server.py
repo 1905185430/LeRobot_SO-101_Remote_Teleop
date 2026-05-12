@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from .config import HOST, POLICY_DEVICE, POLICY_TYPE, PORT, PRETRAINED_NAME_OR_PATH
-from .metrics import EVENT_RECOVERY, MetricEvent
-from .recorder import DEFAULT_RUN_ROOT, JsonlMetricsRecorder, build_run_metadata, create_run_directory
+from .config.defaults import HOST, POLICY_DEVICE, POLICY_TYPE, PORT, PRETRAINED_NAME_OR_PATH
+from .recording.metrics import EVENT_RECOVERY, MetricEvent
+from .recording.recorder import DEFAULT_RUN_ROOT, JsonlMetricsRecorder, build_run_metadata, create_run_directory
 from .reliability import STAGE_SERVER_STARTUP, record_exception_event
 
 

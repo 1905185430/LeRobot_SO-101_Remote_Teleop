@@ -29,7 +29,7 @@ SO-101 follower + OpenCV cameras + LeRobot async inference + SmolVLA
 | 配置驱动 dry-run | 可用，三个 `scripts/run_*.py --dry-run` 都不会碰硬件 |
 | 配置驱动真实远程推理 | 已接入 LeRobot async config，入口是 `scripts/run_server.py` / `scripts/run_client.py` |
 | debug mock TCP roundtrip | 可用，用 `configs/debug/debug_mock_robot.yaml` 测试协议和日志 |
-| 长度头 TCP 协议 | 可用，位于 `so101_remote/network/` |
+| 长度头 TCP 协议 | 可用，位于 `lerobot_remote/network/` |
 | 运行产物记录 | 可用，保存到 config 中的 `experiment.save_dir` |
 | 中文项目说明 | 本文档 |
 
@@ -60,14 +60,15 @@ scripts/
   run_client.py                         # 配置驱动客户端入口
   run_local.py                          # 配置驱动本地入口
 
-so101_remote/
-  config_loader.py                      # 配置文件加载
-  config_schema.py                      # 配置 schema 和校验
-  lerobot_factory.py                    # 从 PlatformConfig 构建 LeRobot config
-  runtime.py                            # 根据 mode 分发真实/模拟运行
+lerobot_remote/
+  config/                               # 默认常量、配置文件加载、schema 校验
+  runtime/                              # 根据 mode 分发真实/模拟运行
+  teleop/                               # TCP 遥操作 client/server、安全检查、动作归一化
+  robots/                               # SO-101、StarAI 等机器人/teleoperator 构建器
+  policies/                             # LeRobot async policy/client config 构建器
   network/                              # TCP 长度头协议和 client/server helper
-  recorder.py                           # run directory、metadata、metrics、summary
-  metrics.py                            # 指标和事件结构
+  recording/                            # run directory、metadata、metrics、summary
+  webui/                                # 可选 Gradio dashboard 状态和渲染
 
 legacy/
   leader_sender.py                      # 旧 UDP leader 发送端

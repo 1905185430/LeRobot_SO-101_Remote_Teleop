@@ -10,8 +10,8 @@ import unittest
 from tempfile import TemporaryDirectory
 from unittest import mock
 
-from so101_remote.config_loader import load_config
-from so101_remote.runtime import (
+from lerobot_remote.config.loader import load_config
+from lerobot_remote.runtime import (
     configured_runtime_summary,
     run_lerobot_policy_server,
     run_lerobot_robot_client,

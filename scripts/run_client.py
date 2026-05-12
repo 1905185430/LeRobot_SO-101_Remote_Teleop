@@ -10,9 +10,8 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from so101_remote.config_loader import load_config
-from so101_remote.config_schema import ConfigError
-from so101_remote.runtime import configured_runtime_summary, run_configured_client
+from lerobot_remote.config import ConfigError, load_config
+from lerobot_remote.runtime import configured_runtime_summary, run_configured_client
 
 
 def parse_args() -> argparse.Namespace:

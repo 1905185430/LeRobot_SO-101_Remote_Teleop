@@ -11,16 +11,15 @@ import unittest
 from tempfile import TemporaryDirectory
 from unittest import mock
 
-from so101_remote.config_loader import load_config
-from so101_remote.runtime import run_configured_client, run_configured_server
-from so101_remote.teleop_tcp import (
+from lerobot_remote.config.loader import load_config
+from lerobot_remote.runtime import run_configured_client, run_configured_server
+from lerobot_remote.teleop import (
     TcpTeleopFollowerServer,
     TcpTeleopLeaderClient,
-    build_so101_follower_robot,
-    build_so101_leader_device,
     tcp_teleop_settings,
     validate_action_values,
 )
+from lerobot_remote.robots.so101 import build_so101_follower_robot, build_so101_leader_device
 
 
 JOINTS = {
@@ -278,9 +277,9 @@ class TcpTeleopTests(unittest.TestCase):
     def test_runtime_dispatches_remote_teleoperation(self) -> None:
         config = load_config("configs/teleop/remote_so101_tcp.yaml")
 
-        with mock.patch("so101_remote.runtime.run_tcp_teleop_follower_server", return_value=0) as server:
+        with mock.patch("lerobot_remote.runtime.dispatch.run_tcp_teleop_follower_server", return_value=0) as server:
             self.assertEqual(run_configured_server(config), 0)
-        with mock.patch("so101_remote.runtime.run_tcp_teleop_leader_client", return_value=0) as client:
+        with mock.patch("lerobot_remote.runtime.dispatch.run_tcp_teleop_leader_client", return_value=0) as client:
             self.assertEqual(run_configured_client(config), 0)
 
         server.assert_called_once_with(config)

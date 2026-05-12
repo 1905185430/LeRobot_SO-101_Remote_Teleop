@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from so101_remote.metrics import (
+from lerobot_remote.recording.metrics import (
     EVENT_RECOVERY,
     EVENT_TIMEOUT,
     LATENCY_MS,

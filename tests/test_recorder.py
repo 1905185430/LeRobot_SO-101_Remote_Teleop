@@ -6,8 +6,8 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
 
-from so101_remote.metrics import EVENT_TIMEOUT, LATENCY_MS, MetricEvent, MetricSample
-from so101_remote.recorder import (
+from lerobot_remote.recording.metrics import EVENT_TIMEOUT, LATENCY_MS, MetricEvent, MetricSample
+from lerobot_remote.recording.recorder import (
     JsonlMetricsRecorder,
     build_run_metadata,
     create_run_directory,

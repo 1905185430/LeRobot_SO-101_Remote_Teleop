@@ -6,7 +6,7 @@ from dataclasses import dataclass
 import time
 from pathlib import Path
 
-from .metrics import (
+from .recording.metrics import (
     EVENT_RECOVERY,
     LATENCY_MS,
     LOOP_INTERVAL_MS,
@@ -14,7 +14,7 @@ from .metrics import (
     MetricEvent,
     MetricSample,
 )
-from .recorder import JsonlMetricsRecorder, build_run_metadata, create_run_directory
+from .recording.recorder import JsonlMetricsRecorder, build_run_metadata, create_run_directory
 from .reliability import STAGE_NETWORK, run_with_retries
 
 

@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from so101_remote import client as _client
-from so101_remote.client import (
+from lerobot_remote import client as _client
+from lerobot_remote.client import (
     ACTIONS_PER_CHUNK,
     AGGREGATE_FN_NAME,
     CAMERAS,

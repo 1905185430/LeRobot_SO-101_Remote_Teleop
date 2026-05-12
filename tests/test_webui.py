@@ -5,8 +5,8 @@ import sys
 import unittest
 from unittest import mock
 
-from so101_remote.config_loader import load_config
-from so101_remote.webui import (
+from lerobot_remote.config.loader import load_config
+from lerobot_remote.webui import (
     DashboardState,
     launch_dashboard,
     render_dashboard_snapshot,

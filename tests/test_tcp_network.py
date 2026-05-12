@@ -5,7 +5,7 @@ import threading
 import time
 import unittest
 
-from so101_remote.network.protocol import (
+from lerobot_remote.network.protocol import (
     HEADER_SIZE,
     MSG_ACTION,
     MSG_OBSERVATION,
@@ -17,8 +17,8 @@ from so101_remote.network.protocol import (
     recv_message,
     send_message,
 )
-from so101_remote.network.tcp_client import TcpClient
-from so101_remote.network.tcp_server import TcpServer, mirror_joint_action
+from lerobot_remote.network.tcp_client import TcpClient
+from lerobot_remote.network.tcp_server import TcpServer, mirror_joint_action
 
 
 JOINTS = {

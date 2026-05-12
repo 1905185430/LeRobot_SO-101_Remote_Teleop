@@ -8,8 +8,8 @@ import unittest
 from unittest import mock
 
 import robot_client
-import so101_remote.client as robot_client_runtime
-import so101_remote.server as policy_server
+import lerobot_remote.client as robot_client_runtime
+import lerobot_remote.server as policy_server
 
 
 class FakePolicyServerConfig:

@@ -88,11 +88,11 @@ Config-driven scripts now support two executable paths:
 - `debug_mock` runs a hardware-free TCP mock observation/action round trip.
 - Server-side `webui.enabled: true` launches an optional Gradio dashboard when Gradio is installed; if Gradio is missing, runtime startup continues and records a warning event.
 
-`local_inference` and real LeRobot observation streaming into WebUI are still explicit next steps. The config layer exposes LeRobot object construction through `so101_remote.lerobot_factory` and keeps lazy imports, so tests can run without LeRobot installed.
+`local_inference` and real LeRobot observation streaming into WebUI are still explicit next steps. The config layer exposes LeRobot object construction through `lerobot_remote.policies.lerobot_async` and keeps lazy imports, so tests can run without LeRobot installed.
 
 ## TCP Protocol Preview
 
-The first TCP layer lives in `so101_remote.network`. It uses a 4-byte big-endian length header followed by one JSON payload:
+The first TCP layer lives in `lerobot_remote.network`. It uses a 4-byte big-endian length header followed by one JSON payload:
 
 ```text
 [4-byte message length][JSON payload]
@@ -133,7 +133,7 @@ The metadata records the role, endpoint, model/policy or robot fields available 
 Run a local dry-run without SO-101 hardware or LeRobot:
 
 ```bash
-python3 -c "from so101_remote.dryrun import run_dry_run; print(run_dry_run())"
+python3 -c "from lerobot_remote.dryrun import run_dry_run; print(run_dry_run())"
 ```
 
 Dry-run validates the code path, metrics plumbing, and artifact generation only.

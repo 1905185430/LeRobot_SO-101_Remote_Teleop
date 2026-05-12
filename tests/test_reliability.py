@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import unittest
 
-from so101_remote.metrics import EVENT_EXCEPTION, EVENT_RECOVERY, EVENT_RETRY, MetricCollector
-from so101_remote.reliability import (
+from lerobot_remote.recording.metrics import EVENT_EXCEPTION, EVENT_RECOVERY, EVENT_RETRY, MetricCollector
+from lerobot_remote.reliability import (
     STAGE_NETWORK,
     STAGE_SERIAL_PORT,
     STAGE_SERVER_STARTUP,

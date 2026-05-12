@@ -27,7 +27,7 @@ RELY-03 remains pending human validation because unit tests use fake LeRobot mod
 
 The legacy UDP teleoperation code in `legacy/` is retained compatibility/reference code. It is not the v1 main runtime path.
 
-The v1 main runtime path remains LeRobot official async inference through `policy_server.py`, `robot_client.py`, and the `so101_remote/` package. Legacy UDP tests stay in the suite so the old reference behavior is not accidentally broken while it remains in the repository.
+The v1 main runtime path remains LeRobot official async inference through `policy_server.py`, `robot_client.py`, and the `lerobot_remote/` package. Legacy UDP tests stay in the suite so the old reference behavior is not accidentally broken while it remains in the repository.
 
 Run the compatibility suite with:
 

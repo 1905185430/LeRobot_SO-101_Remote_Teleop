@@ -6,8 +6,8 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
 
-from so101_remote.config_loader import load_config, parse_simple_yaml
-from so101_remote.config_schema import ConfigError, platform_config_from_mapping
+from lerobot_remote.config.loader import load_config, parse_simple_yaml
+from lerobot_remote.config.schema import ConfigError, platform_config_from_mapping
 
 
 ROOT = Path(__file__).resolve().parents[1]

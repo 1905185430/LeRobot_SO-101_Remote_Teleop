@@ -6,7 +6,7 @@ from importlib import import_module
 from pathlib import Path
 import threading
 
-from .config import (
+from .config.defaults import (
     ACTIONS_PER_CHUNK,
     AGGREGATE_FN_NAME,
     CAMERAS,
@@ -20,8 +20,8 @@ from .config import (
     SERVER_ADDRESS,
     TASK,
 )
-from .metrics import EVENT_EXCEPTION, EVENT_RECOVERY, MetricEvent
-from .recorder import DEFAULT_RUN_ROOT, JsonlMetricsRecorder, build_run_metadata, create_run_directory
+from .recording.metrics import EVENT_EXCEPTION, EVENT_RECOVERY, MetricEvent
+from .recording.recorder import DEFAULT_RUN_ROOT, JsonlMetricsRecorder, build_run_metadata, create_run_directory
 from .reliability import STAGE_CLIENT_STARTUP, record_exception_event
 
 

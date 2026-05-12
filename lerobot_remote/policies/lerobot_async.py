@@ -8,8 +8,8 @@ from __future__ import annotations
 
 from importlib import import_module
 
-from .config_schema import ConfigError, PlatformConfig
-from .starai import STARAI_FOLLOWER_TYPES, build_starai_follower_config, is_starai_follower_type
+from ..config.schema import ConfigError, PlatformConfig
+from ..robots.starai import STARAI_FOLLOWER_TYPES, build_starai_follower_config, is_starai_follower_type
 
 SUPPORTED_ROBOT_TYPES = {"so101_follower", *STARAI_FOLLOWER_TYPES}
 SUPPORTED_POLICY_TYPES = {"smolvla"}

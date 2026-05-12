@@ -3,7 +3,7 @@ from __future__ import annotations
 import sys
 import unittest
 
-from so101_remote.adapters import (
+from lerobot_remote.adapters import (
     PISeriesPolicyPlaceholder,
     SO101LeRobotAdapter,
     SmolVLAPolicyAdapter,

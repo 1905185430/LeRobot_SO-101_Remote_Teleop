@@ -5,9 +5,9 @@ import types
 import unittest
 from unittest import mock
 
-from so101_remote.config_loader import load_config
-from so101_remote.config_schema import ConfigError
-from so101_remote.lerobot_factory import (
+from lerobot_remote.config.loader import load_config
+from lerobot_remote.config.schema import ConfigError
+from lerobot_remote.policies.lerobot_async import (
     build_lerobot_camera_configs,
     build_lerobot_policy_server_config,
     build_lerobot_robot_client_config,

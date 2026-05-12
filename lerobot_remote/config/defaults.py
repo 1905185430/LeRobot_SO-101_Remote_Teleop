@@ -8,7 +8,7 @@ HOST = "0.0.0.0"
 PORT = 8080
 
 # Robot-side network and hardware settings.
-SERVER_ADDRESS = "192.168.1.10:8080"
+SERVER_ADDRESS = "192.168.1.151:8080"
 ROBOT_PORT = "/dev/ttyACM0"
 ROBOT_ID = "my_blue_follower_arm"
 

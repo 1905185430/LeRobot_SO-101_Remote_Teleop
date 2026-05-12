@@ -5,7 +5,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
 
-from so101_remote.dryrun import FakePolicyAdapter, FakeRobotAdapter, run_dry_run
+from lerobot_remote.dryrun import FakePolicyAdapter, FakeRobotAdapter, run_dry_run
 
 
 class DryRunTests(unittest.TestCase):

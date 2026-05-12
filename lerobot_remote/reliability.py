@@ -7,7 +7,7 @@ from inspect import signature
 import time
 from typing import TypeVar
 
-from .metrics import EVENT_EXCEPTION, EVENT_RECOVERY, EVENT_RETRY, MetricEvent
+from .recording.metrics import EVENT_EXCEPTION, EVENT_RECOVERY, EVENT_RETRY, MetricEvent
 
 STAGE_SERVER_STARTUP = "server_startup"
 STAGE_CLIENT_STARTUP = "client_startup"
