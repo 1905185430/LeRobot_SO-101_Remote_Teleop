@@ -6,7 +6,7 @@ This project uses layered validation. Automated tests can prove that the Python 
 
 | Layer | What it proves | Current status | What it does not prove |
 |-------|----------------|----------------|------------------------|
-| `unit-only` | Package imports, fake-LeRobot entrypoint behavior, metrics helpers, recorder helpers, reliability events, adapter placeholders, and legacy protocol/runtime logic. | Passing: `python3 -m unittest discover -s tests -v` ran 55 tests. | Real LeRobot import behavior, real model loading, real cameras, serial hardware, or LAN endurance. |
+| `unit-only` | Package imports, fake-LeRobot entrypoint behavior, metrics helpers, recorder helpers, reliability events, adapter placeholders, TCP teleoperation logic, and legacy protocol/runtime logic. | Passing: `python3 -m unittest discover -s tests -v` ran 106 tests. | Real LeRobot import behavior, real model loading, real cameras, serial hardware, or LAN endurance. |
 | `dry-run-only` | A hardware-free path can create run directories, metadata, metrics, events, CSV, summaries, and deterministic retry/recovery events. | Passing through `tests/test_dryrun.py`. | SO-101 movement, physical safety, camera frames, real inference quality, or real network behavior. |
 | `real LeRobot required` | The installed LeRobot version can import the async inference APIs and construct real server/client runtime objects. | Pending operator validation in the target Python environments. | Hardware control quality or long-running LAN stability by itself. |
 | `hardware-required` | SO-101 serial access, follower calibration id, camera access, observation shape, and physical control-loop behavior. | Pending human validation on the robot-side computer. | General network endurance or future robot arms. |
@@ -27,7 +27,7 @@ RELY-03 remains pending human validation because unit tests use fake LeRobot mod
 
 The legacy UDP teleoperation code in `legacy/` is retained compatibility/reference code. It is not the v1 main runtime path.
 
-The v1 main runtime path remains LeRobot official async inference through `policy_server.py`, `robot_client.py`, and the `lerobot_remote/` package. Legacy UDP tests stay in the suite so the old reference behavior is not accidentally broken while it remains in the repository.
+The current runtime package is `lerobot_remote/`. Config-driven remote inference and TCP teleoperation use `scripts/run_server.py`, `scripts/run_client.py`, and YAML files under `configs/`. The constant-based `policy_server.py` and `robot_client.py` entrypoints remain available for minimal LeRobot async compatibility. Legacy UDP tests stay in the suite so the old reference behavior is not accidentally broken while it remains in the repository.
 
 Run the compatibility suite with:
 

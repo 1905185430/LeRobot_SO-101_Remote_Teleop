@@ -28,6 +28,7 @@ SO-101 follower + OpenCV cameras + LeRobot async inference + SmolVLA
 | YAML/JSON 配置加载与校验 | 可用，入口是 `configs/*.yaml` |
 | 配置驱动 dry-run | 可用，三个 `scripts/run_*.py --dry-run` 都不会碰硬件 |
 | 配置驱动真实远程推理 | 已接入 LeRobot async config，入口是 `scripts/run_server.py` / `scripts/run_client.py` |
+| 配置驱动 TCP 遥操作 | 可用，SO-101 无线 TCP 遥操作和 StarAI 本地 TCP 遥操作均已跑通 |
 | debug mock TCP roundtrip | 可用，用 `configs/debug/debug_mock_robot.yaml` 测试协议和日志 |
 | 长度头 TCP 协议 | 可用，位于 `lerobot_remote/network/` |
 | 运行产物记录 | 可用，保存到 config 中的 `experiment.save_dir` |
@@ -38,10 +39,9 @@ SO-101 follower + OpenCV cameras + LeRobot async inference + SmolVLA
 | 能力 | 当前边界 |
 | --- | --- |
 | 本地真实推理 `local_inference` | 配置和 dry-run 已有，真实本地 policy loop 尚未接 LeRobot 本地 API |
-| 配置驱动 TCP 遥操作 `remote_teleoperation` | 已实现 SO-101 leader/follower ACTION/ACK 流 |
 | WebUI 实时显示 | 已有可选 Gradio dashboard 边界；mock TCP 可更新关节、动作和延迟；真实 LeRobot observation 流尚未接入 |
 | 图像二进制传输优化 | 当前 TCP mock 用 JSON，后续再接 JPEG/msgpack |
-| 多机械臂适配 | 已加入 StarAI LeRobot-backed 类型名和 TCP 遥操作配置骨架 |
+| 多机械臂适配 | 已加入 StarAI LeRobot-backed 类型名；更多机械臂仍需新增 adapter 和硬件验证 |
 
 ## 3. 目录结构
 
@@ -74,6 +74,8 @@ legacy/
   leader_sender.py                      # 旧 UDP leader 发送端
   follower_receiver.py                  # 旧 UDP follower 接收端
 ```
+
+注意：旧实现包 `so101_remote/` 已在 Phase 6 中移除。项目代码、测试和文档中的 Python import 应使用 `lerobot_remote`。
 
 ## 4. 配置文件怎么改
 

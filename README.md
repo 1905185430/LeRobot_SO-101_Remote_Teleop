@@ -2,15 +2,15 @@
 
 This repo is a lightweight LeRobot remote VLA inference and TCP teleoperation experiment framework. It started from SO-101 + SmolVLA wireless inference, and now also records validated TCP teleoperation paths for SO-101 and StarAI arms.
 
-The original minimal LeRobot async inference workflow is still available:
+The original minimal LeRobot async inference workflow is still available as a compatibility entrypoint:
 
 - run `policy_server.py` on the server or GPU machine
 - run `robot_client.py` on the robot-side computer
 - keep `legacy/` around as the old custom UDP teleop reference
 
-There is no local config layer in the main path now. You edit a few constants at the top of each file and run them directly.
+For new experiments, prefer the config-driven scripts under `scripts/` and YAML files under `configs/`. The constant-based `policy_server.py` and `robot_client.py` path remains useful for quick LeRobot async smoke tests.
 
-The next platform layer has started: `configs/*.yaml` plus `scripts/run_client.py`, `scripts/run_server.py`, and `scripts/run_local.py` can validate named platform configs with `--dry-run`. The real LeRobot runtime still uses the existing thin entrypoints until the TCP/WebUI runners are implemented.
+The implementation package is now `lerobot_remote/`. It is split by responsibility into config, runtime, teleop, robots, policies, network, recording, and WebUI modules.
 
 ## Install
 
@@ -22,7 +22,42 @@ Before real hardware experiments, use [docs/setup/ENVIRONMENT.md](docs/setup/ENV
 
 See [docs/validation/VALIDATION.md](docs/validation/VALIDATION.md) for the current validation matrix. The automated suite proves unit-only, dry-run-only, and retained legacy compatibility readiness, but it does not prove real SO-101 hardware, camera frames, SmolVLA model loading, physical control-loop stability, or 10-30 minute LAN endurance.
 
-## Run
+## Run: Config-Driven Paths
+
+Validate a local inference config without touching hardware:
+
+```bash
+python3 scripts/run_local.py --config configs/local_inference/so101_smolvla.yaml --dry-run
+```
+
+Validate the remote inference server/client configs:
+
+```bash
+python3 scripts/run_server.py --config configs/remote_inference/so101_smolvla.yaml --dry-run
+python3 scripts/run_client.py --config configs/remote_inference/so101_smolvla.yaml --dry-run
+```
+
+Run remote inference:
+
+```bash
+# GPU/server machine
+python3 scripts/run_server.py --config configs/remote_inference/so101_smolvla.yaml
+
+# robot-side machine
+python3 scripts/run_client.py --config configs/remote_inference/so101_smolvla.yaml
+```
+
+Run TCP teleoperation:
+
+```bash
+# follower/server machine
+python3 scripts/run_server.py --config configs/teleop/remote_so101_tcp.yaml
+
+# leader/client machine
+python3 scripts/run_client.py --config configs/teleop/remote_so101_tcp.yaml
+```
+
+## Run: Constant-Based Compatibility
 
 On the server or GPU machine:
 
@@ -56,22 +91,9 @@ Before running it, edit these constants in [robot_client.py](robot_client.py):
 - `AGGREGATE_FN_NAME`
 - `DEBUG_VISUALIZE_QUEUE_SIZE`
 
-## Config-Driven Platform Preview
+## Additional Dry-Runs
 
-Validate a local inference config without touching hardware:
-
-```bash
-python3 scripts/run_local.py --config configs/local_inference/so101_smolvla.yaml --dry-run
-```
-
-Validate the remote inference server/client configs:
-
-```bash
-python3 scripts/run_server.py --config configs/remote_inference/so101_smolvla.yaml --dry-run
-python3 scripts/run_client.py --config configs/remote_inference/so101_smolvla.yaml --dry-run
-```
-
-Validate the remote teleoperation config:
+Validate teleoperation configs:
 
 ```bash
 python3 scripts/run_server.py --config configs/teleop/remote_so101_tcp.yaml --dry-run
@@ -80,17 +102,31 @@ python3 scripts/run_server.py --config configs/teleop/remote_starai_tcp.yaml --d
 python3 scripts/run_client.py --config configs/teleop/remote_starai_tcp.yaml --dry-run
 ```
 
-Config-driven scripts now support two executable paths:
+Config-driven scripts now support these executable paths:
 
 - `remote_inference` builds real LeRobot async inference server/client configs for the first supported path, SO-101 follower + SmolVLA.
-- `remote_teleoperation` runs a config-driven TCP SO-101 leader/follower action stream.
+- `remote_teleoperation` runs a config-driven TCP leader/follower action stream for SO-101 and StarAI.
 - StarAI arms are supported through LeRobot-backed type names such as `lerobot_robot_viola`, `lerobot_robot_cello`, and `lerobot_teleoperator_violin`, plus aliases like `starai_viola_follower` and `starai_violin_leader`.
 - `debug_mock` runs a hardware-free TCP mock observation/action round trip.
 - Server-side `webui.enabled: true` launches an optional Gradio dashboard when Gradio is installed; if Gradio is missing, runtime startup continues and records a warning event.
 
 `local_inference` and real LeRobot observation streaming into WebUI are still explicit next steps. The config layer exposes LeRobot object construction through `lerobot_remote.policies.lerobot_async` and keeps lazy imports, so tests can run without LeRobot installed.
 
-## TCP Protocol Preview
+## Package Layout
+
+```text
+lerobot_remote/
+  config/       defaults, YAML/JSON loader, schema validation
+  runtime/      dispatch, remote inference, remote teleop, debug mock loops
+  teleop/       TCP leader/client, follower/server, action normalization, safety checks
+  robots/       SO-101 and StarAI builders plus robot factory dispatch
+  policies/     LeRobot async policy/client config builders
+  network/      length-prefixed TCP protocol helpers
+  recording/    metrics, run directory, metadata, CSV/summary artifacts
+  webui/        optional Gradio dashboard state and rendering
+```
+
+## TCP Protocol
 
 The first TCP layer lives in `lerobot_remote.network`. It uses a 4-byte big-endian length header followed by one JSON payload:
 
@@ -98,7 +134,7 @@ The first TCP layer lives in `lerobot_remote.network`. It uses a 4-byte big-endi
 [4-byte message length][JSON payload]
 ```
 
-Supported message types are `OBSERVATION`, `ACTION`, `HEARTBEAT`, `RESET`, `STOP`, `ERROR`, and `ACK`. The current implementation is a testable mock layer for protocol and client/server round trips; image bytes, msgpack, real policy inference, and WebUI streaming are later work.
+Supported message types are `OBSERVATION`, `ACTION`, `HEARTBEAT`, `RESET`, `STOP`, `ERROR`, and `ACK`. The current TCP teleoperation path uses `ACTION`/`ACK`; debug mock uses `OBSERVATION`/`ACTION`. Image bytes, msgpack, real policy image streaming, and richer WebUI streaming are later work.
 
 ## Experiment Artifacts
 
@@ -111,11 +147,16 @@ The run artifact set is:
 - `metrics.csv`
 - `summary.md`
 
-Real LeRobot runtime hooks are wired in later phases; this artifact layout is the local contract those hooks will write into.
+Real LeRobot remote inference and TCP teleoperation paths write into this artifact layout.
 
 ## Real Runtime Artifacts
 
-When you run the real thin entrypoints, each side creates its own run directory under `logs/experiments/`.
+When you run the config-driven real paths, each side creates its own run directory under `experiment.save_dir`.
+
+- `python3 scripts/run_server.py --config ...` creates a server-role run directory such as `policy-server` or `tcp-teleop-follower`.
+- `python3 scripts/run_client.py --config ...` creates a client-role run directory such as `robot-client` or `tcp-teleop-leader`.
+
+The constant-based compatibility entrypoints still write under `logs/experiments/`:
 
 - `python3 policy_server.py` creates a `policy-server` run directory for the GPU/server process.
 - `python3 robot_client.py` creates a `robot-client` run directory for the robot-side process.
@@ -126,7 +167,7 @@ Each real runtime run directory includes:
 - `events.jsonl`
 - `summary.md`
 
-The metadata records the role, endpoint, model/policy or robot fields available to that side, the run directory, and the resolved constant settings used at startup. For v1, constants in `policy_server.py` and `robot_client.py` remain the configuration path; there is no YAML or CLI override layer required for Phase 4.
+The metadata records the role, endpoint, model/policy or robot fields available to that side, the run directory, and the resolved settings used at startup. Config-driven scripts also copy the selected YAML into the run directory as `config.yaml`.
 
 ## Dry Run
 
@@ -141,10 +182,12 @@ It does not validate real SO-101 hardware, camera frames, real SmolVLA loading, 
 
 ## SO-101 Notes
 
-- `ROBOT_ID` must match your follower calibration id.
-- Camera keys in `CAMERAS` must match the keys expected by the model you trained or downloaded.
-- `TASK` should stay close to the instruction wording used in your data collection or fine-tuning.
-- `ACTIONS_PER_CHUNK` should not exceed what the policy supports.
+- `robot.id` must match your follower calibration id.
+- Camera keys in `camera.cameras` must match the keys expected by the model you trained or downloaded.
+- `experiment.task_name` should stay close to the instruction wording used in your data collection or fine-tuning.
+- `model.action_horizon` should not exceed what the policy supports.
+
+For the constant-based compatibility entrypoints, the equivalent fields are `ROBOT_ID`, `CAMERAS`, `TASK`, and `ACTIONS_PER_CHUNK`.
 
 ## Legacy
 

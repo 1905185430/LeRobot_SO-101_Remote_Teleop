@@ -1,6 +1,6 @@
 # Environment Setup
 
-This guide prepares the two-machine LAN setup used by the v1 SO-101 + SmolVLA remote inference workflow. The current v1 configuration path is still constant-based: edit the operator-facing constants in `policy_server.py` and `robot_client.py` before running real hardware.
+This guide prepares the two-machine LAN setup used by the SO-101 + SmolVLA remote inference workflow and TCP teleoperation experiments. New experiments should use the config-driven YAML path under `configs/` with `scripts/run_server.py` and `scripts/run_client.py`. The constant-based `policy_server.py` and `robot_client.py` entrypoints remain available for minimal LeRobot async smoke tests.
 
 ## GPU Server Setup
 
@@ -28,29 +28,32 @@ Expected result for GPU inference is `True`. If it prints `False`, fix CUDA, dri
 
 ### Model Access
 
-Set the SmolVLA model path in the robot/client configuration to the model you want LeRobot to load:
+Set the SmolVLA model path in `configs/remote_inference/so101_smolvla.yaml` to the model you want LeRobot to load:
 
-- `PRETRAINED_NAME_OR_PATH`
-- `POLICY_TYPE`
-- `POLICY_DEVICE`
+- `model.model_path`
+- `model.type`
+- `model.device`
 
 If the model is hosted on HuggingFace, make sure the server environment has the required HuggingFace access before a real run.
 
-### Server Constants
+### Server Config
 
-Edit these constants before running the server:
+Edit these fields before running the config-driven server:
 
-- `HOST`: defaults to `0.0.0.0`, which binds all network interfaces.
-- `PORT`: defaults to `8080`.
+- `network.server_host`: server bind/listen address.
+- `network.server_port`: server port.
+- `model.model_path`: HuggingFace model name or local checkpoint.
+- `model.device`: usually `cuda` on the GPU server.
 
-Binding `HOST = "0.0.0.0"` is convenient on a trusted LAN, but the server should be firewalled or bound to a narrower interface on untrusted networks.
+Binding `network.server_host: 0.0.0.0` is convenient on a trusted LAN, but the server should be firewalled or bound to a narrower interface on untrusted networks.
 
 ### Policy Server Preflight
 
 Run:
 
 ```bash
-python3 policy_server.py
+python3 scripts/run_server.py --config configs/remote_inference/so101_smolvla.yaml --dry-run
+python3 scripts/run_server.py --config configs/remote_inference/so101_smolvla.yaml
 ```
 
 Before connecting the robot-side client, confirm:
@@ -87,39 +90,37 @@ groups
 
 If needed, add the user to the serial device group used by your Linux distribution, then log out and back in.
 
-### Robot And Camera Constants
+### Robot And Camera Config
 
-Edit these constants before running the client:
+Edit these fields before running the config-driven client:
 
-- `SERVER_ADDRESS`: server address in `IP:PORT` form.
-- `ROBOT_PORT`: SO-101 serial device path, such as `/dev/ttyACM0`.
-- `ROBOT_ID`: follower calibration id.
-- `CAMERAS`: camera names, index/path, width, height, and fps.
-- `TASK`: text instruction sent to the VLA policy.
-- `POLICY_TYPE`: defaults to `smolvla`.
-- `PRETRAINED_NAME_OR_PATH`: HuggingFace or local model path.
-- `POLICY_DEVICE`: defaults to `cuda`.
-- `ACTIONS_PER_CHUNK`: number of actions requested per chunk.
-- `CHUNK_SIZE_THRESHOLD`: queue threshold that triggers another inference request.
-- `AGGREGATE_FN_NAME`: overlapping action chunk aggregation function.
-- `DEBUG_VISUALIZE_QUEUE_SIZE`: whether to visualize action queue size on exit.
+- `network.server_host` and `network.server_port`: server endpoint.
+- `robot.port`: SO-101 serial device path, such as `/dev/ttyACM0`.
+- `robot.id`: follower calibration id.
+- `camera.cameras`: camera names, index/path, width, height, and fps.
+- `experiment.task_name`: text instruction sent to the VLA policy.
+- `model.type`: defaults to `smolvla`.
+- `model.model_path`: HuggingFace or local model path.
+- `model.device`: policy device used by the LeRobot client config.
+- `model.action_horizon`: actions requested per chunk.
 
-Camera keys in `CAMERAS` must match the observation image keys expected by the trained or downloaded policy.
+Camera keys in `camera.cameras` must match the observation image keys expected by the trained or downloaded policy.
 
 ### Robot Client Preflight
 
 Run:
 
 ```bash
-python3 robot_client.py
+python3 scripts/run_client.py --config configs/remote_inference/so101_smolvla.yaml --dry-run
+python3 scripts/run_client.py --config configs/remote_inference/so101_smolvla.yaml
 ```
 
 Before a physical run, confirm:
 
 - The serial port points at the SO-101 follower arm.
-- `ROBOT_ID` matches the follower calibration id.
+- `robot.id` matches the follower calibration id.
 - Cameras open at the configured index or path.
-- `SERVER_ADDRESS` points at the GPU server.
+- `network.server_host` points at the GPU server.
 
 ## LAN Communication Checks
 
@@ -145,8 +146,8 @@ PY
 
 If the connection fails:
 
-- Confirm `HOST` and `PORT` on the server.
-- Confirm `SERVER_ADDRESS` on the robot-side client.
+- Confirm `network.server_host` and `network.server_port` on the server.
+- Confirm the same endpoint is configured on the robot-side client.
 - Check firewall rules on the server.
 - Confirm both machines are on the expected LAN or routed subnet.
 
@@ -163,7 +164,14 @@ Recommended checks:
 
 ## Dry-Run / Mock Setup
 
-Dry-run support is part of the v1 roadmap. Once implemented, use it to validate runtime wiring, run directories, metric files, and summaries without SO-101 hardware or a real model.
+Dry-run support is available for validating runtime wiring and config resolution without SO-101 hardware or a real model:
+
+```bash
+python3 scripts/run_server.py --config configs/remote_inference/so101_smolvla.yaml --dry-run
+python3 scripts/run_client.py --config configs/remote_inference/so101_smolvla.yaml --dry-run
+python3 scripts/run_server.py --config configs/teleop/remote_so101_tcp.yaml --dry-run
+python3 scripts/run_client.py --config configs/teleop/remote_so101_tcp.yaml --dry-run
+```
 
 Dry-run does not validate:
 
@@ -183,9 +191,9 @@ Confirm the same run directory also contains:
 - `metrics.jsonl`
 - `events.jsonl`
 
-For real LeRobot startup, `python3 policy_server.py` creates a `policy-server` run directory and `python3 robot_client.py` creates a `robot-client` run directory under `logs/experiments/`. Each side writes `metadata.json`, `events.jsonl`, and `summary.md`; metadata includes the role, endpoint, run directory, available server/robot/model fields, and the resolved constant settings used at startup.
+For real config-driven startup, `python3 scripts/run_server.py --config ...` and `python3 scripts/run_client.py --config ...` create role-specific run directories under the configured `experiment.save_dir`. Each side writes `metadata.json`, `events.jsonl`, metrics files, `summary.md`, and a copy of the selected `config.yaml` when applicable.
 
-The current v1 configuration path is still the constants in `policy_server.py` and `robot_client.py`. Keep those constants as the source of truth for Phase 4 runs; do not expect a YAML file or CLI override layer.
+The constant-based `policy_server.py` and `robot_client.py` path still writes run artifacts under `logs/experiments/`, but it is now the compatibility/smoke-test path rather than the preferred experiment configuration path.
 
 ## 10-30 Minute LAN Experiment Readiness
 
@@ -195,10 +203,10 @@ See `docs/validation/VALIDATION.md` (`Validation Status`) for the full validatio
 
 Use the target GPU/server machine and robot-side computer on the same LAN:
 
-1. On the GPU/server machine, run `python3 policy_server.py`.
-2. On the robot-side machine, run `python3 robot_client.py`.
+1. On the GPU/server machine, run `python3 scripts/run_server.py --config configs/remote_inference/so101_smolvla.yaml`.
+2. On the robot-side machine, run `python3 scripts/run_client.py --config configs/remote_inference/so101_smolvla.yaml`.
 3. Let the pair run for 10-30 minutes under the intended local network conditions.
-4. Confirm a `policy-server` run directory and a `robot-client` run directory exist under `logs/experiments/`.
+4. Confirm a `policy-server` run directory and a `robot-client` run directory exist under the configured `experiment.save_dir`.
 5. Inspect each run directory's `metadata.json`, `events.jsonl`, and `summary.md`.
 6. Record whether any application-level crashes occurred during the run, including server startup failures, robot client startup failures, disconnects, unhandled exceptions, or control-loop failures.
 
@@ -233,9 +241,9 @@ Symptom: model loading fails or HuggingFace access is denied.
 
 Fix:
 
-- Check `PRETRAINED_NAME_OR_PATH`.
+- Check `model.model_path`.
 - Verify HuggingFace credentials if the model is private.
-- Confirm the model matches `POLICY_TYPE`.
+- Confirm the model matches `model.type`.
 
 ### Camera Index Mismatch
 
@@ -243,7 +251,7 @@ Symptom: camera cannot open or observations do not match policy keys.
 
 Fix:
 
-- Check `CAMERAS`.
+- Check `camera.cameras`.
 - Confirm the camera index or path.
 - Confirm camera names match policy observation keys.
 
@@ -253,7 +261,7 @@ Symptom: SO-101 device cannot open.
 
 Fix:
 
-- Check `ROBOT_PORT`.
+- Check `robot.port`.
 - Check `ls /dev/ttyACM*`.
 - Check user groups with `groups`.
 - Reconnect the device or reboot if the serial device is stale.
@@ -265,8 +273,8 @@ Symptom: robot client cannot connect to the policy server.
 Fix:
 
 - Treat this as a server connection issue until the robot-side computer can reach the configured endpoint.
-- Confirm `python3 policy_server.py` is running.
-- Confirm `SERVER_ADDRESS` uses the server LAN IP and `PORT`.
+- Confirm `python3 scripts/run_server.py --config configs/remote_inference/so101_smolvla.yaml` is running.
+- Confirm `network.server_host` uses the server LAN IP and `network.server_port` matches on both sides.
 - Check firewall rules and routing.
 
 ### Metrics Output Confusion
@@ -278,4 +286,4 @@ Fix:
 - Confirm the current phase actually records the metric you expect.
 - Check whether LeRobot exposes the required timing or queue signal.
 - Check time synchronization before trusting one-way latency.
-- Check `logs/experiments/<run_id>/summary.md`, `metrics.jsonl`, and `events.jsonl` once metrics and run directories are enabled.
+- Check the configured run directory's `summary.md`, `metrics.jsonl`, and `events.jsonl`.

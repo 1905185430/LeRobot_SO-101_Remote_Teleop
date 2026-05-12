@@ -169,7 +169,7 @@ python3 -m unittest discover -s tests -v
 最近一次通过结果：
 
 ```text
-Ran 105 tests
+Ran 106 tests
 OK
 ```
 
