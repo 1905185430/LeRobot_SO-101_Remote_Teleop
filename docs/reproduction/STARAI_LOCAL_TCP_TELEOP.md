@@ -85,13 +85,13 @@ conda activate lerobot
 第一个终端启动 follower/server：
 
 ```bash
-python3 scripts/run_server.py --config configs/teleop/local_starai_tcp.yaml
+python3 scripts/run_teleop_follower.py --config configs/teleop/local_starai_tcp.yaml
 ```
 
 第二个终端启动 leader/client：
 
 ```bash
-python3 scripts/run_client.py --config configs/teleop/local_starai_tcp.yaml
+python3 scripts/run_teleop_leader.py --config configs/teleop/local_starai_tcp.yaml
 ```
 
 ## 成功时的现象
@@ -124,8 +124,8 @@ logging:
 不连接硬件，只验证配置能被脚本正常读取：
 
 ```bash
-python3 scripts/run_server.py --config configs/teleop/local_starai_tcp.yaml --dry-run
-python3 scripts/run_client.py --config configs/teleop/local_starai_tcp.yaml --dry-run
+python3 scripts/run_teleop_follower.py --config configs/teleop/local_starai_tcp.yaml --dry-run
+python3 scripts/run_teleop_leader.py --config configs/teleop/local_starai_tcp.yaml --dry-run
 ```
 
 ## 自动化测试命令

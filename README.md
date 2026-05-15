@@ -2,13 +2,22 @@
 
 This repo is a lightweight LeRobot remote VLA inference and TCP teleoperation experiment framework. It started from SO-101 + SmolVLA wireless inference, and now also records validated TCP teleoperation paths for SO-101 and StarAI arms.
 
-The original minimal LeRobot async inference workflow is still available as a compatibility entrypoint:
+If the architecture feels unclear, start with the Chinese architecture guide:
 
-- run `policy_server.py` on the server or GPU machine
-- run `robot_client.py` on the robot-side computer
-- keep `legacy/` around as the old custom UDP teleop reference
+- [docs/ARCHITECTURE_CN.md](docs/ARCHITECTURE_CN.md)
 
-For new experiments, prefer the config-driven scripts under `scripts/` and YAML files under `configs/`. The constant-based `policy_server.py` and `robot_client.py` path remains useful for quick LeRobot async smoke tests.
+For new experiments, prefer the config-driven scripts under `scripts/` and YAML files under `configs/`.
+
+Recommended paths:
+
+- TCP teleoperation: `scripts/run_teleop_follower.py` and `scripts/run_teleop_leader.py`
+- Remote VLA inference: `scripts/run_server.py` and `scripts/run_client.py`
+
+Transitional compatibility paths:
+
+- `policy_server.py` and `robot_client.py` remain available for constant-based LeRobot async smoke tests.
+- `legacy/` remains available as the old custom UDP teleop reference.
+- See [docs/compatibility/LEGACY_ENTRYPOINTS_CN.md](docs/compatibility/LEGACY_ENTRYPOINTS_CN.md) before changing or removing these paths.
 
 The implementation package is now `lerobot_remote/`. It is split by responsibility into config, runtime, teleop, robots, policies, network, recording, and WebUI modules.
 
@@ -51,9 +60,16 @@ Run TCP teleoperation:
 
 ```bash
 # follower/server machine
-python3 scripts/run_server.py --config configs/teleop/remote_so101_tcp.yaml
+python3 scripts/run_teleop_follower.py --config configs/teleop/remote_so101_tcp.yaml
 
 # leader/client machine
+python3 scripts/run_teleop_leader.py --config configs/teleop/remote_so101_tcp.yaml
+```
+
+The generic commands still work for teleoperation, but the role-explicit commands are easier to read:
+
+```bash
+python3 scripts/run_server.py --config configs/teleop/remote_so101_tcp.yaml
 python3 scripts/run_client.py --config configs/teleop/remote_so101_tcp.yaml
 ```
 
@@ -96,10 +112,10 @@ Before running it, edit these constants in [robot_client.py](robot_client.py):
 Validate teleoperation configs:
 
 ```bash
-python3 scripts/run_server.py --config configs/teleop/remote_so101_tcp.yaml --dry-run
-python3 scripts/run_client.py --config configs/teleop/remote_so101_tcp.yaml --dry-run
-python3 scripts/run_server.py --config configs/teleop/remote_starai_tcp.yaml --dry-run
-python3 scripts/run_client.py --config configs/teleop/remote_starai_tcp.yaml --dry-run
+python3 scripts/run_teleop_follower.py --config configs/teleop/remote_so101_tcp.yaml --dry-run
+python3 scripts/run_teleop_leader.py --config configs/teleop/remote_so101_tcp.yaml --dry-run
+python3 scripts/run_teleop_follower.py --config configs/teleop/remote_starai_tcp.yaml --dry-run
+python3 scripts/run_teleop_leader.py --config configs/teleop/remote_starai_tcp.yaml --dry-run
 ```
 
 Config-driven scripts now support these executable paths:
@@ -117,7 +133,7 @@ Config-driven scripts now support these executable paths:
 ```text
 lerobot_remote/
   config/       defaults, YAML/JSON loader, schema validation
-  runtime/      dispatch, remote inference, remote teleop, debug mock loops
+  runtime/      dispatch, remote inference, teleoperation, debug mock loops
   teleop/       TCP leader/client, follower/server, action normalization, safety checks
   robots/       SO-101 and StarAI builders plus robot factory dispatch
   policies/     LeRobot async policy/client config builders

@@ -6,7 +6,7 @@ from ..config.schema import PlatformConfig
 from .common import configured_runtime_summary
 from .debug_mock import run_local_mock_loop, run_mock_tcp_client, run_mock_tcp_server
 from .remote_inference import run_lerobot_policy_server, run_lerobot_robot_client
-from .remote_teleop import run_tcp_teleop_follower_server, run_tcp_teleop_leader_client
+from .teleoperation import run_tcp_teleop_follower_server, run_tcp_teleop_leader_client
 
 
 def run_configured_server(config: PlatformConfig) -> int:
