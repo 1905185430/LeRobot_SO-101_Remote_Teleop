@@ -253,9 +253,11 @@ lerobot_remote/robots/starai.py
 lerobot_remote/robots/so101.py
 ```
 
-## 7. Transitional / Legacy 路径
+## 7. 已清理的旧路径
 
-这些路径暂时保留，但不是当前推荐入口：
+当前代码库只保留 config-driven 主线。
+
+以下旧路径已经移除：
 
 ```text
 policy_server.py
@@ -264,12 +266,4 @@ legacy/
 lerobot_remote/runtime/remote_teleop.py
 ```
 
-- `policy_server.py` 和 `robot_client.py` 是旧的 constant-based LeRobot async inference 兼容入口。
-- `legacy/` 是旧 UDP teleoperation 参考实现。
-- `runtime/remote_teleop.py` 现在只是兼容导出，新代码应使用 `runtime/teleoperation.py`。
-
-详细说明见：
-
-```text
-docs/compatibility/LEGACY_ENTRYPOINTS_CN.md
-```
+如果未来确实需要恢复旧 UDP 或 constant-based smoke test，应新建独立 GSD 任务，并说明为什么不能通过当前 `scripts/` + `configs/` 主线完成。

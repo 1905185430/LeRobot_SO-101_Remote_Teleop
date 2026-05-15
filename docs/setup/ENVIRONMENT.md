@@ -1,6 +1,6 @@
 # Environment Setup
 
-This guide prepares the two-machine LAN setup used by the SO-101 + SmolVLA remote inference workflow and TCP teleoperation experiments. New experiments should use the config-driven YAML path under `configs/` with `scripts/run_server.py` and `scripts/run_client.py`. The constant-based `policy_server.py` and `robot_client.py` entrypoints remain available for minimal LeRobot async smoke tests.
+This guide prepares the two-machine LAN setup used by the SO-101 + SmolVLA remote inference workflow and TCP teleoperation experiments. Experiments use the config-driven YAML path under `configs/` with scripts under `scripts/`.
 
 ## GPU Server Setup
 
@@ -169,8 +169,8 @@ Dry-run support is available for validating runtime wiring and config resolution
 ```bash
 python3 scripts/run_server.py --config configs/remote_inference/so101_smolvla.yaml --dry-run
 python3 scripts/run_client.py --config configs/remote_inference/so101_smolvla.yaml --dry-run
-python3 scripts/run_server.py --config configs/teleop/remote_so101_tcp.yaml --dry-run
-python3 scripts/run_client.py --config configs/teleop/remote_so101_tcp.yaml --dry-run
+python3 scripts/run_teleop_follower.py --config configs/teleop/remote_so101_tcp.yaml --dry-run
+python3 scripts/run_teleop_leader.py --config configs/teleop/remote_so101_tcp.yaml --dry-run
 ```
 
 Dry-run does not validate:
@@ -192,8 +192,6 @@ Confirm the same run directory also contains:
 - `events.jsonl`
 
 For real config-driven startup, `python3 scripts/run_server.py --config ...` and `python3 scripts/run_client.py --config ...` create role-specific run directories under the configured `experiment.save_dir`. Each side writes `metadata.json`, `events.jsonl`, metrics files, `summary.md`, and a copy of the selected `config.yaml` when applicable.
-
-The constant-based `policy_server.py` and `robot_client.py` path still writes run artifacts under `logs/experiments/`, but it is now the compatibility/smoke-test path rather than the preferred experiment configuration path.
 
 ## 10-30 Minute LAN Experiment Readiness
 

@@ -1,2 +1,16 @@
 __pycache__/
 *.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local runtime artifacts
+logs/
+runs/
+
+# Local editor / assistant state
+.vscode/
+.codex/
+
+# Local generated assets
+map.png

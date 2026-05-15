@@ -24,9 +24,8 @@ SO-101 follower + OpenCV cameras + LeRobot async inference + SmolVLA
 
 | 能力 | 状态 |
 | --- | --- |
-| 常量版 LeRobot async server/client | 可用，入口是 `policy_server.py` 和 `robot_client.py` |
 | YAML/JSON 配置加载与校验 | 可用，入口是 `configs/*.yaml` |
-| 配置驱动 dry-run | 可用，三个 `scripts/run_*.py --dry-run` 都不会碰硬件 |
+| 配置驱动 dry-run | 可用，`scripts/` 下入口加 `--dry-run` 不会碰硬件 |
 | 配置驱动真实远程推理 | 已接入 LeRobot async config，入口是 `scripts/run_server.py` / `scripts/run_client.py` |
 | 配置驱动 TCP 遥操作 | 可用，SO-101 无线 TCP 遥操作和 StarAI 本地 TCP 遥操作均已跑通 |
 | debug mock TCP roundtrip | 可用，用 `configs/debug/debug_mock_robot.yaml` 测试协议和日志 |
@@ -58,6 +57,8 @@ configs/
 scripts/
   run_server.py                         # 配置驱动服务器入口
   run_client.py                         # 配置驱动客户端入口
+  run_teleop_follower.py                # TCP 遥操作 follower 入口
+  run_teleop_leader.py                  # TCP 遥操作 leader 入口
   run_local.py                          # 配置驱动本地入口
 
 lerobot_remote/
@@ -70,12 +71,9 @@ lerobot_remote/
   recording/                            # run directory、metadata、metrics、summary
   webui/                                # 可选 Gradio dashboard 状态和渲染
 
-legacy/
-  leader_sender.py                      # 旧 UDP leader 发送端
-  follower_receiver.py                  # 旧 UDP follower 接收端
 ```
 
-注意：旧实现包 `so101_remote/` 已在 Phase 6 中移除。项目代码、测试和文档中的 Python import 应使用 `lerobot_remote`。
+注意：旧实现包 `so101_remote/`、旧 root constant entrypoints、旧 UDP `legacy/` 路径均已移除。项目代码、测试和文档中的 Python import 应使用 `lerobot_remote`。
 
 ## 4. 配置文件怎么改
 
@@ -313,23 +311,16 @@ python3 scripts/run_server.py --config configs/remote_inference/so101_smolvla.ya
 python3 scripts/run_client.py --config configs/remote_inference/so101_smolvla.yaml
 ```
 
-如果你只想验证旧的最小 LeRobot async 路径，也可以继续使用常量版：
-
-```bash
-python3 policy_server.py
-python3 robot_client.py
-```
-
 如果你要运行 TCP 远程遥操作，先在 follower 机器上启动 server：
 
 ```bash
-python3 scripts/run_server.py --config configs/teleop/remote_so101_tcp.yaml
+python3 scripts/run_teleop_follower.py --config configs/teleop/remote_so101_tcp.yaml
 ```
 
 再在 leader 机器上启动 client：
 
 ```bash
-python3 scripts/run_client.py --config configs/teleop/remote_so101_tcp.yaml
+python3 scripts/run_teleop_leader.py --config configs/teleop/remote_so101_tcp.yaml
 ```
 
 配置里 `robot.port` 是 follower 机器上的串口，`teleop.port` 是 leader 机器上的串口。两台机器各自只需要改自己本机实际存在的串口。`network.server_host` 必须是 follower 机器在局域网或 Tailscale 中可访问的 IP。
@@ -338,17 +329,10 @@ StarAI 遥操作使用对应配置：
 
 ```bash
 # follower 机器
-python3 scripts/run_server.py --config configs/teleop/remote_starai_tcp.yaml
+python3 scripts/run_teleop_follower.py --config configs/teleop/remote_starai_tcp.yaml
 
 # leader 机器
-python3 scripts/run_client.py --config configs/teleop/remote_starai_tcp.yaml
-```
-
-如果你要做旧 UDP 遥操作参考实验，仍可使用：
-
-```bash
-python3 legacy/leader_sender.py --help
-python3 legacy/follower_receiver.py --help
+python3 scripts/run_teleop_leader.py --config configs/teleop/remote_starai_tcp.yaml
 ```
 
 ## 10. 后续优先级

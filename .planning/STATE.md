@@ -4,8 +4,8 @@ milestone: v1.0
 milestone_name: milestone
 status: ready
 stopped_at: Phase 6 executed and validated
-last_updated: "2026-05-15T09:01:45.000Z"
-last_activity: 2026-05-15 - Completed quick task 260515-mrg: Architecture understandability refactor for config-driven TCP teleop
+last_updated: "2026-05-15T09:05:39.000Z"
+last_activity: 2026-05-15 - Completed quick task 260515-nqp: Clean mainline codebase by removing legacy and compatibility paths
 progress:
   total_phases: 6
   completed_phases: 5
@@ -94,6 +94,7 @@ Progress: [██████████] 100%
 | 2026-05-11 | Document successful SO101 wireless teleoperation | Complete |
 | 2026-05-11 | Organize docs into topic folders | Complete |
 | 2026-05-15 | Architecture understandability refactor for config-driven TCP teleop | Complete |
+| 2026-05-15 | Clean mainline codebase by removing legacy and compatibility paths | Complete |
 
 ## Accumulated Context
 
@@ -133,7 +134,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 | Category | Item | Status | Deferred At |
 |----------|------|--------|-------------|
-| Teleoperation | Integrate legacy teleoperation into the new runtime/metrics framework | Deferred to v2 | Initialization |
 | Reporting | Charts, plots, and multi-run comparison | Deferred to v2 | Initialization |
 | Configuration | Full YAML configuration and CLI override system | Deferred to v2 | Initialization |
 | Integrations | Real PI-series policy adapter and second robot arm adapter | Deferred to v2 | Initialization |

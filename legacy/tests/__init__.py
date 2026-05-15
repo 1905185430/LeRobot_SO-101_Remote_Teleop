@@ -1,2 +1,0 @@
-"""Legacy UDP demo tests."""
-

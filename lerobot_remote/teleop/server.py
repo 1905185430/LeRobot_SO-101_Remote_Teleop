@@ -6,8 +6,6 @@ import socket
 import time
 from typing import Any, Mapping
 
-from legacy.protocol import ProtocolError as LegacyProtocolError
-
 from ..network.protocol import MSG_ACK, MSG_ACTION, ProtocolError, recv_message, send_message
 from ..recording.metrics import EVENT_EXCEPTION, EVENT_RECOVERY, LATENCY_MS, MetricEvent, MetricSample
 from ..recording.recorder import JsonlMetricsRecorder
@@ -76,10 +74,7 @@ class TcpTeleopFollowerServer:
             raise ProtocolError(
                 f"Out-of-order or duplicate ACTION frame_id={frame_id}, last={self.last_frame_id}."
             )
-        try:
-            action = normalize_teleop_action(message.get("action"))
-        except LegacyProtocolError as exc:
-            raise ProtocolError(str(exc)) from exc
+        action = normalize_teleop_action(message.get("action"))
 
         self.validate_action_keys(action)
         self.validate_first_action_delta(action)

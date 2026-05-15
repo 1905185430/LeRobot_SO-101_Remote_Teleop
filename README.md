@@ -6,18 +6,12 @@ If the architecture feels unclear, start with the Chinese architecture guide:
 
 - [docs/ARCHITECTURE_CN.md](docs/ARCHITECTURE_CN.md)
 
-For new experiments, prefer the config-driven scripts under `scripts/` and YAML files under `configs/`.
+Experiments are config-driven. Use the scripts under `scripts/` and YAML files under `configs/`.
 
 Recommended paths:
 
 - TCP teleoperation: `scripts/run_teleop_follower.py` and `scripts/run_teleop_leader.py`
 - Remote VLA inference: `scripts/run_server.py` and `scripts/run_client.py`
-
-Transitional compatibility paths:
-
-- `policy_server.py` and `robot_client.py` remain available for constant-based LeRobot async smoke tests.
-- `legacy/` remains available as the old custom UDP teleop reference.
-- See [docs/compatibility/LEGACY_ENTRYPOINTS_CN.md](docs/compatibility/LEGACY_ENTRYPOINTS_CN.md) before changing or removing these paths.
 
 The implementation package is now `lerobot_remote/`. It is split by responsibility into config, runtime, teleop, robots, policies, network, recording, and WebUI modules.
 
@@ -29,7 +23,7 @@ Before real hardware experiments, use [docs/setup/ENVIRONMENT.md](docs/setup/ENV
 
 ## Validation Status
 
-See [docs/validation/VALIDATION.md](docs/validation/VALIDATION.md) for the current validation matrix. The automated suite proves unit-only, dry-run-only, and retained legacy compatibility readiness, but it does not prove real SO-101 hardware, camera frames, SmolVLA model loading, physical control-loop stability, or 10-30 minute LAN endurance.
+See [docs/validation/VALIDATION.md](docs/validation/VALIDATION.md) for the current validation matrix. The automated suite proves unit-only and dry-run readiness, but it does not prove real SO-101 hardware, camera frames, SmolVLA model loading, physical control-loop stability, or 10-30 minute LAN endurance.
 
 ## Run: Config-Driven Paths
 
@@ -72,40 +66,6 @@ The generic commands still work for teleoperation, but the role-explicit command
 python3 scripts/run_server.py --config configs/teleop/remote_so101_tcp.yaml
 python3 scripts/run_client.py --config configs/teleop/remote_so101_tcp.yaml
 ```
-
-## Run: Constant-Based Compatibility
-
-On the server or GPU machine:
-
-```bash
-python3 policy_server.py
-```
-
-Before running it, edit these constants in [policy_server.py](policy_server.py):
-
-- `HOST`
-- `PORT`
-
-On the robot-side machine:
-
-```bash
-python3 robot_client.py
-```
-
-Before running it, edit these constants in [robot_client.py](robot_client.py):
-
-- `SERVER_ADDRESS`
-- `ROBOT_PORT`
-- `ROBOT_ID`
-- `CAMERAS`
-- `TASK`
-- `POLICY_TYPE`
-- `PRETRAINED_NAME_OR_PATH`
-- `POLICY_DEVICE`
-- `ACTIONS_PER_CHUNK`
-- `CHUNK_SIZE_THRESHOLD`
-- `AGGREGATE_FN_NAME`
-- `DEBUG_VISUALIZE_QUEUE_SIZE`
 
 ## Additional Dry-Runs
 
@@ -172,11 +132,6 @@ When you run the config-driven real paths, each side creates its own run directo
 - `python3 scripts/run_server.py --config ...` creates a server-role run directory such as `policy-server` or `tcp-teleop-follower`.
 - `python3 scripts/run_client.py --config ...` creates a client-role run directory such as `robot-client` or `tcp-teleop-leader`.
 
-The constant-based compatibility entrypoints still write under `logs/experiments/`:
-
-- `python3 policy_server.py` creates a `policy-server` run directory for the GPU/server process.
-- `python3 robot_client.py` creates a `robot-client` run directory for the robot-side process.
-
 Each real runtime run directory includes:
 
 - `metadata.json`
@@ -202,12 +157,6 @@ It does not validate real SO-101 hardware, camera frames, real SmolVLA loading, 
 - Camera keys in `camera.cameras` must match the keys expected by the model you trained or downloaded.
 - `experiment.task_name` should stay close to the instruction wording used in your data collection or fine-tuning.
 - `model.action_horizon` should not exceed what the policy supports.
-
-For the constant-based compatibility entrypoints, the equivalent fields are `ROBOT_ID`, `CAMERAS`, `TASK`, and `ACTIONS_PER_CHUNK`.
-
-## Legacy
-
-The old custom UDP teleop path is still under `legacy/`. It is retained compatibility/reference code and not the v1 main runtime path for inference experiments.
 
 Run tests with:
 
