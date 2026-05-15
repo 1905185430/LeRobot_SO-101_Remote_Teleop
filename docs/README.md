@@ -1,29 +1,12 @@
 # 文档目录
 
-本目录按主题组织项目文档。
+当前文档按职责拆分，避免重复维护同一套命令。
 
-## Setup
-
-| 文档 | 内容 |
+| 文档 | 用途 |
 | --- | --- |
+| [ARCHITECTURE_CN.md](ARCHITECTURE_CN.md) | 代码结构、调用链、TCP 遥操作心智模型。 |
 | [setup/ENVIRONMENT.md](setup/ENVIRONMENT.md) | 环境准备、网络检查、硬件实验前检查项。 |
-
-## Project
-
-| 文档 | 内容 |
-| --- | --- |
-| [project/PROJECT_CN.md](project/PROJECT_CN.md) | 中文项目说明、架构、运行模式和使用方式。 |
-
-## Reproduction
-
-| 文档 | 内容 |
-| --- | --- |
-| [reproduction/REPRODUCTION.md](reproduction/REPRODUCTION.md) | 总复现命令和测试命令。 |
+| [reproduction/REPRODUCTION.md](reproduction/REPRODUCTION.md) | 复现文档索引和自动化验证命令。 |
 | [reproduction/STARAI_LOCAL_TCP_TELEOP.md](reproduction/STARAI_LOCAL_TCP_TELEOP.md) | StarAI 本地 TCP 遥操作成功复现说明。 |
 | [reproduction/SO101_WIRELESS_TCP_TELEOP.md](reproduction/SO101_WIRELESS_TCP_TELEOP.md) | SO-101 无线 TCP 遥操作成功复现说明。 |
-
-## Validation
-
-| 文档 | 内容 |
-| --- | --- |
-| [validation/VALIDATION.md](validation/VALIDATION.md) | 当前验证矩阵、自动化测试边界和人工硬件验证边界。 |
+| [validation/VALIDATION.md](validation/VALIDATION.md) | 自动化测试边界和人工硬件验证边界。 |

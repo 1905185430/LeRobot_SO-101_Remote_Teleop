@@ -93,7 +93,7 @@ safety:
 ```bash
 cd ~/wjx/lerobot-remote-vla-teleop
 conda activate lerobot
-python3 scripts/run_server.py --config configs/teleop/remote_so101_tcp.yaml
+python3 scripts/run_teleop_follower.py --config configs/teleop/remote_so101_tcp.yaml
 ```
 
 期望看到：
@@ -109,7 +109,7 @@ TCP teleop follower listening on 192.168.1.151:9001
 ```bash
 cd ~/Documents/VLA+无线通信/lerobot-remote-vla-teleop
 conda activate lerobot
-python3 scripts/run_client.py --config configs/teleop/remote_so101_tcp.yaml
+python3 scripts/run_teleop_leader.py --config configs/teleop/remote_so101_tcp.yaml
 ```
 
 ## 停止顺序
@@ -209,8 +209,8 @@ First ACTION is too far from follower startup position
 不连接硬件，仅验证配置加载：
 
 ```bash
-python3 scripts/run_server.py --config configs/teleop/remote_so101_tcp.yaml --dry-run
-python3 scripts/run_client.py --config configs/teleop/remote_so101_tcp.yaml --dry-run
+python3 scripts/run_teleop_follower.py --config configs/teleop/remote_so101_tcp.yaml --dry-run
+python3 scripts/run_teleop_leader.py --config configs/teleop/remote_so101_tcp.yaml --dry-run
 ```
 
 ## 自动化测试

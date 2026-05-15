@@ -21,16 +21,7 @@ python3 scripts/run_teleop_follower.py --config configs/teleop/local_starai_tcp.
 python3 scripts/run_teleop_leader.py --config configs/teleop/local_starai_tcp.yaml
 ```
 
-这两个脚本比通用的 `run_server.py` / `run_client.py` 更适合操作者，因为它们直接说明了机械臂角色。
-
-通用入口仍然可用：
-
-```bash
-python3 scripts/run_server.py --config configs/teleop/local_starai_tcp.yaml
-python3 scripts/run_client.py --config configs/teleop/local_starai_tcp.yaml
-```
-
-但在 TCP 遥操作里，`server` 表示网络 server，也就是 follower；`client` 表示网络 client，也就是 leader。
+这两个脚本直接说明了机械臂角色，避免把网络 server/client 和机械臂 leader/follower 混在一起。
 
 ### 远程 VLA 推理
 
@@ -252,18 +243,3 @@ lerobot_remote/robots/starai.py
 ```text
 lerobot_remote/robots/so101.py
 ```
-
-## 7. 已清理的旧路径
-
-当前代码库只保留 config-driven 主线。
-
-以下旧路径已经移除：
-
-```text
-policy_server.py
-robot_client.py
-legacy/
-lerobot_remote/runtime/remote_teleop.py
-```
-
-如果未来确实需要恢复旧 UDP 或 constant-based smoke test，应新建独立 GSD 任务，并说明为什么不能通过当前 `scripts/` + `configs/` 主线完成。
