@@ -47,6 +47,23 @@ class ConfigLoaderTests(unittest.TestCase):
         self.assertTrue(config.logging.print_leader_actions)
         self.assertEqual(config.logging.print_action_interval, 10)
 
+    def test_load_local_so101_teleop_config(self) -> None:
+        config = load_config(ROOT / "configs" / "teleop" / "local_so101_tcp.yaml")
+
+        self.assertEqual(config.experiment.name, "so101_local_teleop_tcp")
+        self.assertEqual(config.mode, "remote_teleoperation")
+        self.assertEqual(config.network.endpoint, "127.0.0.1:9011")
+        self.assertEqual(config.robot.type, "so101_follower")
+        self.assertEqual(config.robot.port, "/dev/ttyACM1")
+        self.assertEqual(config.robot.id, "follower_arm")
+        self.assertEqual(config.robot.calibration_dir, "calibrations/robots/so_follower")
+        self.assertEqual(config.teleop.type, "so101_leader")
+        self.assertEqual(config.teleop.port, "/dev/ttyACM0")
+        self.assertEqual(config.teleop.id, "leader_arm")
+        self.assertEqual(config.teleop.calibration_dir, "calibrations/teleoperators/so_leader")
+        self.assertEqual(config.safety.action_min, -180)
+        self.assertEqual(config.safety.action_max, 180)
+
     def test_remote_teleoperation_requires_enabled_teleop(self) -> None:
         data = {
             "experiment": {"name": "bad", "mode": "remote_teleoperation"},
