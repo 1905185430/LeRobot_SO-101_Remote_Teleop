@@ -47,7 +47,7 @@ runtime:
 
 safety:
   max_action_delta: 2.0
-  max_first_action_delta: 25.0
+  max_first_action_delta: 55.0
   action_min: -180
   action_max: 180
   require_action_keys_match: true

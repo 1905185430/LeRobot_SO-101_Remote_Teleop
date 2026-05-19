@@ -47,8 +47,8 @@ runtime:
   hold_last_action_on_timeout: true
 
 safety:
-  max_action_delta: 1.0
-  max_first_action_delta: 12.0
+  max_action_delta: 4.0
+  max_first_action_delta: 50.0
   action_min: -100
   action_max: 100
   require_action_keys_match: true
