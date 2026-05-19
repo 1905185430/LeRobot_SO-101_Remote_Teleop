@@ -119,7 +119,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | 4. SO-101 SmolVLA Runtime Integration | 3/3 | Complete   | 2026-05-11 |
 | 5. Validation And Compatibility Hardening | 2/2 | Complete | 2026-05-11 |
 | 6. Generalize package architecture from so101_remote to lerobot_remote | 4/4 | Complete | 2026-05-15 |
-| 7. SO-101 Local TCP Dataset Replay Baseline | 0/TBD | Specified | - |
+| 7. SO-101 Local TCP Dataset Replay Baseline | 0/3 | Planned | - |
 
 ### Phase 6: Generalize package architecture from so101_remote to lerobot_remote
 
@@ -139,7 +139,14 @@ Plans:
 **Goal:** Reproduce an existing LeRobot SO-101 dataset through the local TCP teleoperation path by replaying dataset actions to a follower on `127.0.0.1`, with the dataset path selected from YAML and run artifacts proving what was replayed.
 **Requirements**: DATASET-TCP-01, DATASET-TCP-02, DATASET-TCP-03, DATASET-TCP-04, DATASET-TCP-05, DATASET-TCP-06, DATASET-TCP-07
 **Depends on:** Phase 6
-**Plans:** TBD after SPEC/discuss/plan
+**Plans:** 3 plans
 
 Plans:
-- [ ] 07-01: TBD by `$gsd-plan-phase 7` after SPEC/discuss.
+**Wave 1**
+- [ ] 07-01: Dataset replay config and action source foundation.
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 07-02: Dataset replay TCP client runtime.
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 07-03: Operator documentation and final validation.
