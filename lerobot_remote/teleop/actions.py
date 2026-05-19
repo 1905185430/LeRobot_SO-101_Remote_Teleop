@@ -50,4 +50,4 @@ def _normalize_so101_action(action: Any) -> dict[str, float]:
             f"Expected action length {EXPECTED_SO101_ACTION_LENGTH}, got {len(normalized_values)}."
         )
 
-    return dict(zip(SO101_ACTION_KEYS, normalized_values, strict=True))
+    return dict(zip(SO101_ACTION_KEYS, normalized_values))
