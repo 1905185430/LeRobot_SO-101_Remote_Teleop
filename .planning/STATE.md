@@ -5,7 +5,7 @@ milestone_name: milestone
 status: ready
 stopped_at: Phase 6 executed and validated
 last_updated: "2026-05-19T14:22:22.000Z"
-last_activity: 2026-05-19 - Completed quick task 260519-ltc: Document local SO-101 TCP teleoperation
+last_activity: 2026-05-19 - Added Phase 7 SPEC for SO-101 local TCP dataset replay baseline
 progress:
   total_phases: 6
   completed_phases: 5
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-05-11)
 
 ## Current Position
 
-Phase: 06
-Plan: Complete
-Status: Executed and validated
-Last activity: 2026-05-19 -- Completed quick task 260519-ltc: Document local SO-101 TCP teleoperation
+Phase: 07
+Plan: SPEC
+Status: Specified, ready for discuss-phase
+Last activity: 2026-05-19 -- Added Phase 7 SPEC for SO-101 local TCP dataset replay baseline
 
 Progress: [██████████] 100%
 
@@ -126,6 +126,7 @@ Recent decisions affecting current work:
 ### Roadmap Evolution
 
 - Phase 6 completed: Generalize package architecture from so101_remote to lerobot_remote
+- Phase 7 added: SO-101 local TCP dataset replay baseline before remote TCP dataset replay
 
 ### Blockers/Concerns
 

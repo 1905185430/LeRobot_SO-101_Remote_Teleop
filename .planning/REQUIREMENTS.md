@@ -115,6 +115,16 @@ Deferred to future releases. These are in the project roadmap but should not blo
 - **VAL-01**: Validation documentation separates `unit-only`, `dry-run-only`, `real LeRobot required`, `hardware-required`, and `10-30 min LAN required` checks.
 - **VAL-02**: Validation documentation keeps real LAN/hardware UAT pending unless it has actually been performed.
 
+### Dataset TCP Replay
+
+- **DATASET-TCP-01**: Operator can select an existing LeRobot SO-101 dataset from YAML by local dataset path.
+- **DATASET-TCP-02**: Runtime can replay selected dataset episode actions through the TCP teleoperation client path instead of reading a physical leader arm.
+- **DATASET-TCP-03**: Local baseline uses one machine and `127.0.0.1` TCP first; two-machine remote TCP replay is a follow-up phase.
+- **DATASET-TCP-04**: Replay validates SO-101 action keys, value ranges, first-action delta, and per-frame delta limits with the existing teleoperation safety model.
+- **DATASET-TCP-05**: Replay run artifacts record dataset path, selected episode ids, frame count, replay frequency, TCP endpoint, safety settings, and any skipped/failed frames.
+- **DATASET-TCP-06**: Replay provides a hardware-free validation path using fake dataset/fake follower data so parsing, TCP send, metrics, and artifact generation can be tested before real SO-101 runs.
+- **DATASET-TCP-07**: Documentation explains local dataset replay prerequisites, YAML fields, startup order, validation commands, and boundaries versus dataset collection and remote two-machine replay.
+
 ## Out of Scope
 
 Explicitly excluded from the initial roadmap.
@@ -178,12 +188,20 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CONF-01 | Phase 1 | Complete |
 | CONF-02 | Phase 1 | Complete |
 | CONF-03 | Phase 1 | Complete |
+| DATASET-TCP-01 | Phase 7 | Pending |
+| DATASET-TCP-02 | Phase 7 | Pending |
+| DATASET-TCP-03 | Phase 7 | Pending |
+| DATASET-TCP-04 | Phase 7 | Pending |
+| DATASET-TCP-05 | Phase 7 | Pending |
+| DATASET-TCP-06 | Phase 7 | Pending |
+| DATASET-TCP-07 | Phase 7 | Pending |
 
 **Coverage:**
 - v1 requirements: 44 total
-- Mapped to phases: 44
+- Dataset TCP replay requirements: 7 total
+- Mapped to phases: 51
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-05-11*
-*Last updated: 2026-05-11 after roadmap creation*
+*Last updated: 2026-05-19 after Phase 7 dataset TCP replay specification*
