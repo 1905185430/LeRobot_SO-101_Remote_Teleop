@@ -5,7 +5,7 @@ milestone_name: milestone
 status: ready
 stopped_at: Phase 6 executed and validated
 last_updated: "2026-05-19T14:22:22.000Z"
-last_activity: 2026-05-19 - Added Phase 7 SPEC for SO-101 local TCP dataset replay baseline
+last_activity: 2026-05-19 - Captured Phase 7 context for SO-101 local TCP dataset replay baseline
 progress:
   total_phases: 6
   completed_phases: 5
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-05-11)
 ## Current Position
 
 Phase: 07
-Plan: SPEC
-Status: Specified, ready for discuss-phase
-Last activity: 2026-05-19 -- Added Phase 7 SPEC for SO-101 local TCP dataset replay baseline
+Plan: Context
+Status: Context gathered, ready for plan-phase
+Last activity: 2026-05-19 -- Captured Phase 7 context for SO-101 local TCP dataset replay baseline
 
 Progress: [██████████] 100%
 
@@ -146,4 +146,4 @@ Items acknowledged and carried forward from previous milestone close:
 
 Last session: 2026-05-12T02:09:57.647Z
 Stopped at: Phase 6 executed and validated
-Resume file: .planning/phases/06-generalize-package-architecture-from-so101-remote-to-lerobot/06-04-SUMMARY.md
+Resume file: .planning/phases/07-so101-local-tcp-dataset-replay-baseline/07-CONTEXT.md
