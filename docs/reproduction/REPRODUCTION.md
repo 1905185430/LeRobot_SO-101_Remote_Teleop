@@ -12,6 +12,7 @@ conda activate lerobot
 | 场景 | 文档 | 配置 |
 | --- | --- | --- |
 | StarAI 本地 TCP 遥操作 | [STARAI_LOCAL_TCP_TELEOP.md](STARAI_LOCAL_TCP_TELEOP.md) | `configs/teleop/local_starai_tcp.yaml` |
+| SO-101 本地 TCP 遥操作 | [SO101_LOCAL_TCP_TELEOP.md](SO101_LOCAL_TCP_TELEOP.md) | `configs/teleop/local_so101_tcp.yaml` |
 | SO-101 无线 TCP 遥操作 | [SO101_WIRELESS_TCP_TELEOP.md](SO101_WIRELESS_TCP_TELEOP.md) | `configs/teleop/remote_so101_tcp.yaml` |
 
 ## 快速 Dry-Run
@@ -35,6 +36,13 @@ SO-101 无线 TCP 遥操作：
 ```bash
 python3 scripts/run_teleop_follower.py --config configs/teleop/remote_so101_tcp.yaml --dry-run
 python3 scripts/run_teleop_leader.py --config configs/teleop/remote_so101_tcp.yaml --dry-run
+```
+
+SO-101 本地 TCP 遥操作：
+
+```bash
+python3 scripts/run_teleop_follower.py --config configs/teleop/local_so101_tcp.yaml --dry-run
+python3 scripts/run_teleop_leader.py --config configs/teleop/local_so101_tcp.yaml --dry-run
 ```
 
 ## 自动化验证
