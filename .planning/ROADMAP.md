@@ -119,7 +119,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | 4. SO-101 SmolVLA Runtime Integration | 3/3 | Complete   | 2026-05-11 |
 | 5. Validation And Compatibility Hardening | 2/2 | Complete | 2026-05-11 |
 | 6. Generalize package architecture from so101_remote to lerobot_remote | 4/4 | Complete | 2026-05-15 |
-| 7. SO-101 Local TCP Dataset Replay Baseline | 1/3 | In Progress | - |
+| 7. SO-101 Local TCP Dataset Replay Baseline | 2/3 | In Progress | - |
 
 ### Phase 6: Generalize package architecture from so101_remote to lerobot_remote
 
@@ -146,7 +146,7 @@ Plans:
 - [x] 07-01: Dataset replay config and action source foundation.
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 07-02: Dataset replay TCP client runtime.
+- [x] 07-02: Dataset replay TCP client runtime.
 
 **Wave 3** *(blocked on Wave 2 completion)*
 - [ ] 07-03: Operator documentation and final validation.
