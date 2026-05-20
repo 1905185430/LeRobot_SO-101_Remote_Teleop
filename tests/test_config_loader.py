@@ -232,6 +232,13 @@ camera:
                 "configs/remote_inference/so101_smolvla.yaml",
                 "--dry-run",
             ],
+            [
+                sys.executable,
+                "scripts/run_dataset_replay_client.py",
+                "--config",
+                "configs/replay/local_so101_tcp_dataset.yaml",
+                "--dry-run",
+            ],
         ]
 
         for command in commands:
