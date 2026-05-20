@@ -64,6 +64,21 @@ class ConfigLoaderTests(unittest.TestCase):
         self.assertEqual(config.safety.action_min, -180)
         self.assertEqual(config.safety.action_max, 180)
 
+    def test_load_local_so101_dataset_replay_config(self) -> None:
+        config = load_config(ROOT / "configs" / "replay" / "local_so101_tcp_dataset.yaml")
+
+        self.assertEqual(config.experiment.name, "so101_local_tcp_dataset_replay")
+        self.assertEqual(config.mode, "remote_teleoperation")
+        self.assertEqual(config.network.endpoint, "127.0.0.1:9012")
+        self.assertEqual(config.dataset.path, "/tmp/lerobot/so101_dataset")
+        self.assertEqual(config.dataset.episode, 0)
+        self.assertEqual(config.dataset.start_frame, 0)
+        self.assertEqual(config.dataset.end_frame, -1)
+        self.assertEqual(config.dataset.timing, "fixed_hz")
+        self.assertEqual(config.dataset.replay_frequency, 50.0)
+        self.assertEqual(config.robot.type, "so101_follower")
+        self.assertEqual(config.teleop.type, "so101_leader")
+
     def test_remote_teleoperation_requires_enabled_teleop(self) -> None:
         data = {
             "experiment": {"name": "bad", "mode": "remote_teleoperation"},

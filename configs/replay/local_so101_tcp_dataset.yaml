@@ -1,0 +1,79 @@
+experiment:
+  name: so101_local_tcp_dataset_replay
+  mode: remote_teleoperation
+  task_name: local_dataset_replay_so101
+  save_dir: runs/so101_local_tcp_dataset_replay
+
+dataset:
+  path: /tmp/lerobot/so101_dataset
+  episode: 0
+  start_frame: 0
+  end_frame: -1
+  timing: fixed_hz
+  replay_frequency: 50
+
+robot:
+  type: so101_follower
+  port: /dev/ttyACM1
+  id: follower_arm
+  calibration_dir: calibrations/robots/so_follower
+
+teleop:
+  enabled: true
+  type: so101_leader
+  port: /dev/ttyACM0
+  id: dataset_replay
+  calibration_dir: calibrations/teleoperators/so_leader
+
+model:
+  type: mock
+  model_path: ""
+  device: cpu
+  dtype: float32
+  action_horizon: 1
+  inference_frequency: 30
+
+camera:
+  enabled: false
+  fps: 30
+  cameras:
+
+network:
+  protocol: tcp
+  server_host: 127.0.0.1
+  server_port: 9012
+  timeout_ms: 200
+  reconnect: true
+  max_packet_size_mb: 4
+
+runtime:
+  control_frequency: 50
+  observation_frequency: 50
+  action_send_frequency: 50
+  safety_stop_on_timeout: true
+  hold_last_action_on_timeout: true
+
+safety:
+  max_action_delta: 2.0
+  max_first_action_delta: 55.0
+  action_min: -180
+  action_max: 180
+  require_action_keys_match: true
+
+webui:
+  enabled: true
+  host: 127.0.0.1
+  port: 7862
+  show_images: false
+  show_joint_states: true
+  show_latency: true
+  show_actions: true
+
+logging:
+  save_video: false
+  save_metrics: true
+  save_observations: false
+  save_actions: true
+  log_level: info
+  print_leader_actions: true
+  print_action_interval: 10
