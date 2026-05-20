@@ -1,12 +1,18 @@
 from __future__ import annotations
 
+from dataclasses import replace
+import json
+import socket
 import sys
+import threading
 import types
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
+import time
 from unittest import mock
 
+from lerobot_remote.config.loader import load_config
 from lerobot_remote.config.schema import DatasetReplayConfig
 from lerobot_remote.replay import (
     DatasetReplayError,
@@ -15,6 +21,8 @@ from lerobot_remote.replay import (
     LeRobotDatasetActionSource,
     require_dataset_path,
 )
+from lerobot_remote.runtime import run_dataset_replay_client
+from lerobot_remote.teleop import TcpTeleopFollowerServer, tcp_teleop_settings
 from lerobot_remote.teleop.settings import TcpTeleopSettings
 
 
@@ -45,6 +53,17 @@ class FakeLeRobotDataset:
 
     def __getitem__(self, index):
         return self.samples[index]
+
+
+class FakeFollower:
+    def __init__(self) -> None:
+        self.actions: list[dict[str, float]] = []
+
+    def send_action(self, action) -> None:
+        self.actions.append(dict(action))
+
+    def get_observation(self) -> dict[str, float]:
+        return {key: 0.0 for key in JOINTS}
 
 
 class DatasetReplayTests(unittest.TestCase):
@@ -141,6 +160,118 @@ class DatasetReplayTests(unittest.TestCase):
         with self.assertRaisesRegex(Exception, "outside"):
             client.build_action_message(list(source)[0])
 
+    def test_dataset_replay_tcp_roundtrip_with_fake_follower(self) -> None:
+        host, port = _free_local_endpoint()
+        with TemporaryDirectory() as tmpdir:
+            config = _with_endpoint(load_config("configs/replay/local_so101_tcp_dataset.yaml"), tmpdir, host, port)
+            config = replace(
+                config,
+                safety=replace(config.safety, max_first_action_delta=200.0, max_action_delta=200.0),
+            )
+            settings = tcp_teleop_settings(config)
+            follower = FakeFollower()
+            server = TcpTeleopFollowerServer(follower, settings)
+            source = InMemoryDatasetActionSource([JOINTS, {key: value + 0.1 for key, value in JOINTS.items()}], replay_frequency=1000)
+            client = DatasetReplayTcpClient(source, source.info, settings)
+            errors: list[BaseException] = []
+
+            def serve() -> None:
+                try:
+                    server.run(max_messages=2)
+                except BaseException as exc:  # pragma: no cover - surfaced below
+                    errors.append(exc)
+
+            thread = threading.Thread(target=serve, daemon=True)
+            thread.start()
+            time.sleep(0.02)
+
+            result = client.run()
+            thread.join(timeout=2.0)
+
+        self.assertEqual(result, 0)
+        self.assertFalse(errors)
+        self.assertFalse(thread.is_alive())
+        self.assertEqual(len(follower.actions), 2)
+        self.assertEqual(follower.actions[0], JOINTS)
+
+    def test_runtime_writes_dataset_replay_artifacts_for_fake_run(self) -> None:
+        host, port = _free_local_endpoint()
+        with TemporaryDirectory() as tmpdir:
+            config = _with_endpoint(load_config("configs/replay/local_so101_tcp_dataset.yaml"), tmpdir, host, port)
+            config = replace(
+                config,
+                safety=replace(config.safety, max_first_action_delta=200.0, max_action_delta=200.0),
+            )
+            settings = tcp_teleop_settings(config)
+            follower = FakeFollower()
+            server = TcpTeleopFollowerServer(follower, settings)
+            errors: list[BaseException] = []
+
+            def serve() -> None:
+                try:
+                    server.run(max_messages=1)
+                except BaseException as exc:  # pragma: no cover - surfaced below
+                    errors.append(exc)
+
+            thread = threading.Thread(target=serve, daemon=True)
+            thread.start()
+            time.sleep(0.02)
+
+            result = run_dataset_replay_client(
+                config,
+                source_factory=lambda _config: InMemoryDatasetActionSource(
+                    [JOINTS],
+                    dataset_path=_config.dataset.path or "",
+                    episode=_config.dataset.episode,
+                    replay_frequency=1000,
+                ),
+            )
+            thread.join(timeout=2.0)
+            run_dirs = sorted(Path(tmpdir).glob("*-dataset-replay-client-*"))
+            self.assertEqual(result, 0)
+            self.assertFalse(errors)
+            self.assertFalse(thread.is_alive())
+            self.assertEqual(len(follower.actions), 1)
+            self.assertEqual(len(run_dirs), 1)
+            run_dir = run_dirs[0]
+            for artifact in (
+                "metadata.json",
+                "events.jsonl",
+                "metrics.jsonl",
+                "metrics.csv",
+                "summary.md",
+                "config.yaml",
+            ):
+                self.assertTrue((run_dir / artifact).exists(), artifact)
+            metadata = json.loads((run_dir / "metadata.json").read_text(encoding="utf-8"))
+            replay_metadata = metadata["extra"]["dataset_replay"]
+            self.assertEqual(replay_metadata["dataset_path"], "/tmp/lerobot/so101_dataset")
+            self.assertEqual(replay_metadata["episode"], 0)
+            self.assertEqual(replay_metadata["frame_count"], 1)
+            self.assertEqual(metadata["extra"]["tcp_endpoint"], f"{host}:{port}")
+            self.assertIn(
+                "dataset_replay_complete",
+                (run_dir / "events.jsonl").read_text(encoding="utf-8"),
+            )
+
+    def test_runtime_validates_dataset_path_before_socket_connection(self) -> None:
+        with TemporaryDirectory() as tmpdir:
+            missing = Path(tmpdir) / "missing-dataset"
+            config = replace(
+                load_config("configs/replay/local_so101_tcp_dataset.yaml"),
+                experiment=replace(
+                    load_config("configs/replay/local_so101_tcp_dataset.yaml").experiment,
+                    save_dir=tmpdir,
+                ),
+                dataset=DatasetReplayConfig(path=str(missing)),
+            )
+
+            with mock.patch("socket.create_connection") as create_connection:
+                with self.assertRaisesRegex(DatasetReplayError, "does not exist"):
+                    run_dataset_replay_client(config)
+
+        create_connection.assert_not_called()
+
 
 def _settings() -> TcpTeleopSettings:
     return TcpTeleopSettings(
@@ -160,6 +291,23 @@ def _settings() -> TcpTeleopSettings:
         require_action_keys_match=True,
         print_leader_actions=False,
         print_action_interval=10,
+    )
+
+
+def _free_local_endpoint() -> tuple[str, int]:
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.bind(("127.0.0.1", 0))
+    host, port = sock.getsockname()
+    sock.close()
+    return host, port
+
+
+def _with_endpoint(config, save_dir: str, host: str, port: int):
+    return replace(
+        config,
+        experiment=replace(config.experiment, save_dir=save_dir),
+        network=replace(config.network, server_host=host, server_port=port, timeout_ms=1000),
+        runtime=replace(config.runtime, action_send_frequency=1000.0, control_frequency=1000.0),
     )
 
 
