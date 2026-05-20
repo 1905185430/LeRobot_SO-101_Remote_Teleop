@@ -30,6 +30,10 @@ Run the automated suite with:
 python3 -m unittest discover -s tests -v
 ```
 
+## Hardware Prevalidation Guides
+
+- `docs/validation/SO101_LOCAL_TCP_DATASET_REPLAY_PREVALIDATION.md` records the real-machine prevalidation checklist for local SO-101 TCP dataset replay. Use it before moving a successful result into `docs/reproduction/`.
+
 ## v2 Continuation Path
 
 The folded todo `Plan multi-arm wireless teleoperation and VLA inference` is represented here as future-work documentation only. It does not authorize Phase 5 implementation.

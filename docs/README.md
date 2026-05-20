@@ -10,3 +10,4 @@
 | [reproduction/STARAI_LOCAL_TCP_TELEOP.md](reproduction/STARAI_LOCAL_TCP_TELEOP.md) | StarAI 本地 TCP 遥操作成功复现说明。 |
 | [reproduction/SO101_WIRELESS_TCP_TELEOP.md](reproduction/SO101_WIRELESS_TCP_TELEOP.md) | SO-101 无线 TCP 遥操作成功复现说明。 |
 | [validation/VALIDATION.md](validation/VALIDATION.md) | 自动化测试边界和人工硬件验证边界。 |
+| [validation/SO101_LOCAL_TCP_DATASET_REPLAY_PREVALIDATION.md](validation/SO101_LOCAL_TCP_DATASET_REPLAY_PREVALIDATION.md) | SO-101 本地 TCP 数据集复现的真机预验证检查表。 |

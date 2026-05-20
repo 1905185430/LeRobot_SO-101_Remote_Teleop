@@ -101,6 +101,7 @@ Progress: [██████████] 100%
 | 2026-05-15 | Trim duplicate documentation and stale teleop commands | Complete |
 | 2026-05-15 | Add SO-101 local TCP teleop config | Complete |
 | 2026-05-19 | Document local SO-101 TCP teleoperation | Complete |
+| 2026-05-20 | Add SO-101 local TCP dataset replay prevalidation guide | Complete |
 
 ## Accumulated Context
 
