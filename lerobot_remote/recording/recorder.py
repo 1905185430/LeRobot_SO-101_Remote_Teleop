@@ -148,6 +148,14 @@ class JsonlMetricsRecorder:
         for event in events:
             self.record_event(event)
 
+    def update_metadata(self, values: Mapping[str, object]) -> None:
+        """Merge and rewrite run metadata after runtime-only details are known."""
+        self.metadata.update(dict(values))
+        self.metadata_path.write_text(
+            json.dumps(self.metadata, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+
     def write_summary(self) -> Path:
         return write_summary_markdown(self.run_dir, self.metadata, self.samples, self.events)
 
