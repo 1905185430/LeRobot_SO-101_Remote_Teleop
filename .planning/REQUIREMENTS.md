@@ -188,13 +188,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CONF-01 | Phase 1 | Complete |
 | CONF-02 | Phase 1 | Complete |
 | CONF-03 | Phase 1 | Complete |
-| DATASET-TCP-01 | Phase 7 | Pending |
-| DATASET-TCP-02 | Phase 7 | Pending |
-| DATASET-TCP-03 | Phase 7 | Pending |
-| DATASET-TCP-04 | Phase 7 | Pending |
-| DATASET-TCP-05 | Phase 7 | Pending |
-| DATASET-TCP-06 | Phase 7 | Pending |
-| DATASET-TCP-07 | Phase 7 | Pending |
+| DATASET-TCP-01 | Phase 7 | Complete |
+| DATASET-TCP-02 | Phase 7 | Complete |
+| DATASET-TCP-03 | Phase 7 | Complete |
+| DATASET-TCP-04 | Phase 7 | Complete |
+| DATASET-TCP-05 | Phase 7 | Complete |
+| DATASET-TCP-06 | Phase 7 | Complete |
+| DATASET-TCP-07 | Phase 7 | Complete |
 
 **Coverage:**
 - v1 requirements: 44 total
