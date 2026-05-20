@@ -15,6 +15,7 @@ VALID_MODES = {
     "debug_mock",
 }
 VALID_NETWORK_PROTOCOLS = {"tcp"}
+VALID_DATASET_TIMING_MODES = {"fixed_hz", "source_timestamps"}
 
 
 class ConfigError(ValueError):
@@ -128,6 +129,16 @@ class LoggingConfig:
 
 
 @dataclass(frozen=True)
+class DatasetReplayConfig:
+    path: str | None = None
+    episode: int = 0
+    start_frame: int = 0
+    end_frame: int = -1
+    timing: str = "fixed_hz"
+    replay_frequency: float = 30.0
+
+
+@dataclass(frozen=True)
 class PlatformConfig:
     experiment: ExperimentConfig
     robot: RobotConfig
@@ -139,6 +150,7 @@ class PlatformConfig:
     safety: SafetyConfig
     webui: WebUIConfig
     logging: LoggingConfig
+    dataset: DatasetReplayConfig
     source_path: Path | None = None
 
     @property
@@ -159,6 +171,14 @@ class PlatformConfig:
             },
             "camera_names": sorted(self.camera.cameras),
             "webui_enabled": self.webui.enabled,
+            "dataset": {
+                "path": self.dataset.path,
+                "episode": self.dataset.episode,
+                "start_frame": self.dataset.start_frame,
+                "end_frame": self.dataset.end_frame,
+                "timing": self.dataset.timing,
+                "replay_frequency": self.dataset.replay_frequency,
+            },
             "source_path": None if self.source_path is None else str(self.source_path),
         }
 
@@ -177,6 +197,7 @@ def platform_config_from_mapping(
     safety = _safety(_section(data, "safety"))
     webui = _webui(_section(data, "webui"))
     logging = _logging(_section(data, "logging"))
+    dataset = _dataset(_section(data, "dataset"), has_section="dataset" in data)
 
     _validate_mode(experiment, teleop)
     return PlatformConfig(
@@ -190,6 +211,7 @@ def platform_config_from_mapping(
         safety=safety,
         webui=webui,
         logging=logging,
+        dataset=dataset,
         source_path=None if source_path is None else Path(source_path),
     )
 
@@ -344,6 +366,37 @@ def _logging(data: Mapping[str, Any]) -> LoggingConfig:
     if logging.print_action_interval <= 0:
         raise ConfigError("logging.print_action_interval must be > 0.")
     return logging
+
+
+def _dataset(data: Mapping[str, Any], *, has_section: bool) -> DatasetReplayConfig:
+    path = _optional_str(data, "path")
+    if has_section and path is None:
+        raise ConfigError("dataset.path is required when dataset section is provided.")
+
+    dataset = DatasetReplayConfig(
+        path=path,
+        episode=_int(data, "episode", default=0),
+        start_frame=_int(data, "start_frame", default=0),
+        end_frame=_int(data, "end_frame", default=-1),
+        timing=_str(data, "timing", default="fixed_hz"),
+        replay_frequency=_float(data, "replay_frequency", default=30.0),
+    )
+    if dataset.episode < 0:
+        raise ConfigError("dataset.episode must be >= 0.")
+    if dataset.start_frame < 0:
+        raise ConfigError("dataset.start_frame must be >= 0.")
+    if dataset.end_frame < -1:
+        raise ConfigError("dataset.end_frame must be -1 or >= dataset.start_frame.")
+    if dataset.end_frame != -1 and dataset.end_frame < dataset.start_frame:
+        raise ConfigError("dataset.end_frame must be -1 or >= dataset.start_frame.")
+    if dataset.timing not in VALID_DATASET_TIMING_MODES:
+        raise ConfigError(
+            f"Unsupported dataset.timing '{dataset.timing}'. "
+            f"Expected one of: {', '.join(sorted(VALID_DATASET_TIMING_MODES))}."
+        )
+    if dataset.replay_frequency <= 0:
+        raise ConfigError("dataset.replay_frequency must be > 0.")
+    return dataset
 
 
 def _validate_mode(experiment: ExperimentConfig, teleop: TeleopConfig) -> None:

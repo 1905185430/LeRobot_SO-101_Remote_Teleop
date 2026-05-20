@@ -109,6 +109,68 @@ class ConfigLoaderTests(unittest.TestCase):
         with self.assertRaisesRegex(ConfigError, "print_action_interval"):
             platform_config_from_mapping(data)
 
+    def test_dataset_replay_section_is_loaded(self) -> None:
+        data = {
+            "experiment": {"name": "dataset-replay", "mode": "remote_teleoperation"},
+            "robot": {"type": "so101_follower", "port": "/dev/ttyACM1"},
+            "teleop": {"enabled": True, "type": "so101_leader", "port": "/dev/ttyACM0"},
+            "model": {"type": "mock"},
+            "dataset": {
+                "path": "/tmp/lerobot/example",
+                "episode": 1,
+                "start_frame": 2,
+                "end_frame": 8,
+                "timing": "fixed_hz",
+                "replay_frequency": 50,
+            },
+        }
+
+        config = platform_config_from_mapping(data)
+
+        self.assertEqual(config.dataset.path, "/tmp/lerobot/example")
+        self.assertEqual(config.dataset.episode, 1)
+        self.assertEqual(config.dataset.start_frame, 2)
+        self.assertEqual(config.dataset.end_frame, 8)
+        self.assertEqual(config.dataset.timing, "fixed_hz")
+        self.assertEqual(config.dataset.replay_frequency, 50.0)
+        self.assertEqual(config.summary()["dataset"]["path"], "/tmp/lerobot/example")
+
+    def test_dataset_section_requires_path_when_present(self) -> None:
+        data = {
+            "experiment": {"name": "dataset-replay", "mode": "remote_teleoperation"},
+            "robot": {"type": "so101_follower", "port": "/dev/ttyACM1"},
+            "teleop": {"enabled": True, "type": "so101_leader", "port": "/dev/ttyACM0"},
+            "model": {"type": "mock"},
+            "dataset": {"episode": 0},
+        }
+
+        with self.assertRaisesRegex(ConfigError, "dataset.path"):
+            platform_config_from_mapping(data)
+
+    def test_dataset_timing_is_validated(self) -> None:
+        data = {
+            "experiment": {"name": "dataset-replay", "mode": "remote_teleoperation"},
+            "robot": {"type": "so101_follower", "port": "/dev/ttyACM1"},
+            "teleop": {"enabled": True, "type": "so101_leader", "port": "/dev/ttyACM0"},
+            "model": {"type": "mock"},
+            "dataset": {"path": "/tmp/lerobot/example", "timing": "fastish"},
+        }
+
+        with self.assertRaisesRegex(ConfigError, "Unsupported dataset.timing"):
+            platform_config_from_mapping(data)
+
+    def test_dataset_frame_range_is_validated(self) -> None:
+        data = {
+            "experiment": {"name": "dataset-replay", "mode": "remote_teleoperation"},
+            "robot": {"type": "so101_follower", "port": "/dev/ttyACM1"},
+            "teleop": {"enabled": True, "type": "so101_leader", "port": "/dev/ttyACM0"},
+            "model": {"type": "mock"},
+            "dataset": {"path": "/tmp/lerobot/example", "start_frame": 10, "end_frame": 2},
+        }
+
+        with self.assertRaisesRegex(ConfigError, "dataset.end_frame"):
+            platform_config_from_mapping(data)
+
     def test_simple_yaml_parser_handles_nested_mapping_and_scalars(self) -> None:
         parsed = parse_simple_yaml(
             """
