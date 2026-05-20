@@ -13,6 +13,7 @@ conda activate lerobot
 | --- | --- | --- |
 | StarAI 本地 TCP 遥操作 | [STARAI_LOCAL_TCP_TELEOP.md](STARAI_LOCAL_TCP_TELEOP.md) | `configs/teleop/local_starai_tcp.yaml` |
 | SO-101 本地 TCP 遥操作 | [SO101_LOCAL_TCP_TELEOP.md](SO101_LOCAL_TCP_TELEOP.md) | `configs/teleop/local_so101_tcp.yaml` |
+| SO-101 本地 TCP 数据集复现 | [SO101_LOCAL_TCP_DATASET_REPLAY.md](SO101_LOCAL_TCP_DATASET_REPLAY.md) | `configs/replay/local_so101_tcp_dataset.yaml` |
 | SO-101 无线 TCP 遥操作 | [SO101_WIRELESS_TCP_TELEOP.md](SO101_WIRELESS_TCP_TELEOP.md) | `configs/teleop/remote_so101_tcp.yaml` |
 
 ## 快速 Dry-Run
@@ -45,12 +46,19 @@ python3 scripts/run_teleop_follower.py --config configs/teleop/local_so101_tcp.y
 python3 scripts/run_teleop_leader.py --config configs/teleop/local_so101_tcp.yaml --dry-run
 ```
 
+SO-101 本地 TCP 数据集复现：
+
+```bash
+python3 scripts/run_dataset_replay_client.py --config configs/replay/local_so101_tcp_dataset.yaml --dry-run
+python3 scripts/run_teleop_follower.py --config configs/replay/local_so101_tcp_dataset.yaml --dry-run
+```
+
 ## 自动化验证
 
 核心测试：
 
 ```bash
-python3 -m unittest tests.test_config_loader tests.test_starai tests.test_tcp_teleop -v
+python3 -m unittest tests.test_config_loader tests.test_starai tests.test_tcp_teleop tests.test_dataset_replay -v
 ```
 
 完整测试：
