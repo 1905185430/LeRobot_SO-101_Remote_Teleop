@@ -10,10 +10,12 @@ from unittest import mock
 from lerobot_remote.config.schema import DatasetReplayConfig
 from lerobot_remote.replay import (
     DatasetReplayError,
+    DatasetReplayTcpClient,
     InMemoryDatasetActionSource,
     LeRobotDatasetActionSource,
     require_dataset_path,
 )
+from lerobot_remote.teleop.settings import TcpTeleopSettings
 
 
 JOINTS = {
@@ -115,6 +117,50 @@ class DatasetReplayTests(unittest.TestCase):
         self.assertEqual([frame.dataset_index for frame in frames], [1, 2])
         self.assertEqual([frame.timestamp_s for frame in frames], [0.02, 0.04])
         self.assertEqual(frames[0].action["shoulder_pan.pos"], 1.0)
+
+    def test_tcp_client_builds_dataset_action_message(self) -> None:
+        source = InMemoryDatasetActionSource([JOINTS], dataset_path="/tmp/demo")
+        client = DatasetReplayTcpClient(
+            source,
+            source.info,
+            _settings(),
+        )
+
+        message = client.build_action_message(list(source)[0])
+
+        self.assertEqual(message["type"], "ACTION")
+        self.assertEqual(message["frame_id"], 0)
+        self.assertEqual(message["dataset_frame"], 0)
+        self.assertEqual(message["leader_id"], "dataset_replay")
+        self.assertEqual(message["action"], JOINTS)
+
+    def test_tcp_client_rejects_out_of_range_action_before_send(self) -> None:
+        source = InMemoryDatasetActionSource([{**JOINTS, "gripper.pos": 999.0}])
+        client = DatasetReplayTcpClient(source, source.info, _settings())
+
+        with self.assertRaisesRegex(Exception, "outside"):
+            client.build_action_message(list(source)[0])
+
+
+def _settings() -> TcpTeleopSettings:
+    return TcpTeleopSettings(
+        host="127.0.0.1",
+        port=1,
+        timeout_s=0.1,
+        max_packet_size=1024 * 1024,
+        send_hz=50.0,
+        control_hz=50.0,
+        leader_id="dataset_replay",
+        follower_id="follower_arm",
+        hold_last_action_on_timeout=True,
+        max_action_delta=2.0,
+        max_first_action_delta=55.0,
+        action_min=-180.0,
+        action_max=180.0,
+        require_action_keys_match=True,
+        print_leader_actions=False,
+        print_action_interval=10,
+    )
 
 
 if __name__ == "__main__":
